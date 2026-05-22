@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Location Filter</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      background: #f1f5f9;
+      color: #1e293b;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 24px;
+      gap: 32px;
+    }
+
+    /* ── Shared panel shell ── */
+    .panel {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.08);
+      overflow: hidden;
+    }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .tab {
+      flex: 1;
+      padding: 11px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #64748b;
+      cursor: pointer;
+      text-align: center;
+      border-bottom: 2px solid transparent;
+      transition: color .15s, border-color .15s;
+      user-select: none;
+    }
+    .tab.active {
+      color: #00A651;
+      border-bottom-color: #00A651;
+    }
+    .tab .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #00A651;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      border-radius: 10px;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      margin-left: 5px;
+    }
+
+    /* ── Search ── */
+    .search-wrap {
+      padding: 12px 12px 8px;
+    }
+    .search-input {
+      width: 100%;
+      height: 34px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 0 10px 0 32px;
+      font-size: 13px;
+      font-family: inherit;
+      color: #1e293b;
+      background: #f8fafc;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .search-input:focus { border-color: #00A651; background: #fff; }
+    .search-wrap { position: relative; }
+    .search-icon {
+      position: absolute;
+      left: 21px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      font-size: 12px;
+      pointer-events: none;
+    }
+
+    /* ══════════════════════════════
+       GEOGRAPHY PANEL
+    ══════════════════════════════ */
+    .geo-panel {
+      width: 300px;
+    }
+
+    .geo-sub-tabs {
+      display: flex;
+      padding: 0 12px;
+      gap: 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .geo-sub-tab {
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #64748b;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      white-space: nowrap;
+      transition: color .15s, border-color .15s;
+      user-select: none;
+    }
+    .geo-sub-tab.active {
+      color: #00A651;
+      border-bottom-color: #00A651;
+    }
+    .geo-sub-tab .count {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-left: 3px;
+    }
+
+    .geo-list {
+      padding: 6px 0;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+    .geo-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      cursor: pointer;
+      border-radius: 0;
+      transition: background .1s;
+    }
+    .geo-item:hover { background: #f8fafc; }
+    .geo-item.selected { background: #f0fdf4; }
+    .geo-item input[type=checkbox] { display: none; }
+    .geo-checkbox {
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: border-color .15s, background .15s;
+    }
+    .geo-item.selected .geo-checkbox {
+      background: #00A651;
+      border-color: #00A651;
+    }
+    .geo-item.selected .geo-checkbox::after {
+      content: '';
+      width: 9px;
+      height: 6px;
+      border-left: 2px solid #fff;
+      border-bottom: 2px solid #fff;
+      transform: rotate(-45deg) translateY(-1px);
+      display: block;
+    }
+    .geo-icon { color: #94a3b8; font-size: 13px; }
+    .geo-label { font-size: 13px; color: #1e293b; }
+
+    .panel-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 10px 14px;
+      border-top: 1px solid #f1f5f9;
+    }
+    .btn-clear {
+      font-size: 12px;
+      font-weight: 500;
+      color: #64748b;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: color .15s, background .15s;
+    }
+    .btn-clear:hover { color: #1e293b; background: #f1f5f9; }
+
+    /* ══════════════════════════════
+       ASSETS PANEL
+    ══════════════════════════════ */
+    .assets-panel {
+      width: 580px;
+      display: flex;
+      flex-direction: column;
+      border-radius: 12px;
+      box-shadow: 0 8px 28px rgba(0,0,0,.10);
+    }
+
+    .assets-body {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* Left: filters */
+    .assets-filters {
+      width: 210px;
+      flex-shrink: 0;
+      border-right: 1px solid #f1f5f9;
+      background: #f8fafc;
+      padding: 12px 0 0;
+      display: flex;
+      flex-direction: column;
+      border-bottom-left-radius: 12px;
+    }
+
+    .filter-section {
+      padding: 0 12px 12px;
+    }
+    .filter-section + .filter-section {
+      border-top: 1px solid #eef0f4;
+      padding-top: 12px;
+    }
+    .filter-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .filter-section-label {
+      font-size: 10.5px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .btn-section-clear {
+      font-size: 11px;
+      color: #94a3b8;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 3px;
+      transition: color .15s;
+    }
+    .btn-section-clear:hover { color: #475569; }
+
+    /* Accordion */
+    .accordion-section {
+      border-top: 1px solid #eef0f4;
+    }
+    .accordion-section:first-child { border-top: none; }
+    .accordion-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 12px;
+      cursor: pointer;
+      user-select: none;
+      transition: background .1s;
+    }
+    .accordion-header:hover { background: #f1f5f9; }
+    .accordion-header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .accordion-label {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #374151;
+    }
+    .accordion-summary {
+      font-size: 11px;
+      color: #00A651;
+      font-weight: 500;
+      display: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 150px;
+    }
+    .accordion-summary.visible { display: block; }
+    .accordion-count { display: none; }
+    .accordion-chevron {
+      font-size: 10px;
+      color: #94a3b8;
+      transition: transform .2s;
+    }
+    .accordion-section.open .accordion-chevron { transform: rotate(180deg); }
+
+    .accordion-body {
+      display: none;
+      padding: 0 0 8px;
+    }
+    .accordion-section.open .accordion-body { display: block; }
+
+    .accordion-search-wrap {
+      position: relative;
+      padding: 6px 12px 8px;
+    }
+    .accordion-search {
+      width: 100%;
+      height: 28px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 0 8px 0 27px;
+      font-size: 12px;
+      font-family: inherit;
+      color: #1e293b;
+      background: #fff;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .accordion-search:focus { border-color: #00A651; }
+    .accordion-search-icon {
+      position: absolute;
+      left: 21px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      font-size: 10px;
+      pointer-events: none;
+    }
+
+    .filter-list-wrap {
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .filter-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: background .1s;
+    }
+    .filter-item:hover { background: #f1f5f9; }
+    .filter-item.active { background: #f0fdf4; }
+    .filter-item-checkbox {
+      width: 15px;
+      height: 15px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 4px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color .15s, background .15s;
+    }
+    .filter-item.active .filter-item-checkbox {
+      background: #00A651;
+      border-color: #00A651;
+    }
+    .filter-item.active .filter-item-checkbox::after {
+      content: '';
+      width: 8px;
+      height: 5px;
+      border-left: 2px solid #fff;
+      border-bottom: 2px solid #fff;
+      transform: rotate(-45deg) translateY(-1px);
+      display: block;
+    }
+    .filter-item-label {
+      font-size: 12.5px;
+      color: #374151;
+    }
+    .filter-item.active .filter-item-label {
+      color: #1e293b;
+      font-weight: 500;
+    }
+
+    /* Right: results */
+    .assets-results {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: #fff;
+      border-bottom-right-radius: 12px;
+    }
+
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 16px 11px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .results-count {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .results-count-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #f0fdf4;
+      color: #00A651;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 6px;
+      padding: 2px 7px;
+      border: 1px solid #bbf7d0;
+    }
+    .results-count-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #1e293b;
+    }
+    .results-hint {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+    .btn-use-all {
+      font-size: 12px;
+      font-weight: 500;
+      color: #fff;
+      background: #00A651;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .15s, box-shadow .15s;
+      box-shadow: 0 1px 4px rgba(0,166,81,.30);
+    }
+    .btn-use-all:hover { background: #009647; }
+
+    .results-list {
+      flex: 1;
+      overflow-y: auto;
+      max-height: 280px;
+    }
+    .result-item {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: background .1s;
+      border-bottom: 1px solid #f8fafc;
+    }
+    .result-item:last-child { border-bottom: none; }
+    .result-item:hover { background: #f8fafc; }
+    .result-item.selected { background: #f1f5f9; }
+
+    .result-checkbox {
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 4px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color .15s, background .15s;
+    }
+    .result-item.selected .result-checkbox {
+      background: #00A651;
+      border-color: #00A651;
+    }
+    .result-item.selected .result-checkbox::after {
+      content: '';
+      width: 9px;
+      height: 5px;
+      border-left: 2px solid #fff;
+      border-bottom: 2px solid #fff;
+      transform: rotate(-45deg) translateY(-1px);
+      display: block;
+    }
+
+    .result-icon {
+      width: 30px;
+      height: 30px;
+      background: #fef9ee;
+      border: 1px solid #fde68a;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 13px;
+    }
+    .result-info { flex: 1; min-width: 0; }
+    .result-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: #1e293b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .result-meta {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 1px;
+    }
+
+    .assets-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 10px 16px;
+      border-top: 1px solid #f1f5f9;
+      gap: 10px;
+    }
+
+    /* ── Labels ── */
+    .demo-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 10px;
+    }
+
+    .col { display: flex; flex-direction: column; }
+
+    /* ══════════════════════════════
+       DROPDOWN VARIANT (v2)
+    ══════════════════════════════ */
+    .assets-panel-v2 {
+      width: 420px;
+      display: flex;
+      flex-direction: column;
+      border-radius: 12px;
+      box-shadow: 0 8px 28px rgba(0,0,0,.10);
+      overflow: visible !important;
+      position: relative;
+      background: #fff;
+    }
+    .assets-panel-v2 .v2-top {
+      border-radius: 0;
+      overflow: visible;
+    }
+    .assets-panel-v2 .tabs {
+      border-radius: 12px 12px 0 0;
+      overflow: hidden;
+    }
+
+    .v2-top {
+      padding: 12px 14px 10px;
+      border-bottom: 1px solid #f1f5f9;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .v2-filter-label {
+      font-size: 10.5px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .v2-filter-row {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .dd-trigger {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px !important;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #374151;
+      background: #fff;
+      cursor: pointer;
+      transition: border-color .15s, background .15s, box-shadow .15s;
+      position: relative;
+      font-family: inherit;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .dd-trigger:hover { border-color: #94a3b8; background: #f8fafc; }
+    .dd-trigger.active {
+      border-color: #00A651;
+      color: #00A651;
+      background: #f0fdf4;
+      box-shadow: 0 0 0 3px rgba(0,166,81,.08);
+    }
+    .dd-trigger .dd-badge {
+      background: #00A651;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      border-radius: 10px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .dd-chevron { font-size: 9px; color: #94a3b8; transition: transform .2s; }
+    .dd-trigger.open .dd-chevron { transform: rotate(180deg); }
+
+    .dd-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      width: 230px;
+      background: #fff;
+      border: 1px solid #e8ecf0;
+      border-radius: 10px;
+      box-shadow: 0 12px 32px rgba(0,0,0,.13);
+      z-index: 100;
+      overflow: hidden;
+    }
+    .dd-trigger.open .dd-menu { display: block; }
+
+    .dd-search-wrap {
+      padding: 10px 10px 8px;
+      border-bottom: 1px solid #f1f5f9;
+      position: relative;
+    }
+    .dd-search {
+      width: 100%;
+      height: 30px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 0 8px 0 28px;
+      font-size: 12px;
+      font-family: inherit;
+      color: #1e293b;
+      background: #f8fafc;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .dd-search:focus { border-color: #00A651; background: #fff; }
+    .dd-search-icon {
+      position: absolute;
+      left: 19px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      font-size: 10px;
+      pointer-events: none;
+    }
+    .dd-list {
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+    .dd-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 7px 12px;
+      cursor: pointer;
+      transition: background .1s;
+    }
+    .dd-item:hover { background: #f8fafc; }
+    .dd-item.active { background: #f0fdf4; }
+    .dd-checkbox {
+      width: 15px;
+      height: 15px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 4px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color .15s, background .15s;
+    }
+    .dd-item.active .dd-checkbox {
+      background: #00A651;
+      border-color: #00A651;
+    }
+    .dd-item.active .dd-checkbox::after {
+      content: '';
+      width: 8px;
+      height: 5px;
+      border-left: 2px solid #fff;
+      border-bottom: 2px solid #fff;
+      transform: rotate(-45deg) translateY(-1px);
+      display: block;
+    }
+    .dd-item-label { font-size: 12.5px; color: #374151; }
+    .dd-item.active .dd-item-label { color: #1e293b; font-weight: 500; }
+
+    .v2-results { background: #fff; border-radius: 0 0 12px 12px; display: flex; flex-direction: column; }
+    .v2-results-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px 7px;
+      border-bottom: none;
+      cursor: pointer;
+      transition: background .1s;
+      user-select: none;
+    }
+    .v2-results-header:hover { background: #f8fafc; }
+    .v2-results-header:hover #select-all-cb { border-color: #00A651; }
+    #select-all-cb.indeterminate {
+      background: #fff;
+      border-color: #00A651;
+      position: relative;
+    }
+    #select-all-cb.indeterminate::after {
+      content: '';
+      width: 8px;
+      height: 2px;
+      background: #00A651;
+      border-radius: 1px;
+      display: block;
+      margin: auto;
+    }
+    #select-all-cb.all-selected {
+      background: #00A651;
+      border-color: #00A651;
+    }
+    #select-all-cb.all-selected::after {
+      content: '';
+      width: 9px;
+      height: 5px;
+      border-left: 2px solid #fff;
+      border-bottom: 2px solid #fff;
+      transform: rotate(-45deg) translateY(-1px);
+      display: block;
+    }
+    .v2-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-top: 1px solid #f1f5f9;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- GEOGRAPHY PANEL -->
+  <div class="col">
+    <div class="demo-label">Geography filter</div>
+    <div class="panel geo-panel">
+      <div class="tabs">
+        <div class="tab active">Geographies <span class="badge">1</span></div>
+        <div class="tab">Assets</div>
+      </div>
+
+      <div class="search-wrap">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input class="search-input" type="text" placeholder="Search geographies…" />
+      </div>
+
+      <div class="geo-sub-tabs">
+        <div class="geo-sub-tab active">All</div>
+        <div class="geo-sub-tab">Regions <span class="count">6</span></div>
+        <div class="geo-sub-tab">Countries <span class="count">224</span></div>
+        <div class="geo-sub-tab">Cities</div>
+      </div>
+
+      <div class="geo-list">
+        <div class="geo-item selected" onclick="toggleGeo(this)">
+          <div class="geo-checkbox"></div>
+          <i class="fa-solid fa-earth-africa geo-icon"></i>
+          <span class="geo-label">Africa</span>
+        </div>
+        <div class="geo-item" onclick="toggleGeo(this)">
+          <div class="geo-checkbox"></div>
+          <i class="fa-solid fa-earth-americas geo-icon"></i>
+          <span class="geo-label">Americas</span>
+        </div>
+        <div class="geo-item" onclick="toggleGeo(this)">
+          <div class="geo-checkbox"></div>
+          <i class="fa-solid fa-earth-asia geo-icon"></i>
+          <span class="geo-label">Asia & The Pacific</span>
+        </div>
+        <div class="geo-item" onclick="toggleGeo(this)">
+          <div class="geo-checkbox"></div>
+          <i class="fa-solid fa-earth-europe geo-icon"></i>
+          <span class="geo-label">Europe & CIS</span>
+        </div>
+        <div class="geo-item" onclick="toggleGeo(this)">
+          <div class="geo-checkbox"></div>
+          <i class="fa-solid fa-earth-africa geo-icon"></i>
+          <span class="geo-label">Middle East & North Africa</span>
+        </div>
+        <div class="geo-item" onclick="toggleGeo(this)">
+          <div class="geo-checkbox"></div>
+          <i class="fa-solid fa-earth-americas geo-icon"></i>
+          <span class="geo-label">South Asia</span>
+        </div>
+      </div>
+
+      <div class="panel-footer">
+        <button class="btn-clear">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASSETS PANEL -->
+  <div class="col">
+    <div class="demo-label">Assets filter</div>
+    <div class="panel assets-panel">
+      <div class="tabs">
+        <div class="tab">Geographies</div>
+        <div class="tab active">Assets <span class="badge">9</span></div>
+      </div>
+
+      <div class="assets-body">
+
+        <!-- Filters column -->
+        <div class="assets-filters">
+          <div class="search-wrap" style="padding: 10px 12px 10px;">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input class="search-input" type="text" placeholder="Search assets…" />
+          </div>
+
+          <div class="accordion-section open" id="acc-type">
+            <div class="accordion-header" onclick="toggleAccordion('acc-type')">
+              <div class="accordion-header-left">
+                <span class="accordion-label">Type</span>
+                <span class="accordion-summary visible" id="acc-type-summary">Data Center</span>
+              </div>
+              <i class="fa-solid fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-body">
+              <div class="accordion-search-wrap">
+                <i class="fa-solid fa-magnifying-glass accordion-search-icon"></i>
+                <input class="accordion-search" type="text" placeholder="Search types…" oninput="filterList(this,'acc-type')" />
+              </div>
+              <div class="filter-list-wrap">
+              <div class="filter-item" onclick="toggleFilter(this,'acc-type-summary')"><div class="filter-item-checkbox"></div><span class="filter-item-label">Aircraft Carrier</span></div>
+              <div class="filter-item" onclick="toggleFilter(this,'acc-type-summary')"><div class="filter-item-checkbox"></div><span class="filter-item-label">Apartment</span></div>
+              <div class="filter-item" onclick="toggleFilter(this,'acc-type-summary')"><div class="filter-item-checkbox"></div><span class="filter-item-label">Banca</span></div>
+              <div class="filter-item" onclick="toggleFilter(this,'acc-type-summary')"><div class="filter-item-checkbox"></div><span class="filter-item-label">Bar</span></div>
+              <div class="filter-item active" onclick="toggleFilter(this,'acc-type-summary')"><div class="filter-item-checkbox"></div><span class="filter-item-label">Data Center</span></div>
+              <div class="filter-item" onclick="toggleFilter(this,'acc-type-summary')"><div class="filter-item-checkbox"></div><span class="filter-item-label">House</span></div>
+              <div class="filter-item" onclick="toggleFilter(this,'acc-type-summary')"><div class="filter-item-checkbox"></div><span class="filter-item-label">Laboratory</span></div>
+              <div class="filter-item" onclick="toggleFilter(this,'acc-type-summary')"><div class="filter-item-checkbox"></div><span class="filter-item-label">Manufacturing Plant</span></div>
+              <div class="filter-item" onclick="toggleFilter(this,'acc-type-summary')"><div class="filter-item-checkbox"></div><span class="filter-item-label">Next Gen Aircraft Carrier</span></div>
+              <div class="filter-item" onclick="toggleFilter(this,'acc-type-summary')"><div class="filter-item-checkbox"></div><span class="filter-item-label">Office</span></div>
+              <div class="filter-item" onclick="toggleFilter(this,'acc-type-summary')"><div class="filter-item-checkbox"></div><span class="filter-item-label">Port</span></div>
+              <div class="filter-item" onclick="toggleFilter(this,'acc-type-summary')"><div class="filter-item-checkbox"></div><span class="filter-item-label">Unknown</span></div>
+              <div class="filter-item" onclick="toggleFilter(this,'acc-type-summary')"><div class="filter-item-checkbox"></div><span class="filter-item-label">Warehouse</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-section open" id="acc-country">
+            <div class="accordion-header" onclick="toggleAccordion('acc-country')">
+              <div class="accordion-header-left">
+                <span class="accordion-label">Country</span>
+                <span class="accordion-summary" id="acc-country-summary"></span>
+              </div>
+              <i class="fa-solid fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-body">
+              <div class="accordion-search-wrap">
+                <i class="fa-solid fa-magnifying-glass accordion-search-icon"></i>
+                <input class="accordion-search" type="text" placeholder="Search countries…" oninput="filterList(this,'acc-country')" />
+              </div>
+              <div class="filter-list-wrap">
+              <div class="filter-item" onclick="toggleFilter(this,'acc-country-summary')"><div class="filter-item-checkbox"></div><span class="filter-item-label">Algeria</span></div>
+              <div class="filter-item" onclick="toggleFilter(this,'acc-country-summary')"><div class="filter-item-checkbox"></div><span class="filter-item-label">Chile</span></div>
+              <div class="filter-item" onclick="toggleFilter(this,'acc-country-summary')"><div class="filter-item-checkbox"></div><span class="filter-item-label">Georgia</span></div>
+              <div class="filter-item" onclick="toggleFilter(this,'acc-country-summary')"><div class="filter-item-checkbox"></div><span class="filter-item-label">Germany</span></div>
+              <div class="filter-item" onclick="toggleFilter(this,'acc-country-summary')"><div class="filter-item-checkbox"></div><span class="filter-item-label">Kenya</span></div>
+              <div class="filter-item" onclick="toggleFilter(this,'acc-country-summary')"><div class="filter-item-checkbox"></div><span class="filter-item-label">Nigeria</span></div>
+              <div class="filter-item" onclick="toggleFilter(this,'acc-country-summary')"><div class="filter-item-checkbox"></div><span class="filter-item-label">Pakistan</span></div>
+              <div class="filter-item" onclick="toggleFilter(this,'acc-country-summary')"><div class="filter-item-checkbox"></div><span class="filter-item-label">Turkey</span></div>
+              <div class="filter-item" onclick="toggleFilter(this,'acc-country-summary')"><div class="filter-item-checkbox"></div><span class="filter-item-label">Ukraine</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results column -->
+        <div class="assets-results">
+          <div class="results-header">
+            <div>
+              <div class="results-count">
+                <span class="results-count-badge">9</span>
+                <span class="results-count-label">assets match</span>
+              </div>
+              <div class="results-hint">Select below or use all</div>
+            </div>
+            <button class="btn-use-all">Select all</button>
+          </div>
+
+          <div class="results-list">
+            <div class="result-item" onclick="toggleResult(this)">
+              <div class="result-checkbox"></div>
+              <div class="result-icon"><i class="fa-solid fa-database" style="color:#d97706"></i></div>
+              <div class="result-info">
+                <div class="result-name">US-Albuquerque-DC</div>
+                <div class="result-meta">US · 30.0 km</div>
+              </div>
+            </div>
+            <div class="result-item" onclick="toggleResult(this)">
+              <div class="result-checkbox"></div>
+              <div class="result-icon"><i class="fa-solid fa-database" style="color:#d97706"></i></div>
+              <div class="result-info">
+                <div class="result-name">US-Chicago-DC</div>
+                <div class="result-meta">US · 25.0 km</div>
+              </div>
+            </div>
+            <div class="result-item" onclick="toggleResult(this)">
+              <div class="result-checkbox"></div>
+              <div class="result-icon"><i class="fa-solid fa-database" style="color:#d97706"></i></div>
+              <div class="result-info">
+                <div class="result-name">US-Detroit-DC</div>
+                <div class="result-meta">US · 30.0 km</div>
+              </div>
+            </div>
+            <div class="result-item" onclick="toggleResult(this)">
+              <div class="result-checkbox"></div>
+              <div class="result-icon"><i class="fa-solid fa-database" style="color:#d97706"></i></div>
+              <div class="result-info">
+                <div class="result-name">US-Indianapolis-DC</div>
+                <div class="result-meta">US · 30.0 km</div>
+              </div>
+            </div>
+            <div class="result-item" onclick="toggleResult(this)">
+              <div class="result-checkbox"></div>
+              <div class="result-icon"><i class="fa-solid fa-database" style="color:#d97706"></i></div>
+              <div class="result-info">
+                <div class="result-name">US-LasVegas-DC</div>
+                <div class="result-meta">US · 25.0 km</div>
+              </div>
+            </div>
+            <div class="result-item" onclick="toggleResult(this)">
+              <div class="result-checkbox"></div>
+              <div class="result-icon"><i class="fa-solid fa-database" style="color:#d97706"></i></div>
+              <div class="result-info">
+                <div class="result-name">US-Minneapolis-DC</div>
+                <div class="result-meta">US · 25.0 km</div>
+              </div>
+            </div>
+            <div class="result-item" onclick="toggleResult(this)">
+              <div class="result-checkbox"></div>
+              <div class="result-icon"><i class="fa-solid fa-database" style="color:#d97706"></i></div>
+              <div class="result-info">
+                <div class="result-name">US-Omaha-DC</div>
+                <div class="result-meta">US · 30.0 km</div>
+              </div>
+            </div>
+            <div class="result-item" onclick="toggleResult(this)">
+              <div class="result-checkbox"></div>
+              <div class="result-icon"><i class="fa-solid fa-database" style="color:#d97706"></i></div>
+              <div class="result-info">
+                <div class="result-name">US-Phoenix-DC</div>
+                <div class="result-meta">US · 28.0 km</div>
+              </div>
+            </div>
+            <div class="result-item" onclick="toggleResult(this)">
+              <div class="result-checkbox"></div>
+              <div class="result-icon"><i class="fa-solid fa-database" style="color:#d97706"></i></div>
+              <div class="result-info">
+                <div class="result-name">US-Seattle-DC</div>
+                <div class="result-meta">US · 22.0 km</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="assets-footer">
+            <span class="selected-count" id="selected-count" style="font-size:12px;color:#64748b;">0 selected</span>
+            <button class="btn-clear">Clear</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ASSETS PANEL v2: DROPDOWN VARIANT -->
+  <div class="col">
+    <div class="demo-label">Assets filter — dropdown variant</div>
+    <div class="panel assets-panel-v2">
+      <div class="tabs">
+        <div class="tab">Geographies</div>
+        <div class="tab active">Assets <span class="badge">9</span></div>
+      </div>
+
+      <div class="v2-top">
+        <div class="search-wrap" style="padding:0; position:relative;">
+          <i class="fa-solid fa-magnifying-glass search-icon" style="left:9px;"></i>
+          <input class="search-input" type="text" placeholder="Search assets…" style="padding-left:28px;" />
+        </div>
+        <div class="v2-filter-row">
+
+          <!-- Type dropdown -->
+          <div class="dd-trigger" id="dd-type" onclick="toggleDd('dd-type')">
+            <span id="dd-type-label">Type</span>
+            <span class="dd-badge" id="dd-type-badge" style="display:none"></span>
+            <i class="fa-solid fa-chevron-down dd-chevron"></i>
+            <div class="dd-menu" onclick="event.stopPropagation()">
+              <div class="dd-search-wrap">
+                <i class="fa-solid fa-magnifying-glass dd-search-icon"></i>
+                <input class="dd-search" type="text" placeholder="Search types…" oninput="ddFilter(this,'dd-type')" />
+              </div>
+              <div class="dd-list">
+                <div class="dd-item" onclick="toggleDdItem(this,'dd-type')"><div class="dd-checkbox"></div><span class="dd-item-label">Aircraft Carrier</span></div>
+                <div class="dd-item" onclick="toggleDdItem(this,'dd-type')"><div class="dd-checkbox"></div><span class="dd-item-label">Apartment</span></div>
+                <div class="dd-item" onclick="toggleDdItem(this,'dd-type')"><div class="dd-checkbox"></div><span class="dd-item-label">Banca</span></div>
+                <div class="dd-item" onclick="toggleDdItem(this,'dd-type')"><div class="dd-checkbox"></div><span class="dd-item-label">Bar</span></div>
+                <div class="dd-item active" onclick="toggleDdItem(this,'dd-type')"><div class="dd-checkbox"></div><span class="dd-item-label">Data Center</span></div>
+                <div class="dd-item" onclick="toggleDdItem(this,'dd-type')"><div class="dd-checkbox"></div><span class="dd-item-label">House</span></div>
+                <div class="dd-item" onclick="toggleDdItem(this,'dd-type')"><div class="dd-checkbox"></div><span class="dd-item-label">Laboratory</span></div>
+                <div class="dd-item" onclick="toggleDdItem(this,'dd-type')"><div class="dd-checkbox"></div><span class="dd-item-label">Manufacturing Plant</span></div>
+                <div class="dd-item" onclick="toggleDdItem(this,'dd-type')"><div class="dd-checkbox"></div><span class="dd-item-label">Next Gen Aircraft Carrier</span></div>
+                <div class="dd-item" onclick="toggleDdItem(this,'dd-type')"><div class="dd-checkbox"></div><span class="dd-item-label">Office</span></div>
+                <div class="dd-item" onclick="toggleDdItem(this,'dd-type')"><div class="dd-checkbox"></div><span class="dd-item-label">Port</span></div>
+                <div class="dd-item" onclick="toggleDdItem(this,'dd-type')"><div class="dd-checkbox"></div><span class="dd-item-label">Unknown</span></div>
+                <div class="dd-item" onclick="toggleDdItem(this,'dd-type')"><div class="dd-checkbox"></div><span class="dd-item-label">Warehouse</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Country dropdown -->
+          <div class="dd-trigger" id="dd-country" onclick="toggleDd('dd-country')">
+            <span id="dd-country-label">Country</span>
+            <span class="dd-badge" id="dd-country-badge" style="display:none"></span>
+            <i class="fa-solid fa-chevron-down dd-chevron"></i>
+            <div class="dd-menu" onclick="event.stopPropagation()">
+              <div class="dd-search-wrap">
+                <i class="fa-solid fa-magnifying-glass dd-search-icon"></i>
+                <input class="dd-search" type="text" placeholder="Search countries…" oninput="ddFilter(this,'dd-country')" />
+              </div>
+              <div class="dd-list">
+                <div class="dd-item" onclick="toggleDdItem(this,'dd-country')"><div class="dd-checkbox"></div><span class="dd-item-label">Algeria</span></div>
+                <div class="dd-item" onclick="toggleDdItem(this,'dd-country')"><div class="dd-checkbox"></div><span class="dd-item-label">Chile</span></div>
+                <div class="dd-item" onclick="toggleDdItem(this,'dd-country')"><div class="dd-checkbox"></div><span class="dd-item-label">Georgia</span></div>
+                <div class="dd-item" onclick="toggleDdItem(this,'dd-country')"><div class="dd-checkbox"></div><span class="dd-item-label">Germany</span></div>
+                <div class="dd-item" onclick="toggleDdItem(this,'dd-country')"><div class="dd-checkbox"></div><span class="dd-item-label">Kenya</span></div>
+                <div class="dd-item" onclick="toggleDdItem(this,'dd-country')"><div class="dd-checkbox"></div><span class="dd-item-label">Nigeria</span></div>
+                <div class="dd-item" onclick="toggleDdItem(this,'dd-country')"><div class="dd-checkbox"></div><span class="dd-item-label">Pakistan</span></div>
+                <div class="dd-item" onclick="toggleDdItem(this,'dd-country')"><div class="dd-checkbox"></div><span class="dd-item-label">Turkey</span></div>
+                <div class="dd-item" onclick="toggleDdItem(this,'dd-country')"><div class="dd-checkbox"></div><span class="dd-item-label">Ukraine</span></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="v2-results">
+        <div class="v2-results-header" onclick="toggleSelectAll()">
+          <div class="result-checkbox" id="select-all-cb"></div>
+          <span style="font-size:12.5px;font-weight:500;color:#374151;">Select all</span>
+          <span style="font-size:11.5px;color:#94a3b8;">· 9 results</span>
+        </div>
+
+        <div class="results-list" style="max-height:260px;">
+          <div class="result-item" onclick="toggleResultV2(this)"><div class="result-checkbox"></div><div class="result-icon"><i class="fa-solid fa-database" style="color:#d97706"></i></div><div class="result-info"><div class="result-name">US-Albuquerque-DC</div><div class="result-meta">US · 30.0 km</div></div></div>
+          <div class="result-item" onclick="toggleResultV2(this)"><div class="result-checkbox"></div><div class="result-icon"><i class="fa-solid fa-database" style="color:#d97706"></i></div><div class="result-info"><div class="result-name">US-Chicago-DC</div><div class="result-meta">US · 25.0 km</div></div></div>
+          <div class="result-item" onclick="toggleResultV2(this)"><div class="result-checkbox"></div><div class="result-icon"><i class="fa-solid fa-database" style="color:#d97706"></i></div><div class="result-info"><div class="result-name">US-Detroit-DC</div><div class="result-meta">US · 30.0 km</div></div></div>
+          <div class="result-item" onclick="toggleResultV2(this)"><div class="result-checkbox"></div><div class="result-icon"><i class="fa-solid fa-database" style="color:#d97706"></i></div><div class="result-info"><div class="result-name">US-Indianapolis-DC</div><div class="result-meta">US · 30.0 km</div></div></div>
+          <div class="result-item" onclick="toggleResultV2(this)"><div class="result-checkbox"></div><div class="result-icon"><i class="fa-solid fa-database" style="color:#d97706"></i></div><div class="result-info"><div class="result-name">US-LasVegas-DC</div><div class="result-meta">US · 25.0 km</div></div></div>
+          <div class="result-item" onclick="toggleResultV2(this)"><div class="result-checkbox"></div><div class="result-icon"><i class="fa-solid fa-database" style="color:#d97706"></i></div><div class="result-info"><div class="result-name">US-Minneapolis-DC</div><div class="result-meta">US · 25.0 km</div></div></div>
+          <div class="result-item" onclick="toggleResultV2(this)"><div class="result-checkbox"></div><div class="result-icon"><i class="fa-solid fa-database" style="color:#d97706"></i></div><div class="result-info"><div class="result-name">US-Omaha-DC</div><div class="result-meta">US · 30.0 km</div></div></div>
+          <div class="result-item" onclick="toggleResultV2(this)"><div class="result-checkbox"></div><div class="result-icon"><i class="fa-solid fa-database" style="color:#d97706"></i></div><div class="result-info"><div class="result-name">US-Phoenix-DC</div><div class="result-meta">US · 28.0 km</div></div></div>
+          <div class="result-item" onclick="toggleResultV2(this)"><div class="result-checkbox"></div><div class="result-icon"><i class="fa-solid fa-database" style="color:#d97706"></i></div><div class="result-info"><div class="result-name">US-Seattle-DC</div><div class="result-meta">US · 22.0 km</div></div></div>
+        </div>
+
+        <div class="v2-footer">
+          <span id="v2-selected-count" style="font-size:12px;color:#64748b;">0 selected</span>
+          <button class="btn-clear">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleGeo(el) {
+      el.classList.toggle('selected');
+    }
+    function filterList(input, accId) {
+      const q = input.value.toLowerCase();
+      document.querySelectorAll(`#${accId} .filter-item`).forEach(item => {
+        const label = item.querySelector('.filter-item-label').textContent.toLowerCase();
+        item.style.display = label.includes(q) ? '' : 'none';
+      });
+    }
+
+    function toggleAccordion(id) {
+      document.getElementById(id).classList.toggle('open');
+    }
+
+    function toggleFilter(el, summaryId) {
+      el.classList.toggle('active');
+      if (summaryId) {
+        const body = el.closest('.accordion-body');
+        const selected = [...body.querySelectorAll('.filter-item.active')]
+          .map(i => i.querySelector('.filter-item-label').textContent);
+        const summary = document.getElementById(summaryId);
+        if (selected.length === 0) {
+          summary.textContent = '';
+          summary.classList.remove('visible');
+        } else if (selected.length <= 2) {
+          summary.textContent = selected.join(', ');
+          summary.classList.add('visible');
+        } else {
+          summary.textContent = `${selected.length} selected`;
+          summary.classList.add('visible');
+        }
+      }
+    }
+    function toggleResult(el) {
+      el.classList.toggle('selected');
+      const n = document.querySelectorAll('.result-item.selected').length;
+      const el2 = document.getElementById('selected-count');
+      el2.textContent = `${n} selected`;
+      el2.style.color = n > 0 ? '#00A651' : '#64748b';
+      el2.style.fontWeight = n > 0 ? '600' : '400';
+    }
+
+    // Dropdown variant
+    function toggleDd(id) {
+      const el = document.getElementById(id);
+      const isOpen = el.classList.contains('open');
+      document.querySelectorAll('.dd-trigger.open').forEach(t => t.classList.remove('open'));
+      if (!isOpen) el.classList.add('open');
+    }
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.dd-trigger')) {
+        document.querySelectorAll('.dd-trigger.open').forEach(t => t.classList.remove('open'));
+      }
+    });
+    function toggleDdItem(el, triggerId) {
+      el.classList.toggle('active');
+      const trigger = document.getElementById(triggerId);
+      const selected = [...trigger.querySelectorAll('.dd-item.active')]
+        .map(i => i.querySelector('.dd-item-label').textContent);
+      const badge = document.getElementById(triggerId + '-badge');
+      trigger.classList.toggle('active', selected.length > 0);
+      if (selected.length === 0) {
+        badge.style.display = 'none';
+      } else {
+        badge.style.display = 'inline-block';
+        badge.textContent = selected.length;
+      }
+    }
+    function ddFilter(input, triggerId) {
+      const q = input.value.toLowerCase();
+      document.querySelectorAll(`#${triggerId} .dd-item`).forEach(item => {
+        item.style.display = item.querySelector('.dd-item-label').textContent.toLowerCase().includes(q) ? '' : 'none';
+      });
+    }
+    function updateV2State() {
+      const all = document.querySelectorAll('.v2-results .result-item');
+      const selected = document.querySelectorAll('.v2-results .result-item.selected');
+      const n = selected.length;
+      const cb = document.getElementById('select-all-cb');
+      cb.classList.remove('indeterminate','all-selected');
+      if (n === 0) { /* unchecked */ }
+      else if (n === all.length) cb.classList.add('all-selected');
+      else cb.classList.add('indeterminate');
+      const counter = document.getElementById('v2-selected-count');
+      counter.textContent = `${n} selected`;
+      counter.style.color = n > 0 ? '#00A651' : '#64748b';
+      counter.style.fontWeight = n > 0 ? '600' : '400';
+    }
+    function toggleResultV2(el) {
+      el.classList.toggle('selected');
+      updateV2State();
+    }
+    function toggleSelectAll() {
+      const all = document.querySelectorAll('.v2-results .result-item');
+      const allSelected = document.querySelectorAll('.v2-results .result-item.selected').length === all.length;
+      all.forEach(el => el.classList.toggle('selected', !allSelected));
+      updateV2State();
+    }
+
+    // Tab switching
+    document.querySelectorAll('.tabs').forEach(tabGroup => {
+      tabGroup.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabGroup.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+        });
+      });
+    });
+
+    document.querySelectorAll('.geo-sub-tabs').forEach(tabGroup => {
+      tabGroup.querySelectorAll('.geo-sub-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabGroup.querySelectorAll('.geo-sub-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+        });
+      });
+    });
+  </script>
+</body>
+</html>

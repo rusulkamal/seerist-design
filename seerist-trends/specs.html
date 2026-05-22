@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Seerist – Trend View Specs</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --fg-higher: #1e293b; --fg-mid: #64748b; --fg-low: #94a3b8;
+  --bg: #fff; --bg-subtle: #f8fafc; --border: #e2e8f0;
+  --primary: #00A651; --primary-light: #e6f7ee;
+  --accent: #6366f1;
+}
+body { font-family: 'Inter', system-ui, sans-serif; font-size: 14px; color: var(--fg-higher); background: #f1f5f9; padding-top: 48px; }
+
+.handoff-toggle { position:fixed; top:0; left:0; right:0; height:48px; background:#fff; border-bottom:1px solid #e5e7eb; display:flex; align-items:center; justify-content:center; gap:4px; z-index:9999; font-family:'Inter',system-ui,sans-serif; }
+.handoff-toggle a { display:inline-flex; align-items:center; gap:5px; padding:4px 14px; border-radius:20px; font-size:12px; font-weight:600; text-decoration:none; color:#64748b; transition:all .12s; }
+.handoff-toggle a.active { background:#111; color:#fff; }
+.handoff-toggle a:not(.active):hover { background:#f3f4f6; color:#111; }
+
+.page { max-width: 900px; margin: 0 auto; padding: 48px 24px 100px; }
+
+/* NAV */
+.toc { background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:16px 20px; margin-bottom:40px; }
+.toc-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--fg-low); margin-bottom:10px; }
+.toc-links { display:flex; flex-wrap:wrap; gap:6px; }
+.toc-links a { font-size:12px; font-weight:500; color:var(--accent); text-decoration:none; padding:3px 10px; border-radius:20px; border:1px solid #e0e7ff; background:#f5f3ff; }
+.toc-links a:hover { background:#ede9fe; }
+
+/* PAGE HEADER */
+.page-header { margin-bottom: 48px; }
+.page-header h1 { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+.page-header p { font-size: 14px; color: var(--fg-mid); line-height: 1.65; max-width:600px; }
+.tag { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; background:var(--primary-light); color:var(--primary); margin-top:12px; }
+
+/* SECTION */
+.section { margin-bottom: 56px; scroll-margin-top: 56px; }
+.section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--fg-low); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+.section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* SPEC CARD */
+.spec-card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
+.spec-card-header { padding: 16px 20px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 12px; }
+.spec-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--bg-subtle); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--fg-mid); font-size: 13px; }
+.spec-card-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.spec-card-sub { font-size: 12px; color: var(--fg-mid); line-height: 1.55; }
+.spec-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; }
+
+/* SPEC ROW */
+.spec-row { display: grid; grid-template-columns: 180px 1fr; gap: 12px; font-size: 13px; }
+.spec-label { font-size: 11px; font-weight: 600; color: var(--fg-low); text-transform: uppercase; letter-spacing: .05em; padding-top: 2px; }
+.spec-value { color: var(--fg-higher); line-height: 1.6; }
+.spec-value code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 11px; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; color: var(--accent); }
+
+/* TABLE */
+.spec-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.spec-table th { text-align: left; padding: 9px 14px; background: var(--bg-subtle); font-weight: 600; color: var(--fg-mid); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid var(--border); }
+.spec-table td { padding: 11px 14px; border-bottom: 1px solid var(--bg-subtle); vertical-align: top; line-height: 1.55; color: var(--fg-higher); }
+.spec-table tr:last-child td { border-bottom: none; }
+.spec-table td:first-child { font-weight: 600; white-space: nowrap; color: var(--fg-mid); }
+.spec-table td code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 11px; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; color: var(--accent); }
+
+/* FLOW */
+.flow { display:flex; flex-direction:column; gap:0; }
+.flow-step { display:flex; align-items:flex-start; gap:14px; position:relative; padding-bottom:16px; }
+.flow-step:last-child { padding-bottom:0; }
+.flow-left { display:flex; flex-direction:column; align-items:center; gap:0; }
+.flow-num { width:24px; height:24px; border-radius:50%; background:var(--fg-higher); color:#fff; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; flex-shrink:0; }
+.flow-line { width:2px; flex:1; background:var(--border); margin-top:4px; min-height:16px; }
+.flow-step:last-child .flow-line { display:none; }
+.flow-content { flex:1; padding-top:2px; }
+.flow-content strong { font-size:13px; display:block; margin-bottom:3px; }
+.flow-content span { font-size:12px; color:var(--fg-mid); line-height:1.6; display:block; }
+
+/* PILL */
+.pill { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600; }
+.pill.green { background:#f0fdf4; color:#16a34a; }
+.pill.blue  { background:#eff6ff; color:#2563eb; }
+.pill.amber { background:#fffbeb; color:#92400e; }
+.pill.red   { background:#fef2f2; color:#dc2626; }
+.pill.gray  { background:var(--bg-subtle); color:var(--fg-mid); border:1px solid var(--border); }
+
+/* CALLOUTS */
+.note { display:flex; gap:10px; border-radius:8px; padding:12px 14px; font-size:12px; line-height:1.6; margin-top:4px; }
+.note i { flex-shrink:0; margin-top:2px; }
+.note.warn { background:#fffbeb; border:1px solid #fcd34d; color:#92400e; }
+.note.warn i { color:#f59e0b; }
+.note.info { background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; }
+.note.info i { color:#3b82f6; }
+.note.tip  { background:#f0fdf4; border:1px solid #bbf7d0; color:#14532d; }
+.note.tip i { color:#22c55e; }
+
+/* EDGE CASE GRID */
+.edge-grid { display:flex; flex-direction:column; gap:10px; }
+.edge-item { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:14px 16px; display:grid; grid-template-columns:1fr 1fr; gap:16px; font-size:12px; }
+.edge-item-label { font-weight:700; font-size:13px; margin-bottom:4px; color:var(--fg-higher); }
+.edge-col-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--fg-low); margin-bottom:5px; }
+.edge-col-body { color:var(--fg-mid); line-height:1.6; }
+.edge-col-body strong { color:var(--fg-higher); }
+</style>
+</head>
+<body><div id="seerist-back" style="display:none;"><a href="https://seerist-design.surge.sh" style="display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#374151;text-decoration:none;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7.5 2L3.5 6L7.5 10" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="width:6px;height:6px;border-radius:50%;background:#00A651;display:inline-block"></span>Seerist Design</a></div>
+
+<div class="handoff-toggle"><a href="https://seerist-design.surge.sh" style="position:absolute;left:20px;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#6b7280;text-decoration:none;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7.5 2L3.5 6L7.5 10" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="width:6px;height:6px;border-radius:50%;background:#00A651;display:inline-block"></span>Back</a>
+  <a href="v4.html">Design</a>
+  <a href="specs.html" class="active">Documentation</a>
+</div>
+
+<div class="page">
+
+  <div class="page-header">
+    <h1>Trend View — Engineering Specs</h1>
+    <p>Full interaction spec for the Trend tab in Seerist Search. Covers layout, all user interactions, filtering logic, special cases, and edge cases.</p>
+    <span class="tag"><i class="fa-solid fa-circle-check"></i> v4 · April 2026 · Desktop only</span>
+  </div>
+
+  <div class="toc">
+    <div class="toc-title">Contents</div>
+    <div class="toc-links">
+      <a href="#layout">Layout</a>
+      <a href="#charts">Charts</a>
+      <a href="#click-filter">Click-to-filter</a>
+      <a href="#cross-filter">Cross-chart filtering</a>
+      <a href="#legend">Legend</a>
+      <a href="#global-filters">Global filters</a>
+      <a href="#tabs">Tabs</a>
+      <a href="#special-cases">Special cases</a>
+      <a href="#edge-cases">Edge cases</a>
+    </div>
+  </div>
+
+  <!-- LAYOUT -->
+  <div class="section" id="layout">
+    <div class="section-title">Layout</div>
+    <div class="spec-card">
+      <div class="spec-card-header">
+        <div class="spec-icon"><i class="fa-solid fa-table-columns"></i></div>
+        <div>
+          <div class="spec-card-title">Split panel</div>
+          <div class="spec-card-sub">Trend tab is a fixed side-by-side layout — results list on the left, charts on the right. Both panels scroll independently.</div>
+        </div>
+      </div>
+      <div class="spec-body">
+        <div class="spec-row">
+          <span class="spec-label">List panel</span>
+          <span class="spec-value"><code>340px</code> fixed width · independently scrollable · always shows results filtered by all active chart selections</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Chart panel</span>
+          <span class="spec-value"><code>flex: 1</code> remaining width · independently scrollable · 5 chart cards stacked with <code>32px</code> gap</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">List count bar</span>
+          <span class="spec-value">Sticky at top of list panel. Default: <strong>N results</strong>. When chart filters active: text turns green and reads <strong>N of Total results match</strong>.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="section" id="charts">
+    <div class="section-title">Charts</div>
+
+    <div class="spec-card">
+      <div class="spec-card-header">
+        <div class="spec-icon"><i class="fa-solid fa-diagram-project"></i></div>
+        <div>
+          <div class="spec-card-title">Charts are conditional on content type</div>
+          <div class="spec-card-sub">The set of charts displayed changes based on what content type the user has filtered to. Two charts always appear by default; the rest are content-type-specific.</div>
+        </div>
+      </div>
+      <div class="spec-body">
+        <div class="spec-row">
+          <span class="spec-label">Always shown</span>
+          <span class="spec-value">Distribution by content type · Distribution by category</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Conditional</span>
+          <span class="spec-value">Charts below only appear once the user filters to a specific content type (Events, OSINT, DiscoverAI, Analysis, or RR Changes).</span>
+        </div>
+        <div class="note info">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>The prototype demonstrates the <strong>OSINT (News/Social)</strong> content type. The full chart set for all content types is documented below.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec-card">
+      <div class="spec-card-header">
+        <div class="spec-icon"><i class="fa-solid fa-newspaper"></i></div>
+        <div>
+          <div class="spec-card-title">Default charts — no content type filter</div>
+          <div class="spec-card-sub">Shown before the user selects a specific content type.</div>
+        </div>
+      </div>
+      <div class="spec-body">
+        <table class="spec-table">
+          <thead><tr><th>Chart</th><th>Available view types</th></tr></thead>
+          <tbody>
+            <tr><td>Distribution by content type</td><td>Stacked Area (by day) · Bar (aggregated) · Pie (aggregated) · Line (by day)</td></tr>
+            <tr><td>Distribution by category</td><td>Line (by day) · Bar (aggregated) · Pie (aggregated)</td></tr>
+          </tbody>
+        </table>
+        <div class="note warn">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>Distribution by category will show 0 for any category that is not an Event or OSINT category.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec-card">
+      <div class="spec-card-header">
+        <div class="spec-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <div>
+          <div class="spec-card-title">Events charts</div>
+          <div class="spec-card-sub">Shown when the user filters to the Events content type.</div>
+        </div>
+      </div>
+      <div class="spec-body">
+        <table class="spec-table">
+          <thead><tr><th>Chart</th><th>Available view types</th></tr></thead>
+          <tbody>
+            <tr><td>Events by Category</td><td>Line (by day) · Stacked Area (by day) · Pie (aggregated) · Bar (aggregated)</td></tr>
+            <tr><td>Events by Status</td><td>Pie (aggregated) · Bar (aggregated)</td></tr>
+            <tr><td>Events by Severity</td><td>Pie (aggregated) · Bar (aggregated)</td></tr>
+            <tr><td>Events by Attack Type</td><td>Pie (aggregated) · Bar (aggregated)</td></tr>
+            <tr><td>Events by Perpetrator</td><td>Pie (aggregated) · Bar (aggregated)</td></tr>
+            <tr><td>Events by Sector</td><td>Pie (aggregated) · Bar (aggregated)</td></tr>
+            <tr><td>Events by Location Precision</td><td>Pie (aggregated) · Bar (aggregated)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="spec-card">
+      <div class="spec-card-header">
+        <div class="spec-icon"><i class="fa-solid fa-globe"></i></div>
+        <div>
+          <div class="spec-card-title">OSINT charts (News / Social)</div>
+          <div class="spec-card-sub">Shown when the user filters to the News or Social Media content type. These are the charts demonstrated in the prototype.</div>
+        </div>
+      </div>
+      <div class="spec-body">
+        <table class="spec-table">
+          <thead><tr><th>Chart</th><th>Available view types</th></tr></thead>
+          <tbody>
+            <tr><td>OSINT Sentiment</td><td>Sentiment Chart (dedicated view — not a standard bar/pie)</td></tr>
+            <tr><td>OSINT Emotions</td><td>Line (by day) · Stacked Area (by day) · Pie (aggregated) · Bar (aggregated)</td></tr>
+            <tr><td>Source Type</td><td>Line (by day) · Stacked Area (by day) · Pie (aggregated) · Bar (aggregated)</td></tr>
+            <tr><td>Source Reliability</td><td>Line (by day) · Stacked Area (by day) · Pie (aggregated) · Bar (aggregated)</td></tr>
+            <tr><td>News/Social by Topic</td><td>Line (by day) · Stacked Area (by day) · Pie (aggregated) · Bar (aggregated)</td></tr>
+          </tbody>
+        </table>
+        <div class="note info">
+          <i class="fa-solid fa-circle-info"></i>
+          <span><strong>Sentiment Chart</strong> is a dedicated view type — it is not a bar or pie. It needs its own design and component treatment, separate from the standard Distribution / Over Time modes.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec-card">
+      <div class="spec-card-header">
+        <div class="spec-icon"><i class="fa-solid fa-robot"></i></div>
+        <div>
+          <div class="spec-card-title">DiscoverAI · Analysis · RR Changes</div>
+          <div class="spec-card-sub">Shown when the user filters to those respective content types. All aggregated views only.</div>
+        </div>
+      </div>
+      <div class="spec-body">
+        <table class="spec-table">
+          <thead><tr><th>Content Type</th><th>Chart</th><th>Available view types</th></tr></thead>
+          <tbody>
+            <tr><td>DiscoverAI</td><td>DiscoverAI by Topic</td><td>Pie (aggregated) · Bar (aggregated)</td></tr>
+            <tr><td>DiscoverAI</td><td>DiscoverAI by New or Accelerating</td><td>Pie (aggregated) · Bar (aggregated)</td></tr>
+            <tr><td>Analysis</td><td>Analysis by Risk Type</td><td>Pie (aggregated) · Bar (aggregated)</td></tr>
+            <tr><td>RR Changes</td><td>Changes by Risk Type</td><td>Pie (aggregated) · Bar (aggregated)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="spec-card">
+      <div class="spec-card-header">
+        <div class="spec-icon"><i class="fa-solid fa-sliders"></i></div>
+        <div>
+          <div class="spec-card-title">Mode switcher — Distribution vs Over Time</div>
+          <div class="spec-card-sub">Each chart card has a mode switcher and a sub-type switcher in its header.</div>
+        </div>
+      </div>
+      <div class="spec-body">
+        <div class="spec-row">
+          <span class="spec-label">Distribution</span>
+          <span class="spec-value">Aggregated counts per value across the full filtered date range. Sub-types: <strong>Pie</strong> · <strong>Bar</strong></span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Over Time</span>
+          <span class="spec-value">Counts per value broken into daily or weekly buckets. Sub-types: <strong>Bar</strong> · <strong>Line</strong> · <strong>Stacked Area</strong></span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">On mode change</span>
+          <span class="spec-value">Sub-type resets to default for that mode (Distribution → Pie, Over Time → Bar). Active filter for that chart is <strong>preserved</strong> — does not clear on mode switch.</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">On sub-type change</span>
+          <span class="spec-value">Chart re-renders with animation. Filter state and selected series are preserved.</span>
+        </div>
+        <div class="note warn">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>Over Time mode maps data to 7 fixed weekly buckets. If a result's <code>weekIndex</code> falls outside the current date range filter, it will still be bucketed but won't appear in <code>activeResults</code> — so counts may be 0 for those weeks. This is expected behaviour, not a bug.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec-card">
+      <div class="spec-card-header">
+        <div class="spec-icon"><i class="fa-solid fa-chevron-up"></i></div>
+        <div>
+          <div class="spec-card-title">Collapse / expand</div>
+          <div class="spec-card-sub">Each chart card can be collapsed to just its header row.</div>
+        </div>
+      </div>
+      <div class="spec-body">
+        <div class="spec-row">
+          <span class="spec-label">Trigger</span>
+          <span class="spec-value">Chevron button in top-right of card header. Toggles <code>.collapsed</code> class on the card.</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Collapsed state</span>
+          <span class="spec-value">Chart body, legend, filter chips, and meta row are hidden via CSS. Chart instance is <strong>not destroyed</strong> — it stays in memory and keeps updating.</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Filter state</span>
+          <span class="spec-value">Active filters on a collapsed chart remain active and continue to affect other charts and the results list.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLICK TO FILTER -->
+  <div class="section" id="click-filter">
+    <div class="section-title">Click-to-filter</div>
+    <div class="spec-card">
+      <div class="spec-card-header">
+        <div class="spec-icon"><i class="fa-solid fa-arrow-pointer"></i></div>
+        <div>
+          <div class="spec-card-title">Selecting a value on a chart</div>
+          <div class="spec-card-sub">Clicking any data element on a chart adds or removes that value from the chart's filter set.</div>
+        </div>
+      </div>
+      <div class="spec-body">
+        <div class="flow">
+          <div class="flow-step">
+            <div class="flow-left"><div class="flow-num">1</div><div class="flow-line"></div></div>
+            <div class="flow-content">
+              <strong>User clicks a data element</strong>
+              <span>Works on: pie slice, distribution bar segment, over-time bar segment, line/area data point. The clickable element is resolved via <code>getElementsAtEventForMode('nearest', {intersect: true})</code>.</span>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-left"><div class="flow-num">2</div><div class="flow-line"></div></div>
+            <div class="flow-content">
+              <strong>Label is resolved</strong>
+              <span>Pie / distribution bar → label from visible series by <code>index</code>. Over-time bar/line/area → label from visible series by <code>datasetIndex</code>. Hidden series are excluded from the visible array before resolving.</span>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-left"><div class="flow-num">3</div><div class="flow-line"></div></div>
+            <div class="flow-content">
+              <strong>Filter set is toggled</strong>
+              <span>Each chart maintains its own <code>Set</code> of active filter values. If the label is in the set → remove it. If not → add it. Multiple values can be active simultaneously (OR logic within the same chart).</span>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-left"><div class="flow-num">4</div><div class="flow-line"></div></div>
+            <div class="flow-content">
+              <strong>All visible charts refresh</strong>
+              <span>Each chart calls <code>getFilteredFor(ownKey)</code> to recompute its data. The results list and count bar also update.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec-card">
+      <div class="spec-card-header">
+        <div class="spec-icon"><i class="fa-solid fa-circle-info"></i></div>
+        <div>
+          <div class="spec-card-title">Hover tooltip</div>
+          <div class="spec-card-sub">Hovering a data element shows a floating tooltip with label and count before the user commits to a click.</div>
+        </div>
+      </div>
+      <div class="spec-body">
+        <div class="spec-row">
+          <span class="spec-label">Position</span>
+          <span class="spec-value">Fixed position following the cursor: <code>clientX + 14px</code>, <code>clientY − 38px</code>. Single shared tooltip instance for all charts.</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Distribution content</span>
+          <span class="spec-value">Label · count · percentage of total · "click to filter"</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Over Time content</span>
+          <span class="spec-value">Label · count for that week · week label · "click to filter"</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Cursor</span>
+          <span class="spec-value">Changes to <code>pointer</code> on hover, resets to <code>default</code> when no element is under cursor.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec-card">
+      <div class="spec-card-header">
+        <div class="spec-icon"><i class="fa-solid fa-palette"></i></div>
+        <div>
+          <div class="spec-card-title">Visual states when a filter is active</div>
+          <div class="spec-card-sub">When one or more values are selected on a chart, the chart re-colours to show selection vs non-selection.</div>
+        </div>
+      </div>
+      <div class="spec-body">
+        <table class="spec-table">
+          <thead><tr><th>State</th><th>Colour treatment</th></tr></thead>
+          <tbody>
+            <tr><td>No filter active</td><td>All segments use full series colour <code>e.c</code></td></tr>
+            <tr><td>Selected segment</td><td>Uses highlight colour <code>e.h</code> (slightly more saturated)</td></tr>
+            <tr><td>Unselected segment</td><td>Uses <code>e.c + '44'</code> — series colour at ~26% opacity</td></tr>
+            <tr><td>Line / area selected</td><td>Selected dataset uses full border + <code>pointRadius: 6</code>. Others use <code>e.c + '55'</code> and <code>pointRadius: 3</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CROSS-CHART FILTERING -->
+  <div class="section" id="cross-filter">
+    <div class="section-title">Cross-chart filtering</div>
+    <div class="spec-card">
+      <div class="spec-card-header">
+        <div class="spec-icon"><i class="fa-solid fa-filter"></i></div>
+        <div>
+          <div class="spec-card-title">How filters combine across charts</div>
+          <div class="spec-card-sub">Selecting a value on Chart A narrows the data shown in Charts B, C, D, E — but not Chart A itself.</div>
+        </div>
+      </div>
+      <div class="spec-body">
+        <div class="spec-row">
+          <span class="spec-label">Logic</span>
+          <span class="spec-value"><strong>AND across charts</strong> — a result must match the active selection in every chart to appear. <strong>OR within a chart</strong> — if multiple values are selected on the same chart, a result matching any of them passes.</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Self-exclusion rule</span>
+          <span class="spec-value">When computing data for Chart A, <code>getFilteredFor('A')</code> applies all charts' filters <em>except</em> Chart A's own filter. This prevents Chart A from filtering itself to zero when a selection is active.</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Results list</span>
+          <span class="spec-value">Uses <code>getFilteredFor(null)</code> — all charts' filters applied, no exclusions. Strictest possible intersection.</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Context indicator</span>
+          <span class="spec-value">When Chart B is being filtered by Chart A, Chart B's header shows a blue chip: <span class="pill blue"><i class="fa-solid fa-filter" style="font-size:9px"></i> Emotions · Anger</span>. Shows chart name + selected values. Truncates to first 2 values + <code>+N more</code> when more than 2 are active.</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Spike badge</span>
+          <span class="spec-value">Shown in chart header when any series has moved ≥10% in the most recent week vs the previous 2 weeks. Computed after cross-filter is applied, so it reflects the currently filtered data.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec-card">
+      <div class="spec-card-header">
+        <div class="spec-icon"><i class="fa-solid fa-tag"></i></div>
+        <div>
+          <div class="spec-card-title">Filter chip row</div>
+          <div class="spec-card-sub">Appears below a chart's header when that chart has at least one active selection.</div>
+        </div>
+      </div>
+      <div class="spec-body">
+        <div class="spec-row">
+          <span class="spec-label">Visibility</span>
+          <span class="spec-value">Hidden by default. Shown when <code>activeFilter.size > 0</code> for that chart.</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Per-chip remove</span>
+          <span class="spec-value">Each chip has an <code>×</code> button. Clicking it removes only that value from the filter set and triggers a full refresh.</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Clear all</span>
+          <span class="spec-value">"Clear all" link appears when <code>activeFilter.size ≥ 2</code>. Clears the entire filter set for that chart only.</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Global clear</span>
+          <span class="spec-value">"Clear filters" button in the top bar clears filter sets across all charts simultaneously. Shows a toast: "Filters cleared — Showing all results".</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="section" id="legend">
+    <div class="section-title">Legend — show / hide series</div>
+    <div class="spec-card">
+      <div class="spec-card-header">
+        <div class="spec-icon"><i class="fa-solid fa-eye-slash"></i></div>
+        <div>
+          <div class="spec-card-title">Legend chips</div>
+          <div class="spec-card-sub">Legend sits below the chart body. Each chip represents one series. Click to hide; click again to show.</div>
+        </div>
+      </div>
+      <div class="spec-body">
+        <div class="spec-row">
+          <span class="spec-label">Hidden state</span>
+          <span class="spec-value">Chip goes to <code>opacity: 0.35</code> with dashed border. Dot goes grey. Series is removed from chart data and the visible series array.</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Filter interaction</span>
+          <span class="spec-value">Hiding a series that is currently in the active filter set <strong>removes it from the filter set</strong>. A hidden series cannot be filtered by. This prevents a filter referring to a value no longer visible in the chart.</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Index resolution</span>
+          <span class="spec-value">Click targets on the chart are resolved against the <em>visible series only</em> array, not the full series list. If series 0, 1 are hidden and the user clicks the first visible segment, the resolved index is 0 of the visible array — not 2 of the full array.</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Restore</span>
+          <span class="spec-value">Clicking a hidden chip restores it to the full series array and triggers a full refresh.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GLOBAL FILTERS -->
+  <div class="section" id="global-filters">
+    <div class="section-title">Global filters</div>
+    <div class="spec-card">
+      <div class="spec-card-header">
+        <div class="spec-icon"><i class="fa-solid fa-sliders"></i></div>
+        <div>
+          <div class="spec-card-title">Date · Location · Source</div>
+          <div class="spec-card-sub">Top-bar filters narrow the base result set before any chart filtering is applied. Changing any global filter resets all chart selections.</div>
+        </div>
+      </div>
+      <div class="spec-body">
+        <table class="spec-table">
+          <thead><tr><th>Filter</th><th>Options</th><th>Effect</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Date range</td>
+              <td>Last 7 / 14 / 30 / 90 days</td>
+              <td>Sets a minimum <code>weekIndex</code>. Results with a lower index are excluded from <code>activeResults</code>.</td>
+            </tr>
+            <tr>
+              <td>Location</td>
+              <td>All · Middle East · Europe · Asia Pacific · Americas · Africa</td>
+              <td>Filters <code>activeResults</code> to items where <code>region === selectedValue</code>. "All" disables the filter.</td>
+            </tr>
+            <tr>
+              <td>Source</td>
+              <td>All · News · Social Media · News + Social</td>
+              <td>"News + Social" passes a comma-separated string; the filter splits on comma and uses <code>Array.includes()</code>. "All" disables the filter.</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="spec-row" style="margin-top:4px">
+          <span class="spec-label">On any change</span>
+          <span class="spec-value">1. Clear all chart filter sets. 2. Recompute <code>activeResults</code>. 3. Animate each chart body to <code>opacity: 0.4</code>, then after 350ms remove loading class and refresh. 4. If chart filters were active before the change, show toast: "Chart selections reset — Search changed, charts updated to match".</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="section" id="tabs">
+    <div class="section-title">Tab behaviour</div>
+    <div class="spec-card">
+      <div class="spec-card-header">
+        <div class="spec-icon"><i class="fa-solid fa-table-list"></i></div>
+        <div>
+          <div class="spec-card-title">List · Map · Trend</div>
+          <div class="spec-card-sub">Chart filters are scoped to the Trend tab. They do not affect List or Map.</div>
+        </div>
+      </div>
+      <div class="spec-body">
+        <table class="spec-table">
+          <thead><tr><th>Tab</th><th>Data source</th><th>Chart filters apply?</th></tr></thead>
+          <tbody>
+            <tr><td>List</td><td><code>activeResults</code> (global filters only, up to 30 shown)</td><td>No</td></tr>
+            <tr><td>Map</td><td>Placeholder — not yet built</td><td>No</td></tr>
+            <tr><td>Trend</td><td><code>getAllFiltered()</code> — activeResults + all chart filters</td><td>Yes</td></tr>
+          </tbody>
+        </table>
+        <div class="note warn" style="margin-top:4px">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>Chart selections are intentionally <strong>not cleared</strong> when switching tabs. If the user goes List → Trend, their previous chart selections are still active. The amber warning banner in the chart panel communicates that selections won't affect List or Map.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPECIAL CASES -->
+  <div class="section" id="special-cases">
+    <div class="section-title">Special cases</div>
+
+    <div class="spec-card">
+      <div class="spec-card-header">
+        <div class="spec-icon"><i class="fa-solid fa-star"></i></div>
+        <div>
+          <div class="spec-card-title">Selecting the same value twice</div>
+          <div class="spec-card-sub">Clicking a value that is already selected deselects it (toggle behaviour).</div>
+        </div>
+      </div>
+      <div class="spec-body">
+        <div class="spec-row">
+          <span class="spec-label">Behaviour</span>
+          <span class="spec-value">The value is removed from the chart's filter <code>Set</code>. If this was the only active filter on that chart, the chart returns to its full-data state (no dimming). All other charts refresh accordingly.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec-card">
+      <div class="spec-card-header">
+        <div class="spec-icon"><i class="fa-solid fa-layer-group"></i></div>
+        <div>
+          <div class="spec-card-title">Multiple values selected on the same chart</div>
+          <div class="spec-card-sub">A user can select more than one value on a single chart.</div>
+        </div>
+      </div>
+      <div class="spec-body">
+        <div class="spec-row">
+          <span class="spec-label">Filter logic</span>
+          <span class="spec-value">OR — a result passes if its field value matches <em>any</em> of the selected values for that chart. For example: selecting "Anger" and "Fear" on Emotions shows all results that are Anger or Fear.</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Visual</span>
+          <span class="spec-value">Both segments display in highlight colour. All unselected segments stay at reduced opacity. Filter chip row shows one chip per selected value.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec-card">
+      <div class="spec-card-header">
+        <div class="spec-icon"><i class="fa-solid fa-arrows-left-right"></i></div>
+        <div>
+          <div class="spec-card-title">Filtering while in Over Time mode</div>
+          <div class="spec-card-sub">Over Time mode shows series as separate datasets. Click targets resolve via <code>datasetIndex</code>, not <code>index</code>.</div>
+        </div>
+      </div>
+      <div class="spec-body">
+        <div class="spec-row">
+          <span class="spec-label">Click target</span>
+          <span class="spec-value">For bar/line/area, the selected label comes from <code>visibleSeries[els[0].datasetIndex]</code>. Clicking a specific week's bar selects the <em>series</em> (e.g. "Sadness"), not the week. The week position is used in the tooltip only.</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">After selection</span>
+          <span class="spec-value">Selected dataset renders at full weight (<code>borderWidth: 2.5</code>, full point radius). Others render at reduced opacity. Chart does not switch back to Distribution mode.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec-card">
+      <div class="spec-card-header">
+        <div class="spec-icon"><i class="fa-solid fa-rotate-left"></i></div>
+        <div>
+          <div class="spec-card-title">Global filter change while chart filters are active</div>
+          <div class="spec-card-sub">Changing date range, location, or source resets the entire chart filter state.</div>
+        </div>
+      </div>
+      <div class="spec-body">
+        <div class="spec-row">
+          <span class="spec-label">Reset scope</span>
+          <span class="spec-value">All 5 chart filter sets are cleared simultaneously. The user's mode and sub-type choices per chart are <strong>preserved</strong> — only the filter selections are reset.</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Toast</span>
+          <span class="spec-value">Only shown if filters were actually active at the time of the global change. Not shown on a clean state change.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec-card">
+      <div class="spec-card-header">
+        <div class="spec-icon"><i class="fa-solid fa-eye-slash"></i></div>
+        <div>
+          <div class="spec-card-title">Hiding a series that is currently filtered</div>
+          <div class="spec-card-sub">Legend hide and active filter interact: hiding removes the value from the filter set.</div>
+        </div>
+      </div>
+      <div class="spec-body">
+        <div class="spec-row">
+          <span class="spec-label">Why</span>
+          <span class="spec-value">If a hidden series stayed in the filter set, other charts would continue to show data filtered by a value that is invisible and inaccessible. This would be confusing and unrecoverable without a "clear all".</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-label">Sequence</span>
+          <span class="spec-value">1. Add label to hidden set. 2. <strong>Remove label from filter set</strong> if present. 3. Trigger full refresh. This means the cross-chart filter effect of that value disappears instantly.</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- EDGE CASES -->
+  <div class="section" id="edge-cases">
+    <div class="section-title">Edge cases</div>
+
+    <div class="edge-grid">
+
+      <div class="edge-item">
+        <div>
+          <div class="edge-item-label">All series hidden on a chart</div>
+          <div class="edge-col-title" style="margin-top:8px">Scenario</div>
+          <div class="edge-col-body">User hides every series in the legend on a single chart.</div>
+        </div>
+        <div>
+          <div class="edge-col-title">Behaviour</div>
+          <div class="edge-col-body">Chart renders with no visible data. The chart canvas remains visible but empty. No crash — <code>vis</code> array is empty so datasets/labels are empty arrays. Other charts are unaffected. <strong>No empty state shown</strong> — this is intentional for this phase.</div>
+        </div>
+      </div>
+
+      <div class="edge-item">
+        <div>
+          <div class="edge-item-label">Cross-filters produce 0 matching results</div>
+          <div class="edge-col-title" style="margin-top:8px">Scenario</div>
+          <div class="edge-col-body">Combining filters from multiple charts results in zero items matching all conditions simultaneously.</div>
+        </div>
+        <div>
+          <div class="edge-col-title">Behaviour</div>
+          <div class="edge-col-body">Results list shows 0 cards with no message (count bar shows <strong>0 of N results match</strong>). Each chart still renders — with <code>getFilteredFor(key)</code> each chart still sees some data because it excludes its own filter. The chart showing the last filter that caused the zero match will still have data for itself.</div>
+        </div>
+      </div>
+
+      <div class="edge-item">
+        <div>
+          <div class="edge-item-label">Global location filter + Region chart filter both active</div>
+          <div class="edge-col-title" style="margin-top:8px">Scenario</div>
+          <div class="edge-col-body">User sets Location dropdown to "Europe" and also clicks "Middle East" on the Region chart.</div>
+        </div>
+        <div>
+          <div class="edge-col-title">Behaviour</div>
+          <div class="edge-col-body">Global filter runs first on <code>activeResults</code> — only Europe results remain. The Region chart then tries to filter by Middle East, but no Middle East results exist in <code>activeResults</code>. Result list shows 0 items. Region chart shows only Europe data (it excludes its own filter when rendering). <strong>This combination is valid but confusing</strong> — a future improvement could warn when a chart filter contradicts a global filter.</div>
+        </div>
+      </div>
+
+      <div class="edge-item">
+        <div>
+          <div class="edge-item-label">Spike badge with insufficient data</div>
+          <div class="edge-col-title" style="margin-top:8px">Scenario</div>
+          <div class="edge-col-body">Date range set to "Last 7 days" — only the most recent week bucket exists. No previous weeks to compare against.</div>
+        </div>
+        <div>
+          <div class="edge-col-title">Behaviour</div>
+          <div class="edge-col-body"><code>computeSpike()</code> checks if both <code>recent</code> and <code>prev</code> arrays are non-empty before computing. If either is empty, returns <code>null</code>. The spike badge is simply not rendered. No error, no fallback label.</div>
+        </div>
+      </div>
+
+      <div class="edge-item">
+        <div>
+          <div class="edge-item-label">Chart in collapsed state while filters change</div>
+          <div class="edge-col-title" style="margin-top:8px">Scenario</div>
+          <div class="edge-col-body">User collapses a chart card, then makes a filter selection on another chart.</div>
+        </div>
+        <div>
+          <div class="edge-col-title">Behaviour</div>
+          <div class="edge-col-body">The collapsed chart's instance is still updated via <code>refreshChart()</code>. Its data is correct when the user re-expands. The chart does not visually animate the loading state while collapsed — the canvas is hidden so the opacity fade has no visible effect.</div>
+        </div>
+      </div>
+
+      <div class="edge-item">
+        <div>
+          <div class="edge-item-label">Tooltip persists on rapid tab switch</div>
+          <div class="edge-col-title" style="margin-top:8px">Scenario</div>
+          <div class="edge-col-body">User hovers over a chart element, then quickly switches to the List tab before the mouseleave event fires.</div>
+        </div>
+        <div>
+          <div class="edge-col-title">Behaviour</div>
+          <div class="edge-col-body">The tooltip is a fixed-position div that is hidden on <code>mouseleave</code>. Switching tabs hides the chart panel but the tooltip element remains visible until the next <code>hideTT()</code> call. <strong>Fix recommendation:</strong> call <code>hideTT()</code> in <code>switchTab()</code> to prevent orphaned tooltips.</div>
+        </div>
+      </div>
+
+      <div class="edge-item">
+        <div>
+          <div class="edge-item-label">Switching mode with an active filter</div>
+          <div class="edge-col-title" style="margin-top:8px">Scenario</div>
+          <div class="edge-col-body">User selects "Anger" on the Emotions pie chart, then switches to Over Time mode on the same chart.</div>
+        </div>
+        <div>
+          <div class="edge-col-title">Behaviour</div>
+          <div class="edge-col-body">The filter for "Anger" remains in the set. In Over Time mode, the Anger dataset renders at full weight and all others are dimmed. The filter chip row still shows the "Anger" chip. This is correct and intentional — the user's selection persists across mode changes.</div>
+        </div>
+      </div>
+
+      <div class="edge-item">
+        <div>
+          <div class="edge-item-label">Source filter "News + Social" combined with Source chart filter</div>
+          <div class="edge-col-title" style="margin-top:8px">Scenario</div>
+          <div class="edge-col-body">User selects "News + Social" from the global source dropdown, then clicks "Blog" on the Source Type chart.</div>
+        </div>
+        <div>
+          <div class="edge-col-title">Behaviour</div>
+          <div class="edge-col-body">Global filter removes Blog and Report from <code>activeResults</code>. Clicking "Blog" on the chart adds it to the chart filter set, but since Blog results don't exist in <code>activeResults</code>, the filtered result list is empty. Source Type chart still shows News and Social bars (it excludes its own filter). Same "conflicting filters" scenario as the region case above.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

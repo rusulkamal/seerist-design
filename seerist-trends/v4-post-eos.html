@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Seerist – Post EOS · Export</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --fg-higher: #1e293b; --fg-mid: #64748b; --fg-low: #94a3b8;
+  --bg: #fff; --bg-subtle: #f8fafc; --border: #e2e8f0;
+  --primary: #00A651; --primary-light: #e6f7ee;
+}
+body { font-family: 'Inter', system-ui, sans-serif; font-size: 13px; color: var(--fg-higher); background: #f1f5f9; display: flex; height: 100vh; overflow: hidden; }
+.sidebar { width: 240px; flex-shrink: 0; background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; height: 100vh; }
+.sidebar-logo { padding: 14px; border-bottom: 1px solid var(--border); }
+.nav-section { padding: 7px; }
+.nav-heading { display: flex; align-items: center; justify-content: space-between; padding: 9px 10px; font-size: 11px; font-weight: 600; color: var(--fg-low); text-transform: uppercase; letter-spacing:.06em; }
+.nav-item { display:flex; align-items:center; gap:9px; padding:9px 10px; border-radius:6px; cursor:pointer; color:var(--fg-mid); font-size:13px; }
+.nav-item:hover { background:var(--bg-subtle); }
+.nav-item.active { background:var(--primary-light); color:var(--primary); font-weight:600; }
+.nav-item i { font-size:12px; width:14px; text-align:center; }
+.nav-sep { height:1px; background:var(--border); margin:4px 10px; }
+.sidebar-user { margin-top:auto; border-top:1px solid var(--border); padding:12px 14px; display:flex; align-items:center; gap:10px; }
+.user-avatar { width:28px; height:28px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; }
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.top-bar { background:var(--bg); border-bottom:1px solid var(--border); padding:0 20px; display:flex; align-items:center; justify-content:space-between; height:48px; flex-shrink:0; }
+.back-link { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--fg-mid); text-decoration:none; padding:5px 8px; border-radius:6px; transition:background .12s; }
+.back-link:hover { background:var(--bg-subtle); color:var(--fg-higher); }
+.eos-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; background:#fef3c7; color:#92400e; font-size:11px; font-weight:700; border:1px solid #fcd34d; }
+.content { flex:1; overflow-y:auto; padding:24px; display:flex; gap:24px; }
+.left-panel { width:260px; flex-shrink:0; display:flex; flex-direction:column; gap:14px; }
+.info-card { background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:16px; }
+.info-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--fg-low); margin-bottom:8px; }
+.info-title { font-size:15px; font-weight:800; color:var(--fg-higher); margin-bottom:6px; }
+.info-desc { font-size:12px; color:var(--fg-mid); line-height:1.6; }
+.check-list { display:flex; flex-direction:column; gap:7px; }
+.check-row { display:flex; align-items:flex-start; gap:8px; font-size:12px; color:var(--fg-mid); line-height:1.4; }
+.check-row i { color:var(--primary); font-size:10px; margin-top:2px; flex-shrink:0; }
+.quote-card { background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:14px 16px; }
+.quote-text { font-size:12px; color:#166534; line-height:1.6; font-style:italic; }
+.quote-src { font-size:10px; color:#4ade80; font-style:normal; font-weight:600; margin-top:5px; display:block; }
+.charts-panel { flex:1; min-width:0; display:flex; flex-direction:column; gap:16px; }
+.chart-card { background:var(--bg); border:1px solid var(--border); border-radius:10px; overflow:visible; position:relative; }
+.chart-header { display:flex; align-items:center; justify-content:space-between; padding:12px 14px 10px; gap:10px; flex-wrap:wrap; }
+.chart-title-row { display:flex; align-items:center; gap:8px; }
+.chart-title { font-size:14px; font-weight:700; }
+.chart-tag { display:inline-flex; align-items:center; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; background:#f1f5f9; color:#64748b; }
+.chart-controls { display:flex; align-items:center; gap:6px; }
+/* mode switcher */
+.mode-switcher { display:flex; background:var(--bg-subtle); border:1px solid var(--border); border-radius:8px; padding:2px; gap:2px; }
+.mode-btn { padding:4px 10px; border-radius:6px; font-size:12px; font-weight:500; color:var(--fg-mid); cursor:pointer; border:none; background:transparent; white-space:nowrap; transition:background .15s; }
+.mode-btn.active { background:var(--bg); color:var(--fg-higher); font-weight:600; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+/* subtype switcher */
+.subtype-sw { display:flex; border:1px solid var(--border); border-radius:6px; overflow:hidden; }
+.sub-btn { width:28px; height:26px; display:flex; align-items:center; justify-content:center; background:var(--bg); border:none; cursor:pointer; color:var(--fg-low); font-size:11px; }
+.sub-btn+.sub-btn { border-left:1px solid var(--border); }
+.sub-btn.active { background:var(--bg-subtle); color:var(--fg-higher); }
+/* icon btns */
+.icon-btn { width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:6px; border:none; background:transparent; cursor:pointer; color:var(--fg-low); font-size:12px; transition:background .12s, color .12s; }
+.icon-btn:hover, .icon-btn.active { background:var(--bg-subtle); color:var(--fg-higher); }
+.chart-body { padding:12px 16px 4px; height:190px; overflow:hidden; transition:opacity .25s; }
+.chart-body canvas { height:100% !important; width:100% !important; }
+.chart-legend { display:flex; align-items:center; justify-content:center; gap:5px; padding:6px 14px 12px; flex-wrap:wrap; }
+.legend-chip { display:inline-flex; align-items:center; gap:5px; padding:3px 9px 3px 8px; border-radius:20px; border:1.5px solid var(--border); background:var(--bg); font-size:11px; font-weight:500; color:var(--fg-higher); }
+.legend-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+/* EXPORT DROPDOWN */
+.export-dd { position:absolute; top:44px; right:14px; background:var(--bg); border:1px solid var(--border); border-radius:10px; box-shadow:0 8px 28px rgba(0,0,0,.13); width:196px; z-index:200; overflow:hidden; display:none; }
+.export-dd.open { display:block; animation:dropIn .15s ease; }
+@keyframes dropIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
+.export-dd-header { padding:9px 14px 7px; font-size:10px; font-weight:700; color:var(--fg-low); text-transform:uppercase; letter-spacing:.06em; border-bottom:1px solid var(--border); }
+.export-opt { display:flex; align-items:center; gap:10px; padding:9px 14px; cursor:pointer; transition:background .1s; }
+.export-opt:hover { background:var(--bg-subtle); }
+.export-opt i { width:15px; text-align:center; color:var(--fg-mid); font-size:13px; flex-shrink:0; }
+.export-opt strong { font-size:12px; font-weight:600; color:var(--fg-higher); display:block; line-height:1.3; }
+.export-opt span { font-size:11px; color:var(--fg-low); }
+.export-sep { height:1px; background:var(--border); }
+.toast-wrap { position:fixed; bottom:20px; right:20px; display:flex; flex-direction:column; gap:8px; z-index:999; pointer-events:none; }
+.toast { display:flex; align-items:center; gap:10px; background:var(--fg-higher); color:#fff; border-radius:8px; padding:10px 14px; font-size:12px; font-weight:500; box-shadow:0 4px 16px rgba(0,0,0,.2); animation:tIn .2s ease; }
+@keyframes tIn { from { opacity:0; transform:translateY(6px); } }
+.toast.out { animation:tOut .3s ease forwards; }
+@keyframes tOut { to { opacity:0; transform:translateY(6px); } }
+</style>
+</head>
+<body><div id="seerist-back" style="display:none;"><a href="https://seerist-design.surge.sh" style="display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#374151;text-decoration:none;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7.5 2L3.5 6L7.5 10" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="width:6px;height:6px;border-radius:50%;background:#00A651;display:inline-block"></span>Seerist Design</a></div>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg viewBox="0 0 140 32" height="32">
+      <rect width="32" height="32" rx="6" fill="#00A651"/>
+      <text x="9" y="23" font-family="Inter,sans-serif" font-size="17" font-weight="800" fill="white">S</text>
+      <text x="40" y="22" font-family="Inter,sans-serif" font-size="14" font-weight="700" fill="#4d4d4d">SEERIST</text>
+    </svg>
+  </div>
+  <div class="nav-section">
+    <div class="nav-item"><i class="fa-solid fa-compass"></i>Explore</div>
+    <div class="nav-item"><i class="fa-solid fa-house"></i>Latest</div>
+    <div class="nav-item active"><i class="fa-solid fa-magnifying-glass"></i>Search</div>
+    <div class="nav-item"><i class="fa-solid fa-map"></i>Map</div>
+    <div class="nav-item"><i class="fa-solid fa-desktop"></i>Monitor</div>
+  </div>
+  <div class="nav-sep"></div>
+  <div class="nav-section">
+    <div class="nav-heading">Tools</div>
+    <div class="nav-item"><i class="fa-solid fa-bell"></i>Alerts</div>
+    <div class="nav-item"><i class="fa-solid fa-folder"></i>Content Folders</div>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-avatar">A</div>
+    <span style="font-size:13px;font-weight:500;flex:1">Amy Elsner</span>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="top-bar">
+    <div style="display:flex;align-items:center;gap:10px">
+      <a href="v4.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Trend View</a>
+      <span style="color:var(--border)">·</span>
+      <span style="font-size:13px;font-weight:700;">What's next</span>
+    </div>
+    <span class="eos-badge"><i class="fa-solid fa-flag-checkered"></i> Post EOS</span>
+  </div>
+
+  <div class="content">
+    <div class="left-panel">
+      <div class="info-card">
+        <div class="info-label">Coming next</div>
+        <div class="info-title">Export &amp; Copy</div>
+        <div class="info-desc">An export button on each chart — download as PNG, copy to clipboard, or grab raw data as CSV. Try the <i class="fa-solid fa-arrow-up-from-bracket" style="color:var(--fg-mid)"></i> button on any chart.</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">Shipped this sprint</div>
+        <div class="check-list">
+          <div class="check-row"><i class="fa-solid fa-check"></i>18 charts across all content types</div>
+          <div class="check-row"><i class="fa-solid fa-check"></i>Click-to-filter, cross-chart filtering</div>
+          <div class="check-row"><i class="fa-solid fa-check"></i>Distribution / Over Time · Pie, Bar, Line, Area</div>
+          <div class="check-row"><i class="fa-solid fa-check"></i>Spike badges, legend toggle, collapse</div>
+        </div>
+      </div>
+      <div class="quote-card">
+        <div class="quote-text">"We can see the charts but it doesn't get generated into a cohesive report… we have to pull those charts into a report of our own design."</div>
+        <cite class="quote-src">— Existing customer, HubSpot</cite>
+      </div>
+    </div>
+
+    <div class="charts-panel">
+
+      <!-- Chart 1: Attack Type -->
+      <div class="chart-card" id="card-1">
+        <div class="chart-header">
+          <div class="chart-title-row">
+            <span class="chart-title">Events by Attack Type</span>
+            <span class="chart-tag">Events</span>
+          </div>
+          <div class="chart-controls">
+            <div class="mode-switcher" id="mode-1">
+              <button class="mode-btn active" data-mode="distribution">Distribution</button>
+              <button class="mode-btn" data-mode="overtime">Over Time</button>
+            </div>
+            <div class="subtype-sw" id="sub-1">
+              <button class="sub-btn active" data-sub="bar" title="Bar"><i class="fa-solid fa-chart-bar"></i></button>
+              <button class="sub-btn" data-sub="pie" title="Pie"><i class="fa-solid fa-circle-half-stroke"></i></button>
+            </div>
+            <button class="icon-btn" id="ebtn-1" title="Export" onclick="toggleDD('1',event)"><i class="fa-solid fa-arrow-up-from-bracket"></i></button>
+            <button class="icon-btn" title="Collapse" onclick="toggleCollapse('card-1',this)"><i class="fa-solid fa-chevron-up"></i></button>
+          </div>
+        </div>
+        <div class="chart-body" id="body-1"><canvas id="cv-1"></canvas></div>
+        <div class="chart-legend" id="leg-1"></div>
+        <div class="export-dd" id="dd-1">
+          <div class="export-dd-header">Export chart</div>
+          <div class="export-opt" onclick="doExport('1','copy')"><i class="fa-solid fa-clipboard"></i><div><strong>Copy image</strong><span>Copy to clipboard</span></div></div>
+          <div class="export-opt" onclick="doExport('1','png')"><i class="fa-regular fa-image"></i><div><strong>Download PNG</strong><span>Save as image file</span></div></div>
+          <div class="export-sep"></div>
+          <div class="export-opt" onclick="doExport('1','csv')"><i class="fa-solid fa-table"></i><div><strong>Download CSV</strong><span>Raw data</span></div></div>
+        </div>
+      </div>
+
+      <!-- Chart 2: Category -->
+      <div class="chart-card" id="card-2">
+        <div class="chart-header">
+          <div class="chart-title-row">
+            <span class="chart-title">Events by Category</span>
+            <span class="chart-tag">Events</span>
+          </div>
+          <div class="chart-controls">
+            <div class="mode-switcher" id="mode-2">
+              <button class="mode-btn active" data-mode="distribution">Distribution</button>
+              <button class="mode-btn" data-mode="overtime">Over Time</button>
+            </div>
+            <div class="subtype-sw" id="sub-2">
+              <button class="sub-btn" data-sub="bar" title="Bar"><i class="fa-solid fa-chart-bar"></i></button>
+              <button class="sub-btn active" data-sub="pie" title="Pie"><i class="fa-solid fa-circle-half-stroke"></i></button>
+            </div>
+            <button class="icon-btn" id="ebtn-2" title="Export" onclick="toggleDD('2',event)"><i class="fa-solid fa-arrow-up-from-bracket"></i></button>
+            <button class="icon-btn" title="Collapse" onclick="toggleCollapse('card-2',this)"><i class="fa-solid fa-chevron-up"></i></button>
+          </div>
+        </div>
+        <div class="chart-body" id="body-2"><canvas id="cv-2"></canvas></div>
+        <div class="chart-legend" id="leg-2"></div>
+        <div class="export-dd" id="dd-2">
+          <div class="export-dd-header">Export chart</div>
+          <div class="export-opt" onclick="doExport('2','copy')"><i class="fa-solid fa-clipboard"></i><div><strong>Copy image</strong><span>Copy to clipboard</span></div></div>
+          <div class="export-opt" onclick="doExport('2','png')"><i class="fa-regular fa-image"></i><div><strong>Download PNG</strong><span>Save as image file</span></div></div>
+          <div class="export-sep"></div>
+          <div class="export-opt" onclick="doExport('2','csv')"><i class="fa-solid fa-table"></i><div><strong>Download CSV</strong><span>Raw data</span></div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="toast-wrap" id="tw"></div>
+
+<script>
+const WEEKS = ['Mar 1','Mar 8','Mar 15','Mar 22','Mar 29','Apr 5','Apr 12'];
+const S1 = [{l:'Bombing',c:'#f87171',h:'#ef4444'},{l:'Shooting',c:'#fb923c',h:'#f97316'},{l:'Cyber',c:'#c084fc',h:'#a855f7'},{l:'Protest',c:'#60a5fa',h:'#3b82f6'},{l:'Riot',c:'#facc15',h:'#eab308'},{l:'Kidnapping',c:'#2dd4bf',h:'#14b8a6'}];
+const D1 = [8,6,9,11,5,4];
+const OT1 = [[1,2,1,2,1,0,1],[0,1,1,2,1,0,1],[2,1,1,2,2,0,1],[1,2,2,3,1,1,1],[1,0,1,1,0,1,1],[1,0,1,1,0,0,0]];
+
+const S2 = [{l:'Conflict & Security',c:'#f87171',h:'#ef4444'},{l:'Politics',c:'#fb923c',h:'#f97316'},{l:'Economy',c:'#facc15',h:'#eab308'},{l:'Environment',c:'#4ade80',h:'#22c55e'},{l:'Health & Social',c:'#60a5fa',h:'#3b82f6'},{l:'Tech & Cyber',c:'#c084fc',h:'#a855f7'}];
+const D2 = [22,18,12,8,10,6];
+const OT2 = [[4,4,3,4,3,2,2],[3,3,3,2,3,2,2],[2,2,1,2,2,1,2],[1,1,1,1,2,1,1],[1,2,1,2,2,1,1],[1,1,1,1,1,0,1]];
+
+const instances = {};
+const state = {
+  '1': { mode:'distribution', sub:'bar' },
+  '2': { mode:'distribution', sub:'pie' }
+};
+
+function buildChart(id) {
+  const s = state[id];
+  const series = id==='1' ? S1 : S2;
+  const distData = id==='1' ? D1 : D2;
+  const otData = id==='1' ? OT1 : OT2;
+  const canvas = document.getElementById('cv-'+id);
+  const body = document.getElementById('body-'+id);
+
+  if (instances[id]) { instances[id].destroy(); instances[id]=null; }
+
+  let type, data, options;
+  const isPie = s.mode==='distribution' && s.sub==='pie';
+  const isOT  = s.mode==='overtime';
+
+  body.className = 'chart-body';
+
+  if (s.mode==='distribution') {
+    if (s.sub==='pie') {
+      type = 'pie';
+      data = { labels: series.map(x=>x.l), datasets:[{ data:distData, backgroundColor:series.map(x=>x.c), hoverBackgroundColor:series.map(x=>x.h), borderColor:'#fff', borderWidth:2 }] };
+      options = { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}} };
+    } else {
+      type = 'bar';
+      data = { labels: series.map(x=>x.l), datasets:[{ data:distData, backgroundColor:series.map(x=>x.c), borderRadius:5, borderWidth:0 }] };
+      options = { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ x:{grid:{color:'#f1f5f9'},ticks:{color:'#94a3b8',font:{size:10}}}, y:{grid:{color:'#f1f5f9'},ticks:{color:'#94a3b8',font:{size:10}},beginAtZero:true} } };
+    }
+  } else {
+    // over time
+    const sub = s.sub==='area'||s.sub==='line' ? 'line' : 'bar';
+    const isArea = s.sub==='area';
+    type = sub;
+    data = { labels:WEEKS, datasets: series.map((x,i)=>({
+      label:x.l, data:otData[i],
+      borderColor:x.c, backgroundColor:isArea?x.c+'33':x.c,
+      borderWidth:2, borderRadius:sub==='bar'?3:0,
+      tension:0.4, fill:isArea, pointRadius:3, pointHoverRadius:5
+    }))};
+    options = { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{ x:{grid:{color:'#f1f5f9'},ticks:{color:'#94a3b8',font:{size:10}}}, y:{grid:{color:'#f1f5f9'},ticks:{color:'#94a3b8',font:{size:10}},beginAtZero:true} } };
+  }
+
+  instances[id] = new Chart(canvas, { type, data, options });
+  buildLegend(id);
+  updateSubBtns(id);
+}
+
+function buildLegend(id) {
+  const series = id==='1' ? S1 : S2;
+  const el = document.getElementById('leg-'+id);
+  el.innerHTML = '';
+  series.forEach(x=>{ const d=document.createElement('div'); d.className='legend-chip'; d.innerHTML=`<span class="legend-dot" style="background:${x.c}"></span>${x.l}`; el.appendChild(d); });
+}
+
+function updateSubBtns(id) {
+  const s = state[id];
+  const isOT = s.mode==='overtime';
+  const subs = isOT
+    ? [{sub:'bar',icon:'fa-chart-bar'},{sub:'line',icon:'fa-chart-line'},{sub:'area',icon:'fa-chart-area'}]
+    : [{sub:'bar',icon:'fa-chart-bar'},{sub:'pie',icon:'fa-circle-half-stroke'}];
+  const el = document.getElementById('sub-'+id);
+  el.innerHTML = '';
+  subs.forEach(t=>{ const b=document.createElement('button'); b.className='sub-btn'+(t.sub===s.sub?' active':''); b.dataset.sub=t.sub; b.title=t.sub.charAt(0).toUpperCase()+t.sub.slice(1); b.innerHTML=`<i class="fa-solid ${t.icon}"></i>`; el.appendChild(b); });
+  el.addEventListener('click', e=>{ const b=e.target.closest('.sub-btn'); if(!b) return; if(state[id].sub===b.dataset.sub) return; state[id].sub=b.dataset.sub; buildChart(id); });
+}
+
+// Build initial charts
+buildChart('1');
+buildChart('2');
+
+// Mode switchers
+['1','2'].forEach(id=>{
+  document.getElementById('mode-'+id).addEventListener('click', e=>{
+    const b=e.target.closest('.mode-btn'); if(!b) return;
+    const mode=b.dataset.mode; if(state[id].mode===mode) return;
+    state[id].mode=mode;
+    state[id].sub = mode==='distribution'?(id==='2'?'pie':'bar'):'bar';
+    document.querySelectorAll('#mode-'+id+' .mode-btn').forEach(x=>x.classList.toggle('active',x.dataset.mode===mode));
+    buildChart(id);
+  });
+});
+
+function toggleCollapse(cardId, btn) {
+  const body = document.querySelector('#'+cardId+' .chart-body');
+  const leg = document.querySelector('#'+cardId+' .chart-legend');
+  const collapsed = body.style.display==='none';
+  body.style.display = collapsed?'':'none';
+  leg.style.display  = collapsed?'':'none';
+  btn.querySelector('i').style.transform = collapsed?'':'rotate(180deg)';
+}
+
+// Export dropdown
+function toggleDD(id, e) {
+  e.stopPropagation();
+  const dd=document.getElementById('dd-'+id);
+  const open=dd.classList.contains('open');
+  closeAll();
+  if(!open){ dd.classList.add('open'); document.getElementById('ebtn-'+id).classList.add('active'); }
+}
+function closeAll() {
+  document.querySelectorAll('.export-dd').forEach(d=>d.classList.remove('open'));
+  document.querySelectorAll('[id^=ebtn-]').forEach(b=>b.classList.remove('active'));
+}
+document.addEventListener('click', closeAll);
+
+function toast(msg, icon='fa-check') {
+  const t=document.createElement('div'); t.className='toast';
+  t.innerHTML=`<i class="fa-solid ${icon}"></i><span>${msg}</span>`;
+  document.getElementById('tw').appendChild(t);
+  setTimeout(()=>{ t.classList.add('out'); t.addEventListener('animationend',()=>t.remove()); }, 2600);
+}
+
+function doExport(id, type) {
+  closeAll();
+  const canvas=document.getElementById('cv-'+id);
+  const title=document.querySelector('#card-'+id+' .chart-title').textContent;
+  const slug=title.toLowerCase().replace(/\s+/g,'-');
+  if (type==='png') {
+    const a=document.createElement('a'); a.download=slug+'.png'; a.href=canvas.toDataURL('image/png'); a.click();
+    toast('Downloaded '+slug+'.png','fa-download');
+  } else if (type==='copy') {
+    canvas.toBlob(blob=>{
+      try { navigator.clipboard.write([new ClipboardItem({'image/png':blob})]); toast('Chart copied to clipboard','fa-clipboard'); }
+      catch { toast('Copy not supported in this browser','fa-triangle-exclamation'); }
+    });
+  } else if (type==='csv') {
+    const ch=instances[id]; const labels=ch.data.labels; const data=ch.data.datasets[0].data;
+    const csv=[['Label','Value'],...labels.map((l,i)=>[l,data[i]])].map(r=>r.join(',')).join('\n');
+    const a=document.createElement('a'); a.download=slug+'.csv'; a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.click();
+    toast('Downloaded '+slug+'.csv','fa-table');
+  }
+}
+</script>
+</body>
+</html>

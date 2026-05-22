@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TOC Alternatives</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; font-size: 13px; background: #f1f5f9; color: #1e293b; padding: 32px 24px; }
+
+    .page-label {
+      font-size: 10.5px; font-weight: 600; color: #94a3b8;
+      text-transform: uppercase; letter-spacing: .06em;
+      margin-bottom: 8px;
+    }
+    .variant-desc { font-size: 12px; color: #64748b; margin-bottom: 16px; max-width: 480px; line-height: 1.5; }
+
+    /* ── Shared card shell ── */
+    .card {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,.05);
+      width: 560px;
+      max-height: 380px;
+      overflow-y: auto;
+      position: relative;
+      scroll-behavior: smooth;
+    }
+    .card-inner { padding: 20px 22px; }
+    .section { margin-bottom: 36px; scroll-margin-top: 60px; }
+    .section-heading { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+    .section-date { font-size: 11px; color: #94a3b8; margin-bottom: 10px; }
+    .section-body p { font-size: 13px; color: #374151; line-height: 1.7; margin-bottom: 8px; }
+
+    .variant { margin-bottom: 56px; }
+
+    /* ══════════════════════════════════════
+       A — Floating pill dropdown
+       ══════════════════════════════════════ */
+    .pill-wrap {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      justify-content: flex-end;
+      padding: 10px 14px 0;
+      pointer-events: none;
+    }
+    .pill-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 11px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #374151;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,.10);
+      pointer-events: all;
+      transition: border-color .15s;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+    .pill-btn:hover { border-color: #00A651; color: #00A651; }
+    .pill-btn i { font-size: 9px; color: #94a3b8; }
+
+    .pill-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      right: 0;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.12);
+      min-width: 160px;
+      z-index: 20;
+      overflow: hidden;
+    }
+    .pill-dropdown.open { display: block; }
+    .pill-drop-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 14px;
+      font-size: 12.5px; font-weight: 500; color: #374151;
+      cursor: pointer;
+      transition: background .1s;
+    }
+    .pill-drop-item:hover { background: #f8fafc; }
+    .pill-drop-item.active { color: #00A651; font-weight: 600; }
+    .pill-drop-item.active::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #00A651;
+      flex-shrink: 0;
+    }
+    .pill-drop-item:not(.active)::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: transparent;
+      flex-shrink: 0;
+    }
+    .pill-anchor { position: relative; }
+
+    /* ══════════════════════════════════════
+       B — Segmented progress bar
+       ══════════════════════════════════════ */
+    .seg-bar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      gap: 2px;
+      padding: 8px 14px 0;
+      background: #fff;
+    }
+    .seg {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background: #e2e8f0;
+      cursor: pointer;
+      transition: background .2s;
+      position: relative;
+    }
+    .seg.active { background: #00A651; }
+    .seg:hover { background: #86efac; }
+    .seg-label {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e293b;
+      color: #fff;
+      font-size: 10.5px;
+      font-weight: 500;
+      padding: 3px 7px;
+      border-radius: 4px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .15s;
+    }
+    .seg:hover .seg-label { opacity: 1; }
+
+    /* ══════════════════════════════════════
+       C — Right-edge dot nav
+       ══════════════════════════════════════ */
+    /* C outer container — floats on right edge, contains both dots + panel */
+    .rdot-outer {
+      position: sticky;
+      top: 20px;
+      float: right;
+      z-index: 20;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    /* The dots — always visible, right side */
+    .rdot-dots {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 6px 4px;
+      align-items: center;
+    }
+    .rdot-bar {
+      width: 3px;
+      height: 14px;
+      border-radius: 2px;
+      background: #e2e8f0;
+      flex-shrink: 0;
+      transition: background .2s;
+    }
+    .rdot.active .rdot-bar { background: #00A651; }
+
+    /* Panel — sits to the LEFT of the dots, same flex row */
+    .rdot-panel {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.12);
+      padding: 6px 4px;
+      min-width: 130px;
+      opacity: 0;
+      pointer-events: none;
+      max-width: 0;
+      overflow: hidden;
+      transition: opacity .18s ease, max-width .18s ease;
+    }
+    .rdot-outer:hover .rdot-panel {
+      opacity: 1;
+      pointer-events: all;
+      max-width: 200px;
+    }
+
+    .rdot {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 5px 10px;
+      border-radius: 5px;
+      transition: background .1s;
+    }
+    .rdot:hover { background: #f8fafc; }
+
+    .rdot-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: #64748b;
+      white-space: nowrap;
+      transition: color .15s;
+    }
+    .rdot:hover .rdot-label { color: #1e293b; }
+    .rdot.active .rdot-label { color: #00A651; font-weight: 600; }
+    .rdot.active .rdot-bar { background: #00A651; }
+
+    /* ══════════════════════════════════════
+       D — Sticky section docking label
+       ══════════════════════════════════════ */
+    .dock-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #fff;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+    }
+    .dock-current {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+    .dock-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #00A651;
+    }
+    .dock-jump {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: #94a3b8;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: none;
+      border: none;
+      font-family: inherit;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: color .1s, background .1s;
+    }
+    .dock-jump:hover { color: #00A651; background: #f0fdf4; }
+    .dock-jump i { font-size: 9px; }
+
+    .dock-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      right: 14px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(0,0,0,.1);
+      min-width: 150px;
+      z-index: 20;
+      overflow: hidden;
+    }
+    .dock-menu.open { display: block; }
+    .dock-menu-item {
+      display: block;
+      padding: 8px 14px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #374151;
+      cursor: pointer;
+      transition: background .1s;
+    }
+    .dock-menu-item:hover { background: #f8fafc; color: #00A651; }
+    .dock-menu-item.active { color: #00A651; font-weight: 600; background: #f0fdf4; }
+
+    .lorem { color: #94a3b8; font-style: italic; font-size: 12.5px; line-height: 1.7; }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ C: Right-edge dots — FEATURED ═══ -->
+  <div class="variant" style="margin-bottom:64px;">
+    <div class="page-label" style="color:#00A651;">★ Preferred direction</div>
+    <div style="font-size:16px;font-weight:700;color:#1e293b;margin-bottom:6px;">Hover-reveal overlay</div>
+    <div class="variant-desc">Thin bars on the right edge of the card track your position. Hover to reveal a floating panel with all sections — overlays the content, no layout shift. Click to jump.</div>
+    <div class="card" id="card-c" onscroll="spyC()" style="overflow-y:scroll;max-height:480px;width:640px;">
+      <div class="card-inner" style="position:relative;">
+        <div class="rdot-outer" id="rdots">
+          <div class="rdot-panel">
+            <div class="rdot active" onclick="jumpC('c-overview')" data-id="c-overview"><span class="rdot-label">Overview</span></div>
+            <div class="rdot" onclick="jumpC('c-political')" data-id="c-political"><span class="rdot-label">Political</span></div>
+            <div class="rdot" onclick="jumpC('c-operational')" data-id="c-operational"><span class="rdot-label">Operational</span></div>
+            <div class="rdot" onclick="jumpC('c-security')" data-id="c-security"><span class="rdot-label">Security</span></div>
+            <div class="rdot" onclick="jumpC('c-cyber')" data-id="c-cyber"><span class="rdot-label">Cyber</span></div>
+          </div>
+          <div class="rdot-dots">
+            <div class="rdot-bar" id="bar-c-overview" style="background:#00A651"></div>
+            <div class="rdot-bar" id="bar-c-political"></div>
+            <div class="rdot-bar" id="bar-c-operational"></div>
+            <div class="rdot-bar" id="bar-c-security"></div>
+            <div class="rdot-bar" id="bar-c-cyber"></div>
+          </div>
+        </div>
+        <div class="section" id="c-overview"><div class="section-heading">Overview</div><div class="section-date">Published May 18, 2026</div><div class="section-body"><p>Political risk will remain elevated over the coming years following the Taliban takeover in August 2021. Several government ministers are members of the Haqqani Network, which has strong ties to al-Qaida.</p><p class="lorem">The economy remains isolated, and the humanitarian crisis has worsened amid a suspension of access to financial lines and international aid. Companies and foreign organisations will face heightened exposure to sanctions and reputational risk.</p></div></div>
+        <div class="section" id="c-political"><div class="section-heading">Political</div><div class="section-date">Published May 18, 2026</div><div class="section-body"><p>The Taliban's Supreme Leader Haibatullah Akhundzada remains the ultimate authority, ruling by decree from Kandahar. The movement remains deeply factionalised.</p><p class="lorem">Any prospect of international recognition remains remote. The Taliban's refusal to form an inclusive government has foreclosed engagement with most states.</p></div></div>
+        <div class="section" id="c-operational"><div class="section-heading">Operational</div><div class="section-date">Published May 18, 2026</div><div class="section-body"><p>Operating in Afghanistan requires navigating a complex regulatory environment. Unofficial payments to local commanders are common and create significant compliance exposure.</p><p class="lorem">Supply chains remain severely disrupted. The banking sector remains largely non-functional for international transfers.</p></div></div>
+        <div class="section" id="c-security"><div class="section-heading">Security</div><div class="section-date">Published May 18, 2026</div><div class="section-body"><p>Islamic State Khorasan Province (ISKP) remains the principal terrorist threat, conducting high-casualty attacks in Kabul.</p><p class="lorem">Kidnapping for ransom remains a serious risk for foreign nationals and NGO workers.</p></div></div>
+        <div class="section" id="c-cyber"><div class="section-heading">Cyber</div><div class="section-date">Published May 18, 2026</div><div class="section-body"><p>Afghanistan's cyber threat environment is primarily shaped by state-sponsored actors from neighbouring countries.</p><p class="lorem">Organisations operating in-country should assume network traffic is subject to interception.</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:24px;padding-bottom:12px;border-bottom:1px solid #e2e8f0;width:640px;">Other ideas</div>
+
+  <!-- ═══ A: Floating pill dropdown ═══ -->
+  <div class="variant">
+    <div class="page-label">A — Floating pill</div>
+    <div class="variant-desc">A small pill anchored to the top-right of the card shows the current section. Click to jump anywhere. Zero layout impact — no column, no row.</div>
+    <div class="card" id="card-a" onscroll="spyA()">
+      <div class="pill-wrap">
+        <div class="pill-anchor">
+          <button class="pill-btn" onclick="togglePill()">
+            <span id="pill-label">Overview</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="pill-dropdown" id="pill-menu">
+            <div class="pill-drop-item active" onclick="jumpA('a-overview','Overview')">Overview</div>
+            <div class="pill-drop-item" onclick="jumpA('a-political','Political')">Political</div>
+            <div class="pill-drop-item" onclick="jumpA('a-operational','Operational')">Operational</div>
+            <div class="pill-drop-item" onclick="jumpA('a-security','Security')">Security</div>
+            <div class="pill-drop-item" onclick="jumpA('a-cyber','Cyber')">Cyber</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-inner">
+        <div class="section" id="a-overview"><div class="section-heading">Overview</div><div class="section-date">Published May 18, 2026</div><div class="section-body"><p>Political risk will remain elevated over the coming years following the Taliban takeover in August 2021. Several government ministers are members of the Haqqani Network, which has strong ties to al-Qaida.</p><p class="lorem">The economy remains isolated, and the humanitarian crisis has worsened amid a suspension of access to financial lines and international aid. Companies and foreign organisations will face heightened exposure to sanctions and reputational risk.</p></div></div>
+        <div class="section" id="a-political"><div class="section-heading">Political</div><div class="section-date">Published May 18, 2026</div><div class="section-body"><p>The Taliban's Supreme Leader Haibatullah Akhundzada remains the ultimate authority, ruling by decree from Kandahar. The movement remains deeply factionalised.</p><p class="lorem">Any prospect of international recognition remains remote. The Taliban's refusal to form an inclusive government has foreclosed engagement with most states. Succession dynamics are a growing concern.</p></div></div>
+        <div class="section" id="a-operational"><div class="section-heading">Operational</div><div class="section-date">Published May 18, 2026</div><div class="section-body"><p>Operating in Afghanistan requires navigating a complex regulatory environment. Unofficial payments to local commanders are common and create significant compliance exposure.</p><p class="lorem">Supply chains remain severely disrupted. The banking sector remains largely non-functional for international transfers.</p></div></div>
+        <div class="section" id="a-security"><div class="section-heading">Security</div><div class="section-date">Published May 18, 2026</div><div class="section-body"><p>Islamic State Khorasan Province (ISKP) remains the principal terrorist threat, conducting high-casualty attacks in Kabul and other urban centres.</p><p class="lorem">Kidnapping for ransom remains a serious risk for foreign nationals and NGO workers. Armed clashes in Panjshir and Baghlan continue at a low level.</p></div></div>
+        <div class="section" id="a-cyber"><div class="section-heading">Cyber</div><div class="section-date">Published May 18, 2026</div><div class="section-body"><p>Afghanistan's cyber threat environment is primarily shaped by state-sponsored actors from neighbouring countries.</p><p class="lorem">Organisations operating in-country should assume network traffic is subject to interception by Taliban intelligence units.</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ B: Segmented progress bar ═══ -->
+  <div class="variant">
+    <div class="page-label">B — Segmented progress bar</div>
+    <div class="variant-desc">A 4px bar across the top of the card, divided into one segment per section. The active segment turns green. Hover shows the section name. Click to jump. Almost no vertical space.</div>
+    <div class="card" id="card-b" onscroll="spyB()">
+      <div class="seg-bar" id="seg-bar">
+        <div class="seg active" onclick="jumpB('b-overview')" data-label="Overview"><span class="seg-label">Overview</span></div>
+        <div class="seg" onclick="jumpB('b-political')" data-label="Political"><span class="seg-label">Political</span></div>
+        <div class="seg" onclick="jumpB('b-operational')" data-label="Operational"><span class="seg-label">Operational</span></div>
+        <div class="seg" onclick="jumpB('b-security')" data-label="Security"><span class="seg-label">Security</span></div>
+        <div class="seg" onclick="jumpB('b-cyber')" data-label="Cyber"><span class="seg-label">Cyber</span></div>
+      </div>
+      <div class="card-inner">
+        <div class="section" id="b-overview"><div class="section-heading">Overview</div><div class="section-date">Published May 18, 2026</div><div class="section-body"><p>Political risk will remain elevated over the coming years following the Taliban takeover in August 2021. Several government ministers are members of the Haqqani Network, which has strong ties to al-Qaida.</p><p class="lorem">The economy remains isolated, and the humanitarian crisis has worsened amid a suspension of access to financial lines and international aid. Companies and foreign organisations will face heightened exposure to sanctions and reputational risk.</p></div></div>
+        <div class="section" id="b-political"><div class="section-heading">Political</div><div class="section-date">Published May 18, 2026</div><div class="section-body"><p>The Taliban's Supreme Leader Haibatullah Akhundzada remains the ultimate authority, ruling by decree from Kandahar. The movement remains deeply factionalised.</p><p class="lorem">Any prospect of international recognition remains remote. The Taliban's refusal to form an inclusive government has foreclosed engagement with most states. Succession dynamics are a growing concern.</p></div></div>
+        <div class="section" id="b-operational"><div class="section-heading">Operational</div><div class="section-date">Published May 18, 2026</div><div class="section-body"><p>Operating in Afghanistan requires navigating a complex regulatory environment. Unofficial payments to local commanders are common and create significant compliance exposure.</p><p class="lorem">Supply chains remain severely disrupted. The banking sector remains largely non-functional for international transfers.</p></div></div>
+        <div class="section" id="b-security"><div class="section-heading">Security</div><div class="section-date">Published May 18, 2026</div><div class="section-body"><p>Islamic State Khorasan Province (ISKP) remains the principal terrorist threat, conducting high-casualty attacks in Kabul and other urban centres.</p><p class="lorem">Kidnapping for ransom remains a serious risk for foreign nationals and NGO workers. Armed clashes in Panjshir and Baghlan continue at a low level.</p></div></div>
+        <div class="section" id="b-cyber"><div class="section-heading">Cyber</div><div class="section-date">Published May 18, 2026</div><div class="section-body"><p>Afghanistan's cyber threat environment is primarily shaped by state-sponsored actors from neighbouring countries.</p><p class="lorem">Organisations operating in-country should assume network traffic is subject to interception by Taliban intelligence units.</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ D: Sticky docking header ═══ -->
+  <div class="variant">
+    <div class="page-label">D — Sticky section header</div>
+    <div class="variant-desc">As you scroll, the current section name docks to a slim header at the top of the card. A "Jump to" button opens a dropdown to navigate. No visual clutter until you need it.</div>
+    <div class="card" id="card-d" onscroll="spyD()" style="position:relative;">
+      <div class="dock-header">
+        <div class="dock-current"><div class="dock-dot"></div><span id="dock-label">Overview</span></div>
+        <div style="position:relative;">
+          <button class="dock-jump" onclick="toggleDockMenu()">Jump to <i class="fa-solid fa-chevron-down"></i></button>
+          <div class="dock-menu" id="dock-menu">
+            <div class="dock-menu-item active" onclick="jumpD('d-overview','Overview')">Overview</div>
+            <div class="dock-menu-item" onclick="jumpD('d-political','Political')">Political</div>
+            <div class="dock-menu-item" onclick="jumpD('d-operational','Operational')">Operational</div>
+            <div class="dock-menu-item" onclick="jumpD('d-security','Security')">Security</div>
+            <div class="dock-menu-item" onclick="jumpD('d-cyber','Cyber')">Cyber</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-inner">
+        <div class="section" id="d-overview"><div class="section-heading">Overview</div><div class="section-date">Published May 18, 2026</div><div class="section-body"><p>Political risk will remain elevated over the coming years following the Taliban takeover in August 2021. Several government ministers are members of the Haqqani Network, which has strong ties to al-Qaida.</p><p class="lorem">The economy remains isolated, and the humanitarian crisis has worsened. Companies and foreign organisations will face heightened exposure to sanctions and reputational risk.</p></div></div>
+        <div class="section" id="d-political"><div class="section-heading">Political</div><div class="section-date">Published May 18, 2026</div><div class="section-body"><p>The Taliban's Supreme Leader Haibatullah Akhundzada remains the ultimate authority, ruling by decree from Kandahar. The movement remains deeply factionalised.</p><p class="lorem">Any prospect of international recognition remains remote. Succession dynamics are a growing concern.</p></div></div>
+        <div class="section" id="d-operational"><div class="section-heading">Operational</div><div class="section-date">Published May 18, 2026</div><div class="section-body"><p>Operating in Afghanistan requires navigating a complex regulatory environment. Unofficial payments to local commanders are common and create significant compliance exposure.</p><p class="lorem">Supply chains remain severely disrupted. The banking sector remains largely non-functional for international transfers.</p></div></div>
+        <div class="section" id="d-security"><div class="section-heading">Security</div><div class="section-date">Published May 18, 2026</div><div class="section-body"><p>Islamic State Khorasan Province (ISKP) remains the principal terrorist threat, conducting high-casualty attacks in Kabul.</p><p class="lorem">Kidnapping for ransom remains a serious risk for foreign nationals and NGO workers.</p></div></div>
+        <div class="section" id="d-cyber"><div class="section-heading">Cyber</div><div class="section-date">Published May 18, 2026</div><div class="section-body"><p>Afghanistan's cyber threat environment is primarily shaped by state-sponsored actors from neighbouring countries.</p><p class="lorem">Organisations in-country should assume network traffic is subject to interception.</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ── A: pill ── */
+    function togglePill() {
+      document.getElementById('pill-menu').classList.toggle('open');
+    }
+    function jumpA(id, label) {
+      document.getElementById(id).scrollIntoView({ block: 'start' });
+      document.getElementById('pill-label').textContent = label;
+      document.querySelectorAll('.pill-drop-item').forEach(i => i.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('pill-menu').classList.remove('open');
+    }
+    function spyA() {
+      const sections = ['a-overview','a-political','a-operational','a-security','a-cyber'];
+      const labels = { 'a-overview':'Overview','a-political':'Political','a-operational':'Operational','a-security':'Security','a-cyber':'Cyber' };
+      const card = document.getElementById('card-a');
+      let current = sections[0];
+      sections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el.offsetTop - card.scrollTop <= 80) current = id;
+      });
+      document.getElementById('pill-label').textContent = labels[current];
+    }
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.pill-anchor')) document.getElementById('pill-menu').classList.remove('open');
+    });
+
+    /* ── B: segments ── */
+    function jumpB(id) {
+      document.getElementById(id).scrollIntoView({ block: 'start' });
+    }
+    function spyB() {
+      const sections = ['b-overview','b-political','b-operational','b-security','b-cyber'];
+      const segs = document.querySelectorAll('.seg');
+      const card = document.getElementById('card-b');
+      let current = 0;
+      sections.forEach((id, i) => {
+        const el = document.getElementById(id);
+        if (el.offsetTop - card.scrollTop <= 60) current = i;
+      });
+      segs.forEach((s, i) => s.classList.toggle('active', i === current));
+    }
+
+    /* ── C: dots ── */
+    function jumpC(id) {
+      document.getElementById(id).scrollIntoView({ block: 'start' });
+    }
+    function spyC() {
+      const sections = ['c-overview','c-political','c-operational','c-security','c-cyber'];
+      const panelDots = document.querySelectorAll('#rdots .rdot');
+      const bars = sections.map(id => document.getElementById('bar-' + id));
+      const card = document.getElementById('card-c');
+      let current = 0;
+      sections.forEach((id, i) => {
+        const el = document.getElementById(id);
+        if (el.offsetTop - card.scrollTop <= 60) current = i;
+      });
+      panelDots.forEach((d, i) => d.classList.toggle('active', i === current));
+      bars.forEach((b, i) => { if (b) b.style.background = i === current ? '#00A651' : '#e2e8f0'; });
+    }
+
+    /* ── D: dock ── */
+    function toggleDockMenu() {
+      document.getElementById('dock-menu').classList.toggle('open');
+    }
+    function jumpD(id, label) {
+      document.getElementById(id).scrollIntoView({ block: 'start' });
+      document.getElementById('dock-label').textContent = label;
+      document.querySelectorAll('.dock-menu-item').forEach(i => i.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('dock-menu').classList.remove('open');
+    }
+    function spyD() {
+      const sections = ['d-overview','d-political','d-operational','d-security','d-cyber'];
+      const labels = { 'd-overview':'Overview','d-political':'Political','d-operational':'Operational','d-security':'Security','d-cyber':'Cyber' };
+      const card = document.getElementById('card-d');
+      let current = sections[0];
+      sections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el.offsetTop - card.scrollTop <= 60) current = id;
+      });
+      document.getElementById('dock-label').textContent = labels[current];
+    }
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.dock-jump') && !e.target.closest('.dock-menu')) {
+        document.getElementById('dock-menu').classList.remove('open');
+      }
+    });
+  </script>
+</body>
+</html>

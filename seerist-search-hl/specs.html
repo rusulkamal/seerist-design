@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seerist — Search Highlight Docs</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #f8fafc; color: #1e293b; padding-top: 48px; }
+
+  .topnav { position: fixed; top: 0; left: 0; right: 0; height: 48px; background: #fff; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: center; gap: 4px; z-index: 999; }
+  .topnav-back { position: absolute; left: 20px; display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; color: #374151; text-decoration: none; }
+  .topnav-back:hover { color: #111; }
+  .topnav a { display: inline-flex; align-items: center; gap: 5px; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; text-decoration: none; color: #6b7280; transition: all .12s; }
+  .topnav a.active { background: #111; color: #fff; }
+  .topnav a:not(.active):hover { background: #f3f4f6; color: #111; }
+
+  .page { max-width: 600px; margin: 0 auto; padding: 24px 24px 80px; display: flex; flex-direction: column; gap: 48px; }
+
+  /* Header */
+  .doc-header { display: flex; flex-direction: column; gap: 6px; }
+  .doc-title { font-size: 20px; font-weight: 700; color: #0f172a; letter-spacing: -.02em; }
+  .doc-sub { font-size: 13px; color: #64748b; line-height: 1.6; max-width: 440px; }
+
+  /* Section */
+  .section { display: flex; flex-direction: column; gap: 14px; }
+  .section-heading { font-size: 12px; font-weight: 600; color: #94a3b8; letter-spacing: .06em; text-transform: uppercase; }
+
+  /* States */
+  .states { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .state-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+  .state-card-label { font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: .06em; }
+  .state-preview { font-size: 13px; line-height: 1.5; color: #1e293b; }
+  .state-preview mark { background: none; color: #1e293b; font-weight: 700; }
+  .state-desc { font-size: 12px; color: #64748b; line-height: 1.55; padding-top: 2px; border-top: 1px solid #f1f5f9; }
+
+  /* Token rows */
+  .tokens { display: flex; flex-direction: column; gap: 1px; }
+  .token-row { display: grid; grid-template-columns: 140px 1fr; background: #fff; border: 1px solid #e2e8f0; border-radius: 0; font-size: 12px; }
+  .token-row:first-child { border-radius: 10px 10px 0 0; }
+  .token-row:last-child { border-radius: 0 0 10px 10px; border-bottom: 1px solid #e2e8f0; }
+  .token-row + .token-row { border-top: none; }
+  .token-key { padding: 11px 16px; color: #64748b; font-weight: 500; }
+  .token-val { padding: 11px 16px; color: #0f172a; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 11px; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; color: #334155; white-space: nowrap; }
+
+  /* Note */
+  .note { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 18px; font-size: 12px; color: #64748b; line-height: 1.65; display: flex; gap: 12px; align-items: flex-start; }
+  .note-icon { width: 20px; height: 20px; background: #f1f5f9; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .note-icon i { color: #94a3b8; font-size: 10px; }
+
+  /* Animation card */
+  .anim-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; }
+  .anim-steps { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+  .anim-step { display: flex; gap: 14px; }
+  .anim-step-line { display: flex; flex-direction: column; align-items: center; gap: 0; flex-shrink: 0; padding-top: 3px; }
+  .anim-step-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .anim-connector { width: 1px; flex: 1; background: #e2e8f0; margin-top: 4px; }
+  .anim-step:last-child .anim-connector { display: none; }
+  .anim-step-body { display: flex; flex-direction: column; gap: 3px; padding-bottom: 16px; }
+  .anim-step:last-child .anim-step-body { padding-bottom: 0; }
+  .anim-step-title { font-size: 12px; font-weight: 600; color: #1e293b; }
+  .anim-step-desc { font-size: 12px; color: #64748b; line-height: 1.55; }
+
+  .anim-preview { padding: 16px 20px; border-top: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 8px; background: #fafafa; }
+  .anim-preview-label { font-size: 10px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: .06em; }
+  .anim-title { font-size: 13px; font-weight: 700; color: #1e293b; line-height: 1.5; transition: font-weight 150ms ease; }
+  .anim-title mark { background: none; color: #1e293b; font-weight: 700; }
+  .anim-title.searching { font-weight: 400; }
+
+  .anim-footer { padding: 10px 20px; border-top: 1px solid #f1f5f9; display: flex; align-items: center; gap: 6px; font-size: 11px; color: #94a3b8; }
+  .replay { color: #6366f1; cursor: pointer; font-weight: 600; margin-left: auto; }
+  .replay:hover { text-decoration: underline; }
+</style>
+</head>
+<body><div id="seerist-back" style="display:none;"><a href="https://seerist-design.surge.sh" style="display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#374151;text-decoration:none;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7.5 2L3.5 6L7.5 10" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="width:6px;height:6px;border-radius:50%;background:#00A651;display:inline-block"></span>Seerist Design</a></div>
+
+<div class="topnav">
+  <a href="https://seerist-design.surge.sh" class="topnav-back"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7.5 2L3.5 6L7.5 10" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="width:6px;height:6px;border-radius:50%;background:#00A651;display:inline-block"></span>Seerist Design</a>
+  <a href="index.html">Design</a>
+  <a href="specs.html" class="active">Documentation</a>
+</div>
+
+<div class="page">
+
+  <div class="doc-header">
+    <div class="doc-title">Search Highlight</div>
+    <div class="doc-sub">When a keyword search is active, all titles dim to regular weight. Matched words stay bold so they stand out without colour or decoration.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-heading">Behaviour</div>
+    <div class="states">
+      <div class="state-card">
+        <div class="state-card-label">Idle</div>
+        <div class="state-preview" style="font-weight:700;">Parliament blocks sanctions bill amid protest</div>
+        <div class="state-desc">All titles at bold weight. No treatment applied.</div>
+      </div>
+      <div class="state-card">
+        <div class="state-card-label">Search active</div>
+        <div class="state-preview" style="font-weight:400;">Parliament blocks <mark>sanctions</mark> bill amid <mark>protest</mark></div>
+        <div class="state-desc">Titles shift to regular. Matched words stay bold.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-heading">Tokens</div>
+    <div class="tokens">
+      <div class="token-row">
+        <div class="token-key">Default</div>
+        <div class="token-val"><code>font-weight: 700</code></div>
+      </div>
+      <div class="token-row">
+        <div class="token-key">Search active</div>
+        <div class="token-val"><code>font-weight: 400</code> <code>transition: 150ms ease</code></div>
+      </div>
+      <div class="token-row">
+        <div class="token-key">Matched word</div>
+        <div class="token-val"><code>font-weight: 700</code> <span style="color:#94a3b8;font-size:11px;">same color</span></div>
+      </div>
+      <div class="token-row">
+        <div class="token-key">Scope</div>
+        <div class="token-val" style="color:#64748b;">Title only — date, tags, source unchanged</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    <div class="note-icon"><i class="fa-solid fa-circle-info"></i></div>
+    <span>Matching is case-insensitive. Unquoted terms match independently — <code>protest sanctions</code> highlights each word. Quoted phrases match exactly — <code>"protest sanctions"</code> only highlights the full sequence.</span>
+  </div>
+
+  <div class="section">
+    <div class="section-heading">Animation</div>
+    <div class="anim-card">
+      <div class="anim-steps">
+        <div class="anim-step">
+          <div class="anim-step-line">
+            <div class="anim-step-dot" style="background:#6366f1;"></div>
+            <div class="anim-connector"></div>
+          </div>
+          <div class="anim-step-body">
+            <div class="anim-step-title">Search starts</div>
+            <div class="anim-step-desc">All titles shift from <code>700</code> → <code>400</code> over 150ms. Matched words wrap in a <code>&lt;mark&gt;</code> and stay at <code>700</code>, creating contrast without any colour change.</div>
+          </div>
+        </div>
+        <div class="anim-step">
+          <div class="anim-step-line">
+            <div class="anim-step-dot" style="background:#94a3b8;"></div>
+            <div class="anim-connector"></div>
+          </div>
+          <div class="anim-step-body">
+            <div class="anim-step-title">Search clears</div>
+            <div class="anim-step-desc">Titles transition back to <code>700</code> over 150ms. Without this, clearing the input snaps all visible titles simultaneously — jarring on a long list.</div>
+          </div>
+        </div>
+      </div>
+      <div class="anim-preview">
+        <div class="anim-preview-label">Live preview</div>
+        <div id="anim-t1" class="anim-title" data-text="UK Parliament blocks new sanctions bill amid protest over election allegations" data-query="sanctions election">UK Parliament blocks new sanctions bill amid protest over election allegations</div>
+        <div id="anim-t2" class="anim-title" data-text="New sanctions package targets energy sector following disputed regional vote" data-query="sanctions">New sanctions package targets energy sector following disputed regional vote</div>
+        <div id="anim-t3" class="anim-title" data-text="Security forces deployed ahead of presidential election amid civil unrest" data-query="election">Security forces deployed ahead of presidential election amid civil unrest</div>
+      </div>
+      <div class="anim-footer">
+        <i class="fa-solid fa-circle-play" style="font-size:10px;"></i>
+        Auto-plays on load
+        <span class="replay" id="replay-btn">Replay</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const animTitles = document.querySelectorAll('[id^="anim-t"]');
+
+  function runAnim() {
+    animTitles.forEach(t => {
+      t.classList.remove('searching');
+      t.innerHTML = t.dataset.text;
+    });
+    setTimeout(() => {
+      animTitles.forEach(t => {
+        const terms = t.dataset.query.split(' ');
+        const regex = new RegExp(`(${terms.map(w => w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')})`, 'gi');
+        t.classList.add('searching');
+        t.innerHTML = t.dataset.text.replace(regex, '<mark>$1</mark>');
+      });
+    }, 900);
+    setTimeout(() => {
+      animTitles.forEach(t => {
+        t.classList.remove('searching');
+        t.innerHTML = t.dataset.text;
+      });
+    }, 2800);
+  }
+
+  runAnim();
+  document.getElementById('replay-btn').addEventListener('click', runAnim);
+</script>
+</body>
+</html>

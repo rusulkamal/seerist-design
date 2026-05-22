@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discover – Inbox View</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #F1F5F9; height: 100vh; overflow: hidden; display: flex; flex-direction: column; color: #0F172A; font-size: 14px; }
+
+    /* ── Topbar ── */
+    .topbar {
+      height: 52px; background: #fff; border-bottom: 1px solid #E2E8F0;
+      display: flex; align-items: center; padding: 0 20px; gap: 12px; flex-shrink: 0;
+    }
+    .topbar-logo  { font-size: 15px; font-weight: 700; color: #00A651; }
+    .topbar-sep   { width: 1px; height: 20px; background: #E2E8F0; }
+    .topbar-title { font-size: 14px; font-weight: 600; color: #1E293B; }
+    .topbar-count { font-size: 13px; color: #94A3B8; }
+    .topbar-right { margin-left: auto; display: flex; gap: 8px; }
+
+    /* ── Search card ── */
+    .search-card {
+      background: #fff;
+      border-bottom: 1px solid #E2E8F0;
+      padding: 12px 20px 10px;
+      flex-shrink: 0;
+    }
+    .search-row { margin-bottom: 10px; }
+    .search-wrap { position: relative; max-width: 560px; }
+    .search-wrap i {
+      position: absolute; left: 10px; top: 50%;
+      transform: translateY(-50%); color: #94a3b8; font-size: 12px; pointer-events: none;
+    }
+    .search-input {
+      width: 100%; padding: 8px 12px 8px 30px;
+      border: 1px solid #e2e8f0; border-radius: 6px;
+      font-size: 13px; font-family: inherit; color: #1e293b; outline: none;
+      box-shadow: 0 1px 2px rgba(18,18,23,.04);
+      transition: border-color 0.15s;
+    }
+    .search-input:focus { border-color: #00A651; box-shadow: 0 0 0 3px rgba(0,166,81,.08); }
+
+    /* ── Filter bar ── */
+    .filter-bar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+    /* ── Chip ── */
+    .chip {
+      position: relative; display: inline-flex; align-items: stretch;
+      border: 1px solid #cbd5e1; border-radius: 6px;
+      background: #ffffff; font-family: inherit; cursor: pointer;
+      white-space: nowrap; user-select: none; height: 2.125rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .chip:hover { border-color: #94a3b8; }
+    .chip.open  { border-color: #00A651; box-shadow: 0 0 0 1px #00A651; }
+    .chip-content { display: flex; align-items: center; gap: 0.375rem; padding: 0 0.625rem; font-size: 0.8125rem; color: #334155; }
+    .chip-label   { font-weight: 400; color: #334155; }
+    .chip-count   { display: inline-flex; align-items: center; padding: 0 0.375rem; min-width: 1.125rem; height: 1.125rem; background: #00A651; color: #fff; border-radius: 9999px; font-size: 0.6875rem; font-weight: 700; }
+    .chip.filtered { border-color: #00A651; }
+    .chip-remove  { display: none; align-items: center; justify-content: center; width: 1.25rem; flex-shrink: 0; background: none; border: none; cursor: pointer; color: #94a3b8; font-size: 0.625rem; padding: 0; transition: color 0.15s; }
+    .chip.filtered .chip-remove, .chip-dynamic .chip-remove { display: flex; }
+    .chip-remove:hover { color: #475569; }
+    .chip-chevron { display: flex; align-items: center; padding: 0 0.5rem; border-left: 1px solid #e2e8f0; color: #94a3b8; font-size: 0.625rem; }
+
+    /* ── Add filter btn ── */
+    .add-filter-btn {
+      position: relative; display: inline-flex; align-items: center; gap: 0.375rem;
+      padding: 0 0.625rem; height: 2.125rem;
+      border: 1px dashed #cbd5e1; border-radius: 6px;
+      background: #ffffff; font-size: 0.8125rem; font-weight: 400;
+      font-family: inherit; cursor: pointer; color: #64748b;
+      white-space: nowrap; transition: border-color 0.2s, color 0.2s;
+    }
+    .add-filter-btn:hover { border-color: #94a3b8; color: #334155; }
+    .add-filter-btn.open  { border-style: solid; border-color: #00A651; color: #00A651; box-shadow: 0 0 0 1px #00A651; }
+
+    /* ── Dropdown ── */
+    .dropdown {
+      position: absolute; top: calc(100% + 4px); left: 0;
+      background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1);
+      z-index: 200; display: none; min-width: 220px; overflow: hidden;
+    }
+    .dropdown.visible { display: block; }
+
+    /* ── Add-filter panel ── */
+    .af-group-header { display: flex; align-items: center; justify-content: space-between; padding: 0.625rem 0.875rem 0.25rem; }
+    .af-group-label  { font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #94a3b8; }
+    .af-divider      { height: 1px; background: #f1f5f9; margin: 0.25rem 0; }
+    .af-option {
+      display: flex; align-items: flex-start; gap: 0.5rem;
+      padding: 0.5rem 0.875rem; cursor: pointer; font-size: 0.875rem; color: #334155;
+      transition: background 0.15s;
+    }
+    .af-option:hover { background: #f1f5f9; }
+    .af-option input[type="checkbox"] { accent-color: #00A651; width: 14px; height: 14px; cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+    .af-option-label { font-size: 0.875rem; color: #334155; }
+
+    /* ── Multi-select panel ── */
+    .ms-search-wrap { display: flex; align-items: center; gap: 0.375rem; padding: 0.5rem 0.625rem 0.375rem; border-bottom: 1px solid #f1f5f9; }
+    .ms-search-inner { position: relative; flex: 1; }
+    .ms-search-inner i { position: absolute; left: 0.5rem; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.75rem; pointer-events: none; }
+    .ms-search-inner input { width: 100%; padding: 0.375rem 0.625rem 0.375rem 1.75rem; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.875rem; font-family: inherit; outline: none; color: #334155; }
+    .ms-search-inner input:focus { border-color: #00A651; box-shadow: 0 0 0 1px #00A651; }
+    .ms-options { max-height: 14rem; overflow-y: auto; padding: 0.25rem; }
+    .ms-options::-webkit-scrollbar { width: 4px; }
+    .ms-options::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+    .ms-option { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; cursor: pointer; font-size: 0.875rem; color: #334155; border-radius: 4px; transition: background 0.15s; }
+    .ms-option-label { flex: 1; }
+    .ms-option-count { font-size: 0.75rem; color: #94a3b8; }
+    .ms-option:hover { background: #f1f5f9; }
+    .ms-option input[type="checkbox"] { accent-color: #00A651; width: 14px; height: 14px; cursor: pointer; flex-shrink: 0; }
+    .ms-select-all-inline { font-size: 0.75rem; color: #64748b; background: none; border: none; cursor: pointer; padding: 0 0 0 0.5rem; font-family: inherit; white-space: nowrap; flex-shrink: 0; }
+    .ms-select-all-inline:hover { color: #00A651; }
+    .ms-subcategories { display: none; }
+    .ms-subcategories.active, .ms-subcategories.open { display: block; }
+    .ms-child { padding-left: 2.375rem !important; font-size: 0.8125rem; }
+    .ms-child .ms-option-label { color: #64748b; }
+    .ms-expand { display: flex; align-items: center; justify-content: center; width: 1rem; height: 1rem; flex-shrink: 0; background: none; border: none; cursor: pointer; color: #cbd5e1; font-size: 0.5625rem; padding: 0; transition: transform 0.15s, color 0.15s; }
+    .ms-expand:hover { color: #94a3b8; }
+    .ms-expand.open { transform: rotate(90deg); color: #64748b; }
+
+    /* ── Date dropdown ── */
+    .date-presets { padding: 0.25rem 0; }
+    .date-preset { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.875rem; cursor: pointer; font-size: 0.875rem; color: #334155; border-radius: 4px; margin: 0 0.25rem; transition: background 0.15s; }
+    .date-preset:hover { background: #f1f5f9; }
+    .date-preset.active { color: #00A651; font-weight: 500; background: rgba(0,166,81,.08); }
+    .date-preset .check-icon { color: #00A651; font-size: 0.6875rem; opacity: 0; width: 0.75rem; }
+    .date-preset.active .check-icon { opacity: 1; }
+    .date-custom { border-top: 1px solid #f1f5f9; padding: 0.625rem 0.875rem; }
+    .date-custom-label { font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 0.5rem; }
+    .date-inputs { display: flex; gap: 0.375rem; align-items: center; }
+    .date-inputs input { flex: 1; padding: 0.375rem 0.5rem; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.75rem; font-family: inherit; color: #334155; outline: none; }
+    .date-inputs input:focus { border-color: #00A651; box-shadow: 0 0 0 1px #00A651; }
+    .date-inputs span { color: #94a3b8; font-size: 0.75rem; }
+
+    /* ── Applied chips ── */
+    .applied-chips-row { display: none; align-items: center; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.5rem; }
+    .applied-chips-row.visible { display: flex; }
+    .applied-chip { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.625rem; background: #f1f5f9; border-radius: 1rem; font-size: 0.8125rem; font-weight: 400; color: #334155; white-space: nowrap; }
+    .applied-chip-remove { display: flex; align-items: center; justify-content: center; width: 0.75rem; height: 0.75rem; background: none; border: none; cursor: pointer; color: #94a3b8; font-size: 0.5625rem; padding: 0; line-height: 1; }
+    .applied-chip-remove:hover { color: #475569; }
+    .clear-all-btn { margin-left: auto; font-size: 0.75rem; color: #94a3b8; background: none; border: none; cursor: pointer; padding: 0 0.125rem; font-family: inherit; white-space: nowrap; flex-shrink: 0; }
+    .clear-all-btn:hover { color: #ef4444; }
+
+    /* ── Layout ── */
+    .main { flex: 1; display: flex; gap: 12px; padding: 12px; overflow: hidden; background: #F1F5F9; }
+
+    .inbox-container { flex: 1; display: flex; overflow: hidden; border: 1px solid #E2E8F0; border-radius: 8px; }
+
+    /* ── Facet panel (right sidebar) ── */
+    .facet-panel {
+      width: 220px; flex-shrink: 0;
+      border: 1px solid #E2E8F0; border-radius: 8px; background: #fff;
+      overflow-y: auto; overflow-x: hidden;
+      display: flex; flex-direction: column;
+      transition: width .2s ease;
+    }
+    .facet-panel.collapsed { width: 36px; }
+
+    .facet-toggle-row {
+      display: flex; align-items: center; justify-content: flex-start;
+      padding: 8px 8px 6px; flex-shrink: 0; border-bottom: 1px solid #F1F5F9;
+    }
+    .facet-toggle-btn {
+      width: 24px; height: 24px; border-radius: 5px; border: none; background: none;
+      color: #94A3B8; font-size: 11px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .facet-toggle-btn:hover { background: #F1F5F9; color: #475569; }
+
+    .facet-body { flex: 1; overflow: hidden; }
+    .facet-panel.collapsed .facet-body { display: none; }
+
+    .facet-section { border-bottom: 1px solid #F1F5F9; }
+    .facet-section-header {
+      display: flex; align-items: center; gap: 5px;
+      padding: 10px 14px 8px; cursor: pointer; user-select: none;
+    }
+    .facet-section-header:hover .facet-section-label { color: #475569; }
+    .facet-chevron { color: #CBD5E1; font-size: 9px; transition: transform .15s; flex-shrink: 0; transform: rotate(0deg); }
+    .facet-section.collapsed .facet-chevron { transform: rotate(-90deg); }
+    .facet-section-label {
+      font-size: 11px; font-weight: 600;
+      color: #94A3B8; transition: color .1s;
+    }
+    .facet-items { padding: 0 12px 12px; display: flex; flex-wrap: wrap; gap: 5px; }
+    .facet-section.collapsed .facet-items { display: none; }
+
+    .facet-item {
+      display: inline-flex; align-items: center;
+      font-size: 11px; font-weight: 400;
+      padding: 2px 8px; border-radius: 1rem;
+      background: #F1F5F9; color: #64748B;
+      border: 1px solid transparent;
+      cursor: pointer; user-select: none; white-space: nowrap;
+      transition: background .12s, color .12s, border-color .12s;
+    }
+    .facet-item:hover { background: #E2E8F0; color: #334155; }
+    .facet-item:focus-visible { outline: 2px solid #00A651; outline-offset: 2px; }
+    .facet-item.active {
+      background: #F0FDF4; color: #14532D;
+      border-color: #00A651; font-weight: 600;
+    }
+    .facet-chip-count { opacity: 0.6; font-size: 10px; margin-left: 3px; }
+
+
+    /* ── Left: Card List ── */
+    .list-pane {
+      flex: 1; overflow-y: auto;
+      background: #fff;
+      display: flex; flex-direction: column; gap: 0;
+    }
+    .list-wrap {
+      position: relative; display: flex; flex-direction: column;
+      width: 420px; flex-shrink: 0; overflow: hidden;
+      border-right: 1px solid #E2E8F0;
+    }
+    .back-to-top {
+      position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+      display: none; align-items: center; gap: 5px;
+      padding: 5px 14px; border-radius: 99px;
+      background: #fff; color: #334155;
+      border: 1px solid #E2E8F0;
+      font-size: 11px; font-weight: 500; font-family: inherit;
+      cursor: pointer; z-index: 10;
+      box-shadow: 0 2px 12px rgba(0,0,0,.1);
+      white-space: nowrap;
+    }
+    .back-to-top.visible { display: inline-flex; }
+    .back-to-top:hover { background: #F8FAFC; border-color: #CBD5E1; }
+
+    /* ── Card ── */
+    .card {
+      background: #fff; border: 1px solid #E2E8F0; border-left: 2px solid transparent;
+      border-radius: 0; padding: 12px 14px 10px; cursor: pointer; position: relative;
+      transition: background .1s, border-left-color .1s;
+    }
+    .card + .card { margin-top: -1px; }
+    .card:first-child { border-top: none; }
+    .card:last-child  { border-bottom: none; }
+    .card:hover { background: #FAFBFC; }
+    .card.active { border-left: 2px solid #00A651; background: #F0FDF4; }
+
+    .eyebrow { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+    .ct-icon { color: #64748B; font-size: 11px; flex-shrink: 0; }
+    .eyebrow-meta { font-size: 11px; color: #475569; flex: 1; }
+
+    .status-badge { font-size: 10px; font-weight: 500; padding: 1px 7px; border-radius: 20px; flex-shrink: 0; border: 1px solid #CBD5E1; color: #475569; background: #fff; }
+    .status-unverified { border-color: #CBD5E1; color: #64748B; }
+    .status-future     { border-color: #93C5FD; color: #1D4ED8; background: #EFF6FF; }
+    .status-verified   { border-color: #86EFAC; color: #15803D; background: #F0FDF4; }
+    .status-breaking   { border-color: #FCA5A5; color: #B91C1C; background: #FFF1F2; }
+
+    .more-btn { width: 22px; height: 22px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 4px; color: #CBD5E1; font-size: 12px; }
+    .card:hover .more-btn { color: #94A3B8; }
+    .more-btn:hover { background: #F1F5F9; color: #475569 !important; }
+
+    .card-title { font-size: 12.5px; font-weight: 600; color: #0F172A; line-height: 1.4; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .card-meta-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .loc-pill { display: flex; align-items: center; gap: 4px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 20px; padding: 2px 8px; font-size: 11px; color: #334155; }
+    .loc-more { font-size: 11px; color: #64748B; background: #F1F5F9; border-radius: 20px; padding: 2px 7px; }
+    .severity-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+    .sev-high   { background: #FFF1F2; color: #BE123C; }
+    .sev-medium { background: #FFF7ED; color: #C2410C; }
+    .sev-low    { background: #F0FDF4; color: #15803D; }
+
+    /* ── Right: Detail Pane ── */
+    .detail-pane { flex: 1; display: flex; flex-direction: column; background: #fff; overflow: hidden; }
+    .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: #94A3B8; }
+    .empty-state i { font-size: 32px; opacity: .4; }
+    .empty-state p { font-size: 13px; }
+    .detail-content { display: flex; flex-direction: column; height: 100%; }
+
+    .dp-header { padding: 12px 20px; border-bottom: 1px solid #E2E8F0; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .pp-type-badge { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 20px; }
+    .pp-nav { display: flex; gap: 2px; }
+    .pp-nav-btn { width: 28px; height: 28px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #64748B; cursor: pointer; border: none; background: none; }
+    .pp-nav-btn:hover:not(:disabled) { background: #F1F5F9; }
+    .pp-nav-btn:disabled { color: #CBD5E1; cursor: default; }
+    .pp-spacer { flex: 1; }
+    .pp-icon-btn { width: 28px; height: 28px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #64748B; cursor: pointer; border: none; background: none; }
+    .pp-icon-btn:hover { background: #F1F5F9; }
+
+    .dp-body { flex: 1; overflow-y: auto; padding: 24px 28px; }
+    .pp-date { font-size: 12px; color: #94A3B8; margin-bottom: 8px; }
+    .pp-title { font-size: 18px; font-weight: 700; color: #0F172A; line-height: 1.4; margin-bottom: 18px; }
+    .pp-meta { display: flex; flex-direction: column; gap: 7px; margin-bottom: 16px; }
+    .pp-meta-row { display: flex; gap: 10px; align-items: flex-start; }
+    .pp-meta-key { font-size: 11px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: .05em; width: 72px; flex-shrink: 0; padding-top: 1px; }
+    .pp-meta-val { font-size: 13px; color: #334155; }
+    .val-high   { color: #BE123C; font-weight: 600; }
+    .val-medium { color: #C2410C; font-weight: 600; }
+    .val-low    { color: #15803D; font-weight: 600; }
+    .pp-divider { height: 1px; background: #F1F5F9; margin: 16px 0; }
+    .pp-section { font-size: 11px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
+    .pp-text { font-size: 13.5px; color: #334155; line-height: 1.7; margin-bottom: 10px; }
+    .pp-locs { display: flex; flex-wrap: wrap; gap: 7px; }
+    .pp-loc { display: flex; align-items: center; gap: 5px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 20px; padding: 3px 10px; font-size: 12px; color: #334155; }
+    .pp-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .pp-tag { background: #F1F5F9; color: #475569; font-size: 12px; padding: 4px 10px; border-radius: 5px; }
+
+    .dp-footer { padding: 12px 20px; border-top: 1px solid #E2E8F0; display: flex; align-items: center; justify-content: flex-end; flex-shrink: 0; gap: 8px; }
+    .dp-footer-left { display: flex; gap: 4px; }
+    .dp-footer-right { display: flex; gap: 6px; align-items: center; }
+
+    .btn-icon { width: 32px; height: 32px; border-radius: 6px; border: 1px solid #E2E8F0; background: #fff; color: #64748B; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: inherit; transition: background .12s, color .12s, border-color .12s; }
+    .btn-icon:hover { background: #F8FAFC; border-color: #CBD5E1; color: #334155; }
+    .btn-icon:active { background: #F1F5F9; }
+
+    .btn-secondary { display: inline-flex; align-items: center; gap: 6px; padding: 0 14px; height: 32px; border-radius: 6px; border: 1px solid #CBD5E1; background: #fff; color: #334155; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; white-space: nowrap; transition: background .12s, border-color .12s; }
+    .btn-secondary:hover { background: #F8FAFC; border-color: #94A3B8; }
+    .btn-secondary i { font-size: 11px; color: #64748B; }
+
+    .btn-primary { display: inline-flex; align-items: center; gap: 6px; padding: 0 14px; height: 32px; background: #00A651; color: #fff; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; transition: background .12s; }
+    .btn-primary:hover { background: #009144; }
+    .btn-primary i { font-size: 11px; }
+  </style>
+</head>
+<body>
+  <div id="seerist-back" style="position:fixed;top:0;left:0;right:0;height:38px;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border-bottom:1px solid #e5e7eb;display:flex;align-items:center;padding:0 20px;z-index:99999;font-family:Inter,system-ui,sans-serif;"><a href="https://seerist-design.surge.sh" style="display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#374151;text-decoration:none;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7.5 2L3.5 6L7.5 10" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="width:6px;height:6px;border-radius:50%;background:#00A651;display:inline-block"></span>Seerist Design</a></div>
+
+  <div class="topbar">
+    <div class="topbar-logo">Seerist</div>
+    <div class="topbar-sep"></div>
+    <div class="topbar-title">Discover</div>
+    <div class="topbar-count" id="resultsCount">5 results</div>
+  </div>
+
+  <!-- Search + filter bar -->
+  <div class="search-card">
+    <div class="search-row">
+      <div class="search-wrap">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input class="search-input" type="text" placeholder="Search by keyword…" />
+      </div>
+    </div>
+    <div class="filter-bar" id="filterBar">
+
+      <!-- Date -->
+      <div class="chip" id="chip-date" data-filter="date">
+        <div class="chip-content">
+          <span class="chip-label">Date</span>
+          <span class="chip-value" id="date-value" style="display:none;font-size:0.75rem;color:#64748b;"></span>
+        </div>
+        <div class="chip-chevron"><i class="fa-solid fa-chevron-down"></i></div>
+        <div class="dropdown" id="dd-date" style="min-width:240px;">
+          <div class="date-presets">
+            <div class="date-preset" data-val="Today"><i class="fa-solid fa-check check-icon"></i> Today</div>
+            <div class="date-preset" data-val="Last 7 days"><i class="fa-solid fa-check check-icon"></i> Last 7 days</div>
+            <div class="date-preset" data-val="Last 30 days"><i class="fa-solid fa-check check-icon"></i> Last 30 days</div>
+            <div class="date-preset" data-val="Last 90 days"><i class="fa-solid fa-check check-icon"></i> Last 90 days</div>
+            <div class="date-preset" data-val="Last year"><i class="fa-solid fa-check check-icon"></i> Last year</div>
+          </div>
+          <div class="date-custom">
+            <div class="date-custom-label">Custom range</div>
+            <div class="date-inputs">
+              <input type="date" id="date-from" />
+              <span>→</span>
+              <input type="date" id="date-to" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Location -->
+      <div class="chip" id="chip-location" data-filter="location">
+        <div class="chip-content">
+          <span class="chip-label">Location</span>
+          <span class="chip-count" id="location-count" style="display:none;"></span>
+        </div>
+        <button class="chip-remove" id="clear-location" title="Clear"><i class="fa-solid fa-xmark"></i></button>
+        <div class="chip-chevron"><i class="fa-solid fa-chevron-down"></i></div>
+        <div class="dropdown" id="dd-location" style="min-width:240px;">
+          <div class="ms-search-wrap">
+            <div class="ms-search-inner">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" placeholder="Search locations…" data-target="location-opts" />
+            </div>
+            <button class="ms-select-all-inline" onclick="selectAllStatic('location')">Select all</button>
+          </div>
+          <div class="ms-options" id="location-opts">
+            <div class="ms-option" data-filter="location" data-val="Global"><input type="checkbox" /><span class="ms-option-label">Global</span><span class="ms-option-count">4,821</span></div>
+            <div class="ms-option" data-filter="location" data-val="Middle East"><input type="checkbox" /><span class="ms-option-label">Middle East</span><span class="ms-option-count">1,347</span></div>
+            <div class="ms-option" data-filter="location" data-val="Europe"><input type="checkbox" /><span class="ms-option-label">Europe</span><span class="ms-option-count">983</span></div>
+            <div class="ms-option" data-filter="location" data-val="Africa"><input type="checkbox" /><span class="ms-option-label">Africa</span><span class="ms-option-count">762</span></div>
+            <div class="ms-option" data-filter="location" data-val="Asia Pacific"><input type="checkbox" /><span class="ms-option-label">Asia Pacific</span><span class="ms-option-count">1,105</span></div>
+            <div class="ms-option" data-filter="location" data-val="North America"><input type="checkbox" /><span class="ms-option-label">North America</span><span class="ms-option-count">634</span></div>
+            <div class="ms-option" data-filter="location" data-val="Latin America"><input type="checkbox" /><span class="ms-option-label">Latin America</span><span class="ms-option-count">418</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Type -->
+      <div class="chip" id="chip-contentType" data-filter="contentType">
+        <div class="chip-content">
+          <span class="chip-label">Content Type</span>
+          <span class="chip-count" id="contentType-count" style="display:none;"></span>
+        </div>
+        <button class="chip-remove" id="clear-contentType" title="Clear"><i class="fa-solid fa-xmark"></i></button>
+        <div class="chip-chevron"><i class="fa-solid fa-chevron-down"></i></div>
+        <div class="dropdown" id="dd-contentType" style="min-width:220px;">
+          <div class="ms-options" id="contentType-opts">
+            <div class="ms-option" data-filter="contentType" data-val="Great Power Competition"><input type="checkbox" /><span class="ms-option-label">Great Power Competition</span><span class="ms-option-count">2,191</span></div>
+            <div class="ms-option ms-parent" data-filter="contentType" data-val="Events"><input type="checkbox" /><span class="ms-option-label">Events</span><span class="ms-option-count">2,847</span></div>
+            <div class="ms-subcategories" id="sub-eventStatus">
+              <div class="ms-option ms-child" data-filter="eventStatus" data-val="Future"><input type="checkbox" /><span class="ms-option-label">Future</span><span class="ms-option-count">312</span></div>
+              <div class="ms-option ms-child" data-filter="eventStatus" data-val="Breaking"><input type="checkbox" /><span class="ms-option-label">Breaking</span><span class="ms-option-count">47</span></div>
+              <div class="ms-option ms-child" data-filter="eventStatus" data-val="Verified Events"><input type="checkbox" /><span class="ms-option-label">Verified Events</span><span class="ms-option-count">1,894</span></div>
+              <div class="ms-option ms-child" data-filter="eventStatus" data-val="Unverified"><input type="checkbox" /><span class="ms-option-label">Unverified</span><span class="ms-option-count">953</span></div>
+            </div>
+            <div class="ms-option" data-filter="contentType" data-val="Analysis"><input type="checkbox" /><span class="ms-option-label">Analysis</span><span class="ms-option-count">418</span></div>
+            <div class="ms-option" data-filter="contentType" data-val="Risk Rating Changes"><input type="checkbox" /><span class="ms-option-label">Risk Rating Changes</span><span class="ms-option-count">76</span></div>
+            <div class="ms-option" data-filter="contentType" data-val="News &amp; Social"><input type="checkbox" /><span class="ms-option-label">News &amp; Social</span><span class="ms-option-count">18,492</span></div>
+            <div class="ms-option" data-filter="contentType" data-val="Evacuation Changes"><input type="checkbox" /><span class="ms-option-label">Evacuation Changes</span><span class="ms-option-count">43</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dynamic chips injected here -->
+      <div id="dynamicChips" style="display:contents;"></div>
+
+      <!-- Add filter -->
+      <div class="add-filter-btn" id="addFilterBtn">
+        <i class="fa-solid fa-plus" style="font-size:11px;"></i>
+        Add filter
+        <div class="dropdown" id="dd-addFilter" style="min-width:260px; max-height:460px; overflow-y:auto;">
+          <div class="af-section" data-section="eventsAll">
+            <div class="af-group-header"><span class="af-group-label">Events (All)</span></div>
+            <div class="af-option" data-category="category" data-group="eventsAll"><input type="checkbox" id="af-category" /><div class="af-option-text"><span class="af-option-label">Category</span></div></div>
+            <div class="af-option" data-category="severity" data-group="eventsAll"><input type="checkbox" id="af-severity" /><div class="af-option-text"><span class="af-option-label">Severity</span></div></div>
+            <div class="af-divider"></div>
+          </div>
+          <div class="af-section" data-section="greatPower">
+            <div class="af-group-header"><span class="af-group-label">Great Power Competition</span></div>
+            <div class="af-option" data-category="influencer" data-group="greatPower"><input type="checkbox" id="af-influencer" /><div class="af-option-text"><span class="af-option-label">Influencer</span></div></div>
+            <div class="af-option" data-category="targetOfInfluence" data-group="greatPower"><input type="checkbox" id="af-targetOfInfluence" /><div class="af-option-text"><span class="af-option-label">Target of Influence</span></div></div>
+            <div class="af-option" data-category="pmesii" data-group="greatPower"><input type="checkbox" id="af-pmesii" /><div class="af-option-text"><span class="af-option-label">PMESII Type</span></div></div>
+            <div class="af-divider"></div>
+          </div>
+          <div class="af-section" data-section="ve">
+            <div class="af-group-header"><span class="af-group-label">Verified Events</span></div>
+            <div class="af-option" data-category="attackType" data-group="ve"><input type="checkbox" id="af-attackType" /><div class="af-option-text"><span class="af-option-label">Attack Type</span></div></div>
+            <div class="af-option" data-category="perpetrator" data-group="ve"><input type="checkbox" id="af-perpetrator" /><div class="af-option-text"><span class="af-option-label">Perpetrator</span></div></div>
+            <div class="af-divider"></div>
+          </div>
+          <div class="af-section" data-section="newsSocial">
+            <div class="af-group-header"><span class="af-group-label">News &amp; Social</span></div>
+            <div class="af-option" data-category="sourceType" data-group="newsSocial"><input type="checkbox" id="af-sourceType" /><div class="af-option-text"><span class="af-option-label">Source Type</span></div></div>
+            <div class="af-option" data-category="sentiment" data-group="newsSocial"><input type="checkbox" id="af-sentiment" /><div class="af-option-text"><span class="af-option-label">Sentiment</span></div></div>
+            <div class="af-divider"></div>
+          </div>
+          <div class="af-section" data-section="analysis">
+            <div class="af-group-header"><span class="af-group-label">Analysis</span></div>
+            <div class="af-option" data-category="tags" data-group="analysis"><input type="checkbox" id="af-tags" /><div class="af-option-text"><span class="af-option-label">Tags</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Clear all -->
+      <button class="clear-all-btn" id="appliedClearAll" style="display:none;">Clear all</button>
+    </div>
+
+    <!-- Applied chips -->
+    <div class="applied-chips-row" id="appliedChipsRow"></div>
+  </div>
+
+  <div class="main">
+    <div class="inbox-container">
+    <div class="list-wrap">
+      <div class="list-pane" id="listPane"></div>
+      <button class="back-to-top" id="backToTop"><i class="fa-solid fa-arrow-up" style="font-size:9px;"></i> Top</button>
+    </div>
+
+    <div class="detail-pane" id="detailPane">
+      <div class="empty-state" id="emptyState">
+        <i class="fa-regular fa-file-lines"></i>
+        <p>Select an item to read</p>
+      </div>
+      <div class="detail-content" id="detailContent" style="display:none;">
+        <div class="dp-header">
+          <div class="pp-type-badge" id="dpBadge"></div>
+          <div class="pp-nav">
+            <button class="pp-nav-btn" id="navUp" onclick="navigate(-1)"><i class="fa-solid fa-chevron-up"></i></button>
+            <button class="pp-nav-btn" id="navDown" onclick="navigate(1)"><i class="fa-solid fa-chevron-down"></i></button>
+          </div>
+          <div class="pp-spacer"></div>
+          <button class="btn-icon" title="Copy link"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="dp-body" id="dpBody"></div>
+        <div class="dp-footer">
+          <button class="btn-secondary">Save to Content Folder</button>
+          <button class="btn-primary">View Details</button>
+        </div>
+      </div>
+    </div>
+    </div><!-- /.inbox-container -->
+
+    <div class="facet-panel" id="facetPanel">
+      <div class="facet-toggle-row">
+        <button class="facet-toggle-btn" id="facetToggleBtn" title="Collapse panel">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+      <div class="facet-body">
+        <div class="facet-section" id="fs-contentType">
+          <div class="facet-section-header" onclick="toggleFacetSection('fs-contentType')">
+            <i class="fa-solid fa-chevron-down facet-chevron"></i>
+            <span class="facet-section-label">Content Type</span>
+          </div>
+          <div class="facet-items">
+            <div class="facet-item" role="checkbox" aria-checked="false" tabindex="0" data-facet="contentType" data-val="OSINT">OSINT <span class="facet-chip-count">1,002,820</span></div>
+            <div class="facet-item" role="checkbox" aria-checked="false" tabindex="0" data-facet="contentType" data-val="Event">Event <span class="facet-chip-count">462,651</span></div>
+            <div class="facet-item" role="checkbox" aria-checked="false" tabindex="0" data-facet="contentType" data-val="News &amp; Social">News &amp; Social <span class="facet-chip-count">58,546</span></div>
+            <div class="facet-item" role="checkbox" aria-checked="false" tabindex="0" data-facet="contentType" data-val="Analysis">Analysis <span class="facet-chip-count">11,241</span></div>
+            <div class="facet-item" role="checkbox" aria-checked="false" tabindex="0" data-facet="contentType" data-val="Risk Rating Change">Risk Rating Change <span class="facet-chip-count">108</span></div>
+            <div class="facet-item" role="checkbox" aria-checked="false" tabindex="0" data-facet="contentType" data-val="Evacuation Change">Evacuation Change <span class="facet-chip-count">56</span></div>
+            <div class="facet-item" role="checkbox" aria-checked="false" tabindex="0" data-facet="contentType" data-val="Unverified Event">Unverified Event <span class="facet-chip-count">25</span></div>
+          </div>
+        </div>
+        <div class="facet-section" id="fs-severity">
+          <div class="facet-section-header" onclick="toggleFacetSection('fs-severity')">
+            <i class="fa-solid fa-chevron-down facet-chevron"></i>
+            <span class="facet-section-label">Severity</span>
+          </div>
+          <div class="facet-items">
+            <div class="facet-item" role="checkbox" aria-checked="false" tabindex="0" data-facet="severity" data-val="Low">Low <span class="facet-chip-count">534,299</span></div>
+            <div class="facet-item" role="checkbox" aria-checked="false" tabindex="0" data-facet="severity" data-val="Medium">Medium <span class="facet-chip-count">39,211</span></div>
+            <div class="facet-item" role="checkbox" aria-checked="false" tabindex="0" data-facet="severity" data-val="High">High <span class="facet-chip-count">13,603</span></div>
+            <div class="facet-item" role="checkbox" aria-checked="false" tabindex="0" data-facet="severity" data-val="Extreme">Extreme <span class="facet-chip-count">2</span></div>
+            <div class="facet-item" role="checkbox" aria-checked="false" tabindex="0" data-facet="severity" data-val="Very Low">Very Low <span class="facet-chip-count">1</span></div>
+          </div>
+        </div>
+        <div class="facet-section" id="fs-sentiment">
+          <div class="facet-section-header" onclick="toggleFacetSection('fs-sentiment')">
+            <i class="fa-solid fa-chevron-down facet-chevron"></i>
+            <span class="facet-section-label">Sentiment</span>
+          </div>
+          <div class="facet-items">
+            <div class="facet-item" role="checkbox" aria-checked="false" tabindex="0" data-facet="sentiment" data-val="Neutral">Neutral <span class="facet-chip-count">647,167</span></div>
+            <div class="facet-item" role="checkbox" aria-checked="false" tabindex="0" data-facet="sentiment" data-val="Positive">Positive <span class="facet-chip-count">390,717</span></div>
+            <div class="facet-item" role="checkbox" aria-checked="false" tabindex="0" data-facet="sentiment" data-val="Negative">Negative <span class="facet-chip-count">139,780</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // ─── Card data ───────────────────────────────
+  const cards = [
+    {
+      icon: 'fa-calendar-days', type: 'Event', typeClass: 'sev-high',
+      date: 'Apr 15, 2025', category: 'Events', sentiment: 'Neutral',
+      status: 'Unverified', statusClass: 'status-unverified',
+      title: 'Mass gathering planned near Parliament as protest groups converge on central London',
+      locations: [{ flag: '🇬🇧', name: 'United Kingdom' }, { flag: '🇨🇦', name: 'Canada' }],
+      locationOverflow: 4, severity: 'High Severity', sevClass: 'sev-high',
+      sourceUri: 'reuters.com', sourceDate: 'Apr 15 2025, 09:14 UTC',
+      relevance: 'High', relevanceClass: 'val-high',
+      summary: ['Multiple protest groups are coordinating a large-scale demonstration near the Houses of Parliament, expected to draw tens of thousands of participants. Metropolitan Police have issued advance notice of road closures and transit disruptions across Westminster beginning Tuesday morning.', 'Security services assessed the event as low risk for violence but high impact for movement and access. Business operations within a 2km radius may experience significant disruption.'],
+      allLocations: [{ flag: '🇬🇧', name: 'United Kingdom' }, { flag: '🇨🇦', name: 'Canada' }, { flag: '🇦🇺', name: 'Australia' }, { flag: '🇩🇪', name: 'Germany' }, { flag: '🇫🇷', name: 'France' }, { flag: '🇧🇷', name: 'Brazil' }],
+      topics: ['Civil Unrest', 'Security', 'Mass Gathering', 'UK Politics', 'Travel Disruption'],
+    },
+    {
+      icon: 'fa-calendar-days', type: 'Event', typeClass: 'sev-medium',
+      date: 'Apr 14, 2025', category: 'Events', sentiment: 'Negative',
+      status: 'Verified', statusClass: 'status-verified',
+      title: 'Infrastructure disruption reported across eastern districts following overnight storm damage',
+      locations: [{ flag: '🇩🇪', name: 'Germany' }],
+      locationOverflow: 2, severity: 'Medium Severity', sevClass: 'sev-medium',
+      sourceUri: 'apnews.com', sourceDate: 'Apr 14 2025, 14:30 UTC',
+      relevance: 'Medium', relevanceClass: 'val-medium',
+      summary: ['Severe overnight storms caused significant infrastructure damage across eastern Germany, including road closures, power outages affecting ~80,000 households, and suspension of rail services on three major lines.', 'Emergency restoration work underway. Disruptions to logistics and freight operations expected to persist 48–72 hours.'],
+      allLocations: [{ flag: '🇩🇪', name: 'Germany' }, { flag: '🇦🇹', name: 'Austria' }, { flag: '🇨🇿', name: 'Czech Republic' }],
+      topics: ['Natural Hazard', 'Infrastructure', 'Logistics', 'Energy'],
+    },
+    {
+      icon: 'fa-file-lines', type: 'Personal IB', typeClass: 'sev-low',
+      date: 'Apr 14, 2025', category: 'Personal IB', sentiment: 'Positive',
+      status: 'Future', statusClass: 'status-future',
+      title: 'Security advisory update: travel restrictions lifted for northern provinces ahead of schedule',
+      locations: [{ flag: '🇫🇷', name: 'France' }, { flag: '🇧🇪', name: 'Belgium' }],
+      locationOverflow: 0, severity: 'Low Severity', sevClass: 'sev-low',
+      sourceUri: 'internal', sourceDate: 'Apr 14 2025, 11:00 UTC',
+      relevance: 'High', relevanceClass: 'val-high',
+      summary: ['French authorities announced early lifting of travel restrictions on three northern provinces, originally scheduled until 20 April. Effective immediately.', 'Belgian border crossings return to normal operations from Tuesday 09:00 local time.'],
+      allLocations: [{ flag: '🇫🇷', name: 'France' }, { flag: '🇧🇪', name: 'Belgium' }],
+      topics: ['Travel Risk', 'Civil Unrest', 'Border Operations'],
+    },
+    {
+      icon: 'fa-plane', type: 'Travel', typeClass: 'sev-high',
+      date: 'Apr 13, 2025', category: 'Travel', sentiment: 'Negative',
+      status: 'Breaking', statusClass: 'status-breaking',
+      title: 'Airport delays expected at major hubs due to air traffic control strike action beginning Wednesday',
+      locations: [{ flag: '🇪🇸', name: 'Spain' }],
+      locationOverflow: 3, severity: 'High Severity', sevClass: 'sev-high',
+      sourceUri: 'bbc.com', sourceDate: 'Apr 13 2025, 08:45 UTC',
+      relevance: 'High', relevanceClass: 'val-high',
+      summary: ['Spanish air traffic controllers announced a 72-hour strike beginning Wednesday 06:00. Madrid Barajas and Barcelona El Prat expected at 30–40% capacity.', 'Airlines cancelling and rebooking affected flights. Alternative routing through Lisbon or Paris recommended.'],
+      allLocations: [{ flag: '🇪🇸', name: 'Spain' }, { flag: '🇵🇹', name: 'Portugal' }, { flag: '🇫🇷', name: 'France' }, { flag: '🇮🇹', name: 'Italy' }],
+      topics: ['Travel Disruption', 'Labour Action', 'Aviation', 'Strike Action'],
+    },
+    {
+      icon: 'fa-chart-line', type: 'Scenario', typeClass: 'sev-medium',
+      date: 'Apr 12, 2025', category: 'Scenario', sentiment: 'Neutral',
+      status: 'Unverified', statusClass: 'status-unverified',
+      title: 'Escalation scenario: political crisis in Southeast Asia may affect regional supply chains Q2 2025',
+      locations: [{ flag: '🇲🇾', name: 'Malaysia' }, { flag: '🇸🇬', name: 'Singapore' }],
+      locationOverflow: 3, severity: 'Medium Severity', sevClass: 'sev-medium',
+      sourceUri: 'analyst-team', sourceDate: 'Apr 12 2025, 16:00 UTC',
+      relevance: 'Medium', relevanceClass: 'val-medium',
+      summary: ['Ongoing political instability in Malaysia presents a plausible escalation scenario in which governmental deadlock leads to early elections, causing 6–8 weeks of policy uncertainty.', 'Regional supply chain exposure most acute in semiconductor precursors. Probability assessed at 25–35% within Q2 2025.'],
+      allLocations: [{ flag: '🇲🇾', name: 'Malaysia' }, { flag: '🇸🇬', name: 'Singapore' }, { flag: '🇹🇭', name: 'Thailand' }, { flag: '🇻🇳', name: 'Vietnam' }, { flag: '🇮🇩', name: 'Indonesia' }],
+      topics: ['Political Risk', 'Supply Chain', 'Elections', 'Southeast Asia'],
+    },
+    {
+      icon: 'fa-shield-halved', type: 'Event', typeClass: 'sev-high',
+      date: 'Apr 11, 2025', category: 'Events', sentiment: 'Negative',
+      status: 'Verified', statusClass: 'status-verified',
+      title: 'Armed robbery targeting foreign nationals reported near embassy district in Nairobi',
+      locations: [{ flag: '🇰🇪', name: 'Kenya' }],
+      locationOverflow: 0, severity: 'High Severity', sevClass: 'sev-high',
+      sourceUri: 'reuters.com', sourceDate: 'Apr 11 2025, 17:22 UTC',
+      relevance: 'High', relevanceClass: 'val-high',
+      summary: ['Three armed individuals targeted a vehicle carrying foreign nationals near the embassy district. No fatalities reported; two individuals sustained minor injuries.', 'Local authorities have increased patrols in the area. Incident consistent with pattern of opportunistic targeting of diplomatic personnel observed in Q1 2025.'],
+      allLocations: [{ flag: '🇰🇪', name: 'Kenya' }],
+      topics: ['Crime', 'Security', 'Diplomatic Risk'],
+    },
+    {
+      icon: 'fa-bolt', type: 'Event', typeClass: 'sev-medium',
+      date: 'Apr 10, 2025', category: 'Events', sentiment: 'Negative',
+      status: 'Unverified', statusClass: 'status-unverified',
+      title: 'Power grid instability reported across three provinces in northeastern Brazil following equipment failure',
+      locations: [{ flag: '🇧🇷', name: 'Brazil' }],
+      locationOverflow: 0, severity: 'Medium Severity', sevClass: 'sev-medium',
+      sourceUri: 'folha.com.br', sourceDate: 'Apr 10 2025, 21:05 UTC',
+      relevance: 'Medium', relevanceClass: 'val-medium',
+      summary: ['A cascading equipment failure at a regional substation caused rolling blackouts across Pernambuco, Ceará, and Piauí. Estimated 1.2 million households affected.', 'Grid operator CHESF reports partial restoration underway; full recovery expected within 36 hours.'],
+      allLocations: [{ flag: '🇧🇷', name: 'Brazil' }],
+      topics: ['Infrastructure', 'Energy', 'Operations'],
+    },
+    {
+      icon: 'fa-file-lines', type: 'Analysis', typeClass: 'sev-low',
+      date: 'Apr 9, 2025', category: 'Analysis', sentiment: 'Neutral',
+      status: 'Future', statusClass: 'status-future',
+      title: 'Quarterly risk outlook: Gulf states governance shifts and their impact on regional travel safety',
+      locations: [{ flag: '🇸🇦', name: 'Saudi Arabia' }, { flag: '🇦🇪', name: 'UAE' }],
+      locationOverflow: 3, severity: 'Low Severity', sevClass: 'sev-low',
+      sourceUri: 'analyst-team', sourceDate: 'Apr 09 2025, 09:00 UTC',
+      relevance: 'Medium', relevanceClass: 'val-medium',
+      summary: ['Recent governance changes across Gulf Cooperation Council states present a mixed risk picture for Q2 2025. Vision 2030-aligned reforms in Saudi Arabia continue to improve traveller experience while introducing new compliance obligations for foreign businesses.', 'UAE maintains a stable risk environment with an elevated cybersecurity profile. Analysts flag increasing scrutiny of dual-national travellers.'],
+      allLocations: [{ flag: '🇸🇦', name: 'Saudi Arabia' }, { flag: '🇦🇪', name: 'UAE' }, { flag: '🇶🇦', name: 'Qatar' }, { flag: '🇰🇼', name: 'Kuwait' }, { flag: '🇧🇭', name: 'Bahrain' }],
+      topics: ['Political Risk', 'Travel Safety', 'Governance', 'Gulf Region'],
+    },
+    {
+      icon: 'fa-calendar-days', type: 'Event', typeClass: 'sev-high',
+      date: 'Apr 8, 2025', category: 'Events', sentiment: 'Negative',
+      status: 'Breaking', statusClass: 'status-breaking',
+      title: 'Clashes between security forces and demonstrators reported in central Jakarta; roads blocked',
+      locations: [{ flag: '🇮🇩', name: 'Indonesia' }],
+      locationOverflow: 0, severity: 'High Severity', sevClass: 'sev-high',
+      sourceUri: 'kompas.com', sourceDate: 'Apr 08 2025, 13:40 UTC',
+      relevance: 'High', relevanceClass: 'val-high',
+      summary: ['Protests over proposed fuel subsidy cuts escalated into clashes near the National Parliament building. Police deployed water cannons; at least 14 arrests reported.', 'Major arterial roads in central Jakarta remain blocked. Soekarno-Hatta airport access via Tol Dalam Kota affected.'],
+      allLocations: [{ flag: '🇮🇩', name: 'Indonesia' }],
+      topics: ['Civil Unrest', 'Security', 'Travel Disruption'],
+    },
+    {
+      icon: 'fa-chart-line', type: 'Scenario', typeClass: 'sev-medium',
+      date: 'Apr 7, 2025', category: 'Scenario', sentiment: 'Neutral',
+      status: 'Unverified', statusClass: 'status-unverified',
+      title: 'Escalation scenario: Red Sea shipping disruption extends into Q3, impacting European energy imports',
+      locations: [{ flag: '🇾🇪', name: 'Yemen' }, { flag: '🇸🇦', name: 'Saudi Arabia' }],
+      locationOverflow: 4, severity: 'Medium Severity', sevClass: 'sev-medium',
+      sourceUri: 'analyst-team', sourceDate: 'Apr 07 2025, 15:00 UTC',
+      relevance: 'Medium', relevanceClass: 'val-medium',
+      summary: ['Continued Houthi interdiction of commercial vessels in the Red Sea presents a plausible scenario in which LNG diversions via the Cape of Good Hope extend into Q3 2025.', 'European gas storage levels would face downward pressure if the disruption persists beyond June. Probability assessed at 30–40%.'],
+      allLocations: [{ flag: '🇾🇪', name: 'Yemen' }, { flag: '🇸🇦', name: 'Saudi Arabia' }, { flag: '🇪🇬', name: 'Egypt' }, { flag: '🇬🇧', name: 'United Kingdom' }, { flag: '🇩🇪', name: 'Germany' }, { flag: '🇳🇱', name: 'Netherlands' }],
+      topics: ['Maritime Security', 'Energy', 'Supply Chain', 'Geopolitics'],
+    },
+    {
+      icon: 'fa-plane', type: 'Travel', typeClass: 'sev-low',
+      date: 'Apr 6, 2025', category: 'Travel', sentiment: 'Positive',
+      status: 'Future', statusClass: 'status-future',
+      title: 'Visa-on-arrival reinstated for 47 nationalities entering Vietnam effective 1 May 2025',
+      locations: [{ flag: '🇻🇳', name: 'Vietnam' }],
+      locationOverflow: 0, severity: 'Low Severity', sevClass: 'sev-low',
+      sourceUri: 'gov.vn', sourceDate: 'Apr 06 2025, 08:00 UTC',
+      relevance: 'Medium', relevanceClass: 'val-medium',
+      summary: ['Vietnam\'s Ministry of Foreign Affairs confirmed the reinstatement of visa-on-arrival for 47 nationalities from 1 May 2025, reversing a temporary suspension introduced in late 2024.', 'E-visa processing times also reduced to 3 business days. Travellers should verify current entry requirements with the nearest Vietnamese diplomatic mission.'],
+      allLocations: [{ flag: '🇻🇳', name: 'Vietnam' }],
+      topics: ['Travel Policy', 'Entry Requirements', 'Southeast Asia'],
+    },
+  ];
+
+  // ─── Filter definitions (for dynamic chips) ───
+  const FILTER_DEFS = {
+    category:    { label: 'Category', options: ['Armed Conflict', 'Civil Unrest', 'Crime', 'Cybersecurity', 'Disaster', 'Health', 'Political', 'Terrorism', 'Transportation'] },
+    severity:    { label: 'Severity', options: ['Low', 'Medium', 'High'] },
+    attackType:  { label: 'Attack Type', options: ['Active Assailant', 'Airstrike', 'Arson', 'Car Bomb', 'Drone', 'Grenade', 'Kidnapping', 'Missile / Rocket', 'Riot', 'Robbery'] },
+    perpetrator: { label: 'Perpetrator', options: ['Anti-Capitalist', 'Common Criminal', 'Environmentalist', 'Left-Wing Activist', 'Right-Wing Activist', 'Security Forces'] },
+    sourceType:  { label: 'Source Type', options: ['Journalistic', 'Government', 'NGO', 'Think Tank', 'Academic', 'Social Media', 'State-Controlled Media'] },
+    sentiment:   { label: 'Sentiment', options: ['Negative', 'Neutral', 'Positive'] },
+    tags:        { label: 'Tags', options: ['Big Picture', 'Cyber Daily', 'Weekly Report', 'Monthly Outlook', 'Climate Change', 'Global Issues'] },
+    influencer:  { label: 'Influencer', options: ['China', 'Russia'] },
+    targetOfInfluence: { label: 'Target of Influence', options: ['Afghanistan', 'Albania', 'Algeria', 'Australia', 'Austria', 'Belgium', 'Brazil', 'Canada', 'China', 'Egypt', 'France', 'Germany', 'India', 'Indonesia', 'Iran', 'Iraq', 'Israel', 'Italy', 'Japan', 'Jordan', 'Kenya', 'Malaysia', 'Mexico', 'Nigeria', 'Pakistan', 'Poland', 'Russia', 'Saudi Arabia', 'Singapore', 'South Korea', 'Spain', 'Taiwan', 'Turkey', 'Ukraine', 'United Kingdom', 'United States', 'Vietnam'] },
+    pmesii: { label: 'PMESII Type', subcategories: { 'Political': ['Political Corruption', 'Political Visits', 'Political Summits'], 'Military': [], 'Economic': ['Economic Aid', 'Economic Debts', 'Economic Trades'], 'Social': ['Humanitarian Aid', 'Academic Programs'], 'Infrastructure': ['Infrastructure Ownership', 'Infrastructure Security'], 'Information': [] } },
+  };
+
+  const CONTENT_TYPE_SECTIONS = {
+    'Great Power Competition': ['greatPower', 'eventsAll'],
+    'Events':                  ['eventsAll', 've'],
+    'Analysis':                ['analysis'],
+    'Risk Rating Changes':     ['analysis'],
+    'News & Social':           ['newsSocial'],
+    'Evacuation Changes':      [],
+  };
+
+  // ─── State ───────────────────────────────────
+  const selections = { date: null, dateFrom: null, dateTo: null, location: new Set(), contentType: new Set(), eventStatus: new Set() };
+  Object.keys(FILTER_DEFS).forEach(k => { selections[k] = new Set(); });
+  const activeCategories = new Set();
+  let openDropdown = null;
+  let activeIndex = -1;
+
+  // ─── Dropdown logic ───────────────────────────
+  function openDd(ddId, triggerEl) {
+    if (openDropdown && openDropdown !== ddId) closeDd(openDropdown);
+    const dd = document.getElementById(ddId);
+    if (!dd) return;
+    dd.classList.add('visible');
+    if (triggerEl) triggerEl.classList.add('open');
+    openDropdown = ddId;
+  }
+  function closeDd(ddId) {
+    const dd = document.getElementById(ddId);
+    if (!dd) return;
+    dd.classList.remove('visible');
+    openDropdown = null;
+    document.querySelectorAll('.chip.open, .add-filter-btn.open').forEach(el => el.classList.remove('open'));
+  }
+  function toggleDd(ddId, triggerEl) {
+    const dd = document.getElementById(ddId);
+    if (!dd) return;
+    dd.classList.contains('visible') ? closeDd(ddId) : openDd(ddId, triggerEl);
+  }
+  document.addEventListener('click', e => {
+    if (!openDropdown) return;
+    if (!e.target.closest('.chip') && !e.target.closest('.add-filter-btn')) closeDd(openDropdown);
+  });
+
+  // ─── Static chip triggers ─────────────────────
+  document.getElementById('chip-date').addEventListener('click', function(e) { e.stopPropagation(); toggleDd('dd-date', this); });
+  document.getElementById('chip-location').addEventListener('click', function(e) { if (e.target.closest('.chip-remove')) return; e.stopPropagation(); toggleDd('dd-location', this); });
+  document.getElementById('chip-contentType').addEventListener('click', function(e) { if (e.target.closest('.chip-remove')) return; e.stopPropagation(); toggleDd('dd-contentType', this); });
+  document.querySelectorAll('.chip .dropdown, .add-filter-btn .dropdown').forEach(dd => dd.addEventListener('click', e => e.stopPropagation()));
+
+  // ─── Date ─────────────────────────────────────
+  document.querySelectorAll('.date-preset').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.date-preset').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      removeAllAppliedChipsFor('date');
+      selections.date = el.dataset.val;
+      addAppliedChip('date', el.dataset.val);
+      updateDateChip();
+    });
+  });
+  document.getElementById('date-from').addEventListener('change', function() {
+    document.querySelectorAll('.date-preset').forEach(p => p.classList.remove('active'));
+    selections.date = 'custom'; selections.dateFrom = this.value;
+    removeAllAppliedChipsFor('date'); updateDateChipApplied(); updateDateChip();
+  });
+  document.getElementById('date-to').addEventListener('change', function() {
+    selections.dateTo = this.value;
+    removeAllAppliedChipsFor('date'); updateDateChipApplied(); updateDateChip();
+  });
+  function updateDateChipApplied() {
+    if (selections.dateFrom && selections.dateTo) addAppliedChip('date', `${selections.dateFrom} → ${selections.dateTo}`);
+    else if (selections.dateFrom) addAppliedChip('date', `From ${selections.dateFrom}`);
+  }
+  function updateDateChip() {
+    const chip = document.getElementById('chip-date');
+    const valEl = document.getElementById('date-value');
+    let label = null;
+    if (selections.date === 'custom') { label = selections.dateFrom && selections.dateTo ? `${selections.dateFrom} → ${selections.dateTo}` : selections.dateFrom ? `From ${selections.dateFrom}` : null; }
+    else if (selections.date) { label = selections.date; }
+    if (label) { valEl.textContent = label; valEl.style.display = ''; chip.classList.add('filtered'); }
+    else { valEl.style.display = 'none'; chip.classList.remove('filtered'); }
+  }
+
+  // ─── Location multi-select ────────────────────
+  function bindMsOptions(containerId, filterKey) {
+    document.getElementById(containerId)?.querySelectorAll('.ms-option').forEach(opt => {
+      opt.addEventListener('click', function() {
+        const val = this.dataset.val;
+        const cb = this.querySelector('input[type="checkbox"]');
+        if (selections[filterKey].has(val)) { selections[filterKey].delete(val); cb.checked = false; removeAppliedChip(filterKey, val); }
+        else { selections[filterKey].add(val); cb.checked = true; addAppliedChip(filterKey, val); }
+        updateChipCount(filterKey);
+      });
+    });
+  }
+  bindMsOptions('location-opts', 'location');
+
+  function updateChipCount(key) {
+    const count = selections[key].size;
+    const chip = document.getElementById(`chip-${key}`);
+    const el = document.getElementById(`${key}-count`);
+    if (!chip) return;
+    if (count > 0) { if (el) { el.textContent = count; el.style.display = ''; } chip.classList.add('filtered'); }
+    else { if (el) el.style.display = 'none'; chip.classList.remove('filtered'); }
+  }
+
+  function selectAllStatic(key) {
+    document.querySelectorAll(`#${key}-opts .ms-option`).forEach(o => {
+      const val = o.dataset.val; const cb = o.querySelector('input');
+      if (!selections[key].has(val)) { selections[key].add(val); cb.checked = true; addAppliedChip(key, val); }
+    });
+    updateChipCount(key);
+  }
+
+  // ─── Content Type ─────────────────────────────
+  function updateAddFilterVisibility() {
+    const selected = selections.contentType;
+    const allSections = document.querySelectorAll('#dd-addFilter .af-section');
+    if (selected.size === 0) { allSections.forEach(s => s.style.display = ''); return; }
+    const visible = new Set();
+    selected.forEach(ct => (CONTENT_TYPE_SECTIONS[ct] || []).forEach(s => visible.add(s)));
+    allSections.forEach(s => { s.style.display = visible.has(s.dataset.section) ? '' : 'none'; });
+  }
+
+  document.getElementById('contentType-opts')?.querySelectorAll('.ms-option[data-filter="contentType"]').forEach(opt => {
+    opt.addEventListener('click', function(e) {
+      if (e.target.closest('.ms-expand')) return;
+      const val = this.dataset.val;
+      const cb = this.querySelector('input[type="checkbox"]');
+      if (selections.contentType.has(val)) {
+        selections.contentType.delete(val); cb.checked = false; removeAppliedChip('contentType', val);
+        if (val === 'Events') { selections.eventStatus.clear(); document.querySelectorAll('#sub-eventStatus .ms-option').forEach(o => o.querySelector('input').checked = false); removeAllAppliedChipsFor('eventStatus'); document.getElementById('sub-eventStatus')?.classList.remove('active'); }
+      } else {
+        selections.contentType.add(val); cb.checked = true; addAppliedChip('contentType', val);
+        if (val === 'Events') document.getElementById('sub-eventStatus')?.classList.add('active');
+      }
+      updateChipCount('contentType'); updateAddFilterVisibility();
+    });
+  });
+
+  document.querySelectorAll('#sub-eventStatus .ms-option').forEach(opt => {
+    opt.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const val = this.dataset.val; const cb = this.querySelector('input[type="checkbox"]');
+      if (selections.eventStatus.has(val)) { selections.eventStatus.delete(val); cb.checked = false; removeAppliedChip('eventStatus', val); }
+      else { selections.eventStatus.add(val); cb.checked = true; addAppliedChip('eventStatus', val); }
+    });
+  });
+
+  document.getElementById('clear-location').addEventListener('click', e => { e.stopPropagation(); clearStaticChip('location'); });
+  document.getElementById('clear-contentType').addEventListener('click', e => { e.stopPropagation(); clearStaticChip('contentType'); });
+
+  function clearStaticChip(key) {
+    if (key === 'contentType') {
+      selections.contentType.clear();
+      document.querySelectorAll('#contentType-opts .ms-option[data-filter="contentType"]').forEach(o => o.querySelector('input[type="checkbox"]').checked = false);
+      selections.eventStatus.clear();
+      document.querySelectorAll('#sub-eventStatus .ms-option').forEach(o => o.querySelector('input').checked = false);
+      document.getElementById('sub-eventStatus')?.classList.remove('active');
+      removeAllAppliedChipsFor('eventStatus');
+      updateChipCount('contentType'); removeAllAppliedChipsFor('contentType'); updateAddFilterVisibility(); return;
+    }
+    selections[key].clear();
+    document.querySelectorAll(`#${key}-opts .ms-option`).forEach(o => o.querySelector('input').checked = false);
+    updateChipCount(key); removeAllAppliedChipsFor(key);
+  }
+
+  document.querySelectorAll('[data-target]').forEach(input => {
+    input.addEventListener('input', function() {
+      const q = this.value.toLowerCase();
+      document.getElementById(this.dataset.target)?.querySelectorAll('.ms-option').forEach(opt => { opt.style.display = opt.textContent.toLowerCase().includes(q) ? '' : 'none'; });
+    });
+  });
+
+  // ─── Add filter panel ─────────────────────────
+  document.getElementById('addFilterBtn').addEventListener('click', function(e) { e.stopPropagation(); toggleDd('dd-addFilter', this); });
+
+  document.querySelectorAll('.af-option').forEach(opt => {
+    opt.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const cat = this.dataset.category;
+      const cb = this.querySelector('input[type="checkbox"]');
+      if (activeCategories.has(cat)) { cb.checked = false; activeCategories.delete(cat); removeAllAppliedChipsFor(cat); removeFilterChip(cat); }
+      else { cb.checked = true; activeCategories.add(cat); addFilterChip(cat); }
+    });
+    opt.querySelector('input').addEventListener('click', e => e.stopPropagation());
+  });
+
+  // ─── Dynamic chips ────────────────────────────
+  function mockCount(str) { let h = 0; for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) & 0xffff; return ((h % 900) + 50).toLocaleString(); }
+
+  function buildOptionsHtml(cat, def) {
+    if (def.subcategories) {
+      return Object.entries(def.subcategories).map(([parent, children]) => {
+        if (!children.length) return `<div class="ms-option ms-parent" data-filter="${cat}" data-val="${parent}"><span style="width:16px;flex-shrink:0;"></span><input type="checkbox" /><span class="ms-option-label">${parent}</span><span class="ms-option-count">${mockCount(parent)}</span></div>`;
+        const subId = `sub-${cat}-${parent.replace(/\s+/g, '-')}`;
+        return `<div class="ms-option ms-parent" data-filter="${cat}" data-val="${parent}"><button class="ms-expand" data-sub="${subId}"><i class="fa-solid fa-chevron-right"></i></button><input type="checkbox" /><span class="ms-option-label">${parent}</span><span class="ms-option-count">${mockCount(parent)}</span></div><div class="ms-subcategories" id="${subId}">${children.map(c => `<div class="ms-option ms-child" data-filter="${cat}" data-val="${c}"><input type="checkbox" /><span class="ms-option-label">${c}</span><span class="ms-option-count">${mockCount(c)}</span></div>`).join('')}</div>`;
+      }).join('');
+    }
+    return def.options.map(o => `<div class="ms-option" data-filter="${cat}" data-val="${o}"><input type="checkbox" /><span class="ms-option-label">${o}</span><span class="ms-option-count">${mockCount(o)}</span></div>`).join('');
+  }
+
+  function addFilterChip(cat) {
+    const def = FILTER_DEFS[cat];
+    if (!def || document.getElementById(`dchip-${cat}`)) return;
+    const chip = document.createElement('div');
+    chip.className = 'chip chip-dynamic'; chip.id = `dchip-${cat}`;
+    chip.innerHTML = `<div class="chip-content"><span class="chip-label">${def.label}</span><span class="chip-count" id="dcount-${cat}" style="display:none;"></span></div><button class="chip-remove" title="Remove"><i class="fa-solid fa-xmark"></i></button><div class="chip-chevron"><i class="fa-solid fa-chevron-down"></i></div><div class="dropdown" id="ddd-${cat}" style="min-width:240px;"><div class="ms-search-wrap"><div class="ms-search-inner"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search…" data-target="dopt-${cat}" /></div></div><div class="ms-options" id="dopt-${cat}">${buildOptionsHtml(cat, def)}</div></div>`;
+    document.getElementById('dynamicChips').appendChild(chip);
+    chip.addEventListener('click', function(e) { if (e.target.closest('.chip-remove')) return; e.stopPropagation(); toggleDd(`ddd-${cat}`, this); });
+    chip.querySelector('.dropdown').addEventListener('click', e => e.stopPropagation());
+    chip.querySelector('.chip-remove').addEventListener('click', function(e) { e.stopPropagation(); removeAllAppliedChipsFor(cat); removeFilterChip(cat); activeCategories.delete(cat); const af = document.getElementById(`af-${cat}`); if (af) af.checked = false; });
+    chip.querySelectorAll('.ms-expand').forEach(btn => btn.addEventListener('click', function(e) { e.stopPropagation(); const sub = document.getElementById(this.dataset.sub); if (!sub) return; const isOpen = sub.classList.toggle('open'); this.classList.toggle('open', isOpen); }));
+    chip.querySelectorAll('.ms-option').forEach(opt => {
+      opt.addEventListener('click', function(e) {
+        if (e.target.closest('.ms-expand')) return;
+        const val = this.dataset.val; const cb = this.querySelector('input[type="checkbox"]');
+        if (selections[cat].has(val)) { selections[cat].delete(val); cb.checked = false; removeAppliedChip(cat, val); }
+        else { selections[cat].add(val); cb.checked = true; addAppliedChip(cat, val); }
+        updateDynamicChipCount(cat);
+      });
+    });
+    chip.querySelector('[data-target]').addEventListener('input', function() {
+      const q = this.value.toLowerCase();
+      document.getElementById(this.dataset.target)?.querySelectorAll('.ms-option').forEach(opt => { opt.style.display = opt.textContent.toLowerCase().includes(q) ? '' : 'none'; });
+    });
+  }
+
+  function updateDynamicChipCount(cat) {
+    const count = selections[cat].size;
+    const chip = document.getElementById(`dchip-${cat}`); const el = document.getElementById(`dcount-${cat}`);
+    if (!el || !chip) return;
+    if (count > 0) { el.textContent = count; el.style.display = ''; chip.classList.add('filtered'); }
+    else { el.style.display = 'none'; chip.classList.remove('filtered'); }
+  }
+
+  function removeFilterChip(cat) { document.getElementById(`dchip-${cat}`)?.remove(); selections[cat].clear(); }
+
+  // ─── Applied chips ────────────────────────────
+  const FILTER_LABELS = { date: 'Date', location: 'Location', contentType: 'Content Type', eventStatus: 'Event Status' };
+  function getFilterLabel(k) { return FILTER_LABELS[k] || FILTER_DEFS[k]?.label || k; }
+  function chipId(k, v) { return `achip-${k}-${v.replace(/[^a-z0-9]/gi, '-')}`; }
+
+  function addAppliedChip(key, val) {
+    const row = document.getElementById('appliedChipsRow');
+    const id = chipId(key, val);
+    if (document.getElementById(id)) return;
+    const chip = document.createElement('div');
+    chip.className = 'applied-chip'; chip.id = id;
+    chip.innerHTML = `<span><span style="opacity:0.6;">${getFilterLabel(key)}:</span> ${val}</span><button class="applied-chip-remove"><i class="fa-solid fa-xmark"></i></button>`;
+    chip.querySelector('.applied-chip-remove').addEventListener('click', e => { e.stopPropagation(); dismissAppliedChip(key, val); });
+    row.appendChild(chip); syncAppliedRow();
+  }
+  function removeAppliedChip(key, val) { document.getElementById(chipId(key, val))?.remove(); syncAppliedRow(); }
+  function removeAllAppliedChipsFor(key) { document.querySelectorAll(`[id^="achip-${key}-"]`).forEach(el => el.remove()); syncAppliedRow(); }
+  function syncAppliedRow() {
+    const row = document.getElementById('appliedChipsRow');
+    const hasChips = row.querySelectorAll('.applied-chip').length > 0;
+    row.classList.toggle('visible', hasChips);
+    document.getElementById('appliedClearAll').style.display = hasChips ? '' : 'none';
+  }
+  function dismissAppliedChip(key, val) {
+    if (key === 'date') { selections.date = null; selections.dateFrom = null; selections.dateTo = null; document.querySelectorAll('.date-preset').forEach(p => p.classList.remove('active')); document.getElementById('date-from').value = ''; document.getElementById('date-to').value = ''; updateDateChip(); }
+    else if (selections[key] instanceof Set) {
+      selections[key].delete(val);
+      document.querySelectorAll(`[data-filter="${key}"][data-val="${val}"] input, #dopt-${key} [data-val="${val}"] input`).forEach(cb => cb.checked = false);
+      if (key === 'contentType' && val === 'Events') { selections.eventStatus.clear(); document.querySelectorAll('#sub-eventStatus .ms-option').forEach(o => o.querySelector('input').checked = false); removeAllAppliedChipsFor('eventStatus'); document.getElementById('sub-eventStatus')?.classList.remove('active'); }
+      updateChipCount(key); updateDynamicChipCount(key);
+      if (key === 'contentType') updateAddFilterVisibility();
+    }
+    removeAppliedChip(key, val);
+  }
+
+  document.getElementById('appliedClearAll').addEventListener('click', () => {
+    selections.date = null; selections.dateFrom = null; selections.dateTo = null;
+    document.querySelectorAll('.date-preset').forEach(p => p.classList.remove('active'));
+    document.getElementById('date-from').value = ''; document.getElementById('date-to').value = '';
+    updateDateChip();
+    ['location', 'contentType', 'eventStatus'].forEach(k => clearStaticChip(k));
+    [...activeCategories].forEach(cat => { removeFilterChip(cat); const af = document.getElementById(`af-${cat}`); if (af) af.checked = false; });
+    activeCategories.clear();
+    document.querySelectorAll('#appliedChipsRow .applied-chip').forEach(el => el.remove());
+    syncAppliedRow();
+  });
+
+  // ─── Card rendering ───────────────────────────
+  function renderCards() {
+    const pane = document.getElementById('listPane');
+    pane.innerHTML = '';
+    cards.forEach((c, i) => {
+      const el = document.createElement('div');
+      el.className = 'card' + (i === activeIndex ? ' active' : '');
+      const locsHtml = c.locations.map(l => `<div class="loc-pill">${l.flag} ${l.name}</div>`).join('') + (c.locationOverflow > 0 ? `<div class="loc-more">+${c.locationOverflow}</div>` : '');
+      el.innerHTML = `
+        <div class="eyebrow">
+          <i class="fa-solid ${c.icon} ct-icon"></i>
+          <span class="eyebrow-meta">${c.date} &bull; ${c.category}</span>
+          <span class="status-badge ${c.statusClass}">${c.status}</span>
+          <div class="more-btn" data-stop><i class="fa-solid fa-ellipsis-vertical"></i></div>
+        </div>
+        <div class="card-title">${c.title}</div>
+        <div class="card-meta-row">${locsHtml}<div class="severity-tag ${c.sevClass}">${c.severity}</div></div>
+      `;
+      el.addEventListener('click', (e) => { if (e.target.closest('[data-stop]')) return; openDetail(i); });
+      pane.appendChild(el);
+    });
+  }
+
+  function openDetail(index) {
+    activeIndex = index;
+    const c = cards[index];
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('detailContent').style.display = 'flex';
+    document.getElementById('dpBadge').className = `pp-type-badge ${c.sevClass}`;
+    document.getElementById('dpBadge').innerHTML = `<i class="fa-solid ${c.icon}"></i> ${c.type}`;
+    document.getElementById('navUp').disabled   = index === 0;
+    document.getElementById('navDown').disabled = index === cards.length - 1;
+    document.getElementById('dpBody').innerHTML = `
+      <div class="pp-date">${c.date} UTC</div>
+      <div class="pp-title">${c.title}</div>
+      <div class="pp-meta">
+        <div class="pp-meta-row"><span class="pp-meta-key">Source</span><span class="pp-meta-val">${c.sourceUri}</span></div>
+        <div class="pp-meta-row"><span class="pp-meta-key">Published</span><span class="pp-meta-val">${c.sourceDate}</span></div>
+        <div class="pp-meta-row"><span class="pp-meta-key">Severity</span><span class="pp-meta-val ${c.relevanceClass}">${c.severity}</span></div>
+        <div class="pp-meta-row"><span class="pp-meta-key">Status</span><span class="pp-meta-val">${c.status}</span></div>
+      </div>
+      <div class="pp-divider"></div>
+      <div class="pp-section">Summary</div>
+      ${c.summary.map(p => `<div class="pp-text">${p}</div>`).join('')}
+      <div class="pp-divider"></div>
+      <div class="pp-section">Locations</div>
+      <div class="pp-locs">${c.allLocations.map(l => `<div class="pp-loc">${l.flag} ${l.name}</div>`).join('')}</div>
+      <div class="pp-divider"></div>
+      <div class="pp-section">Topics</div>
+      <div class="pp-tags">${c.topics.map(t => `<span class="pp-tag">${t}</span>`).join('')}</div>
+    `;
+    renderCards();
+  }
+
+  function navigate(dir) { const next = activeIndex + dir; if (next >= 0 && next < cards.length) openDetail(next); }
+
+  document.addEventListener('keydown', e => {
+    if (activeIndex > -1 && (e.key === 'j' || e.key === 'ArrowDown')) { e.preventDefault(); navigate(1); }
+    if (activeIndex > -1 && (e.key === 'k' || e.key === 'ArrowUp'))   { e.preventDefault(); navigate(-1); }
+  });
+
+  // ─── Facet panel ──────────────────────────────
+  let facetOpen = true;
+
+  document.getElementById('facetToggleBtn').addEventListener('click', () => {
+    facetOpen = !facetOpen;
+    const panel = document.getElementById('facetPanel');
+    const btn = document.getElementById('facetToggleBtn').querySelector('i');
+    panel.classList.toggle('collapsed', !facetOpen);
+    btn.className = facetOpen ? 'fa-solid fa-chevron-right' : 'fa-solid fa-chevron-left';
+    document.getElementById('facetToggleBtn').title = facetOpen ? 'Collapse panel' : 'Expand panel';
+  });
+
+  function toggleFacetSection(id) {
+    document.getElementById(id).classList.toggle('collapsed');
+  }
+
+  function toggleFacetItem(item) {
+    if (item.classList.contains('active')) {
+      item.classList.remove('active');
+      item.setAttribute('aria-checked', 'false');
+    } else {
+      item.classList.add('active');
+      item.setAttribute('aria-checked', 'true');
+    }
+  }
+
+  document.querySelectorAll('.facet-item').forEach(item => {
+    item.addEventListener('click', () => toggleFacetItem(item));
+    item.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleFacetItem(item); } });
+  });
+
+  // ─── Back to top ──────────────────────────────
+  const listPane = document.getElementById('listPane');
+  const backToTop = document.getElementById('backToTop');
+  listPane.addEventListener('scroll', () => {
+    backToTop.classList.toggle('visible', listPane.scrollTop > 120);
+  });
+  backToTop.addEventListener('click', () => listPane.scrollTo({ top: 0, behavior: 'smooth' }));
+
+  // ─── Init ─────────────────────────────────────
+  renderCards();
+  openDetail(0);
+  </script>
+</body>
+</html>

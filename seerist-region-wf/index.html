@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Region Selection — Settings</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: rgba(0,0,0,.45); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; padding-top: 72px; }
+
+  .topnav { position: fixed; top: 0; left: 0; right: 0; height: 48px; background: #fff; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: center; gap: 4px; z-index: 9999; font-family: 'Inter', system-ui, sans-serif; }
+  .topnav-back { position: absolute; left: 20px; display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; color: #374151; text-decoration: none; }
+  .topnav-back:hover { color: #111; }
+  .topnav a { display: inline-flex; align-items: center; gap: 5px; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; text-decoration: none; color: #6b7280; transition: all .12s; }
+  .topnav a.active { background: #111; color: #fff; }
+  .topnav a:not(.active):hover { background: #f3f4f6; color: #111; }
+
+  .modal { background: #fff; border-radius: 12px; width: 580px; box-shadow: 0 16px 48px rgba(0,0,0,.22); max-height: 92vh; display: flex; flex-direction: column; }
+
+  /* Header */
+  .modal-header { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; border-radius: 12px 12px 0 0; }
+  .modal-title { font-size: 16px; font-weight: 700; color: #0f172a; }
+  .modal-close { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid #e2e8f0; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #64748b; cursor: pointer; }
+  .modal-close:hover { background: #f8fafc; }
+
+  /* Body */
+  .modal-body { overflow-y: visible; flex: 1; }
+
+  /* Sections */
+  .section { padding: 20px 24px; }
+  .section + .section { border-top: 1px solid #f1f5f9; }
+  .section-title { font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 16px; }
+
+  /* Fields */
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field-label { font-size: 12px; font-weight: 600; color: #334155; }
+
+  /* Select box (static) */
+  .select-box { display: flex; align-items: center; justify-content: space-between; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 12px; font-size: 13px; color: #0f172a; background: #fff; cursor: pointer; gap: 8px; }
+  .select-box:hover { border-color: #94a3b8; }
+  .select-box i { color: #94a3b8; font-size: 11px; flex-shrink: 0; }
+
+  /* Toggle rows */
+  .setting-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+  .setting-row + .setting-row { margin-top: 16px; }
+  .setting-label { font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 2px; }
+  .setting-desc { font-size: 12px; color: #64748b; line-height: 1.5; }
+  .toggle { width: 40px; height: 22px; border-radius: 11px; background: #cbd5e1; flex-shrink: 0; position: relative; cursor: pointer; transition: background .15s; }
+  .toggle.on { background: #00A651; }
+  .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left .15s; box-shadow: 0 1px 3px rgba(0,0,0,.18); }
+  .toggle.on::after { left: 21px; }
+
+  /* Region field */
+  .region-field { display: flex; flex-direction: column; gap: 6px; }
+  .region-helper { font-size: 12px; color: #64748b; line-height: 1.5; }
+  .region-chips { display: flex; flex-wrap: wrap; gap: 5px; padding-top: 2px; }
+  .region-chip { font-size: 11px; color: #475569; background: #f1f5f9; border-radius: 4px; padding: 2px 8px; }
+
+  /* Custom dropdown */
+  .select-wrapper { position: relative; }
+  .dropdown-menu { display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.10); z-index: 50; overflow: hidden; }
+  .dropdown-menu.open { display: block; }
+  .dropdown-option { padding: 9px 12px; font-size: 13px; color: #0f172a; cursor: pointer; }
+  .dropdown-option:hover { background: #f8fafc; }
+  .dropdown-option.active { color: #00A651; font-weight: 500; }
+
+  /* Footer */
+  .modal-footer { padding: 14px 24px; border-top: 1px solid #f1f5f9; display: flex; justify-content: flex-end; align-items: center; gap: 8px; flex-shrink: 0; border-radius: 0 0 12px 12px; }
+  .btn-cancel { background: none; border: none; font-size: 13px; font-weight: 500; color: #64748b; cursor: pointer; font-family: inherit; padding: 7px 12px; border-radius: 6px; }
+  .btn-cancel:hover { background: #f8fafc; }
+  .btn-save { background: #00A651; border: none; font-size: 13px; font-weight: 600; color: #fff; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-family: inherit; }
+  .btn-save:hover { background: #009144; }
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <a href="https://seerist-design.surge.sh" class="topnav-back"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7.5 2L3.5 6L7.5 10" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="width:6px;height:6px;border-radius:50%;background:#00A651;display:inline-block"></span>Seerist Design</a>
+  <a href="index.html" class="active">Design</a>
+</div>
+
+<div class="modal">
+  <div class="modal-header">
+    <div class="modal-title">Settings</div>
+    <div class="modal-close"><i class="fa-solid fa-xmark"></i></div>
+  </div>
+
+  <div class="modal-body">
+
+    <div class="section">
+      <div class="section-title">Localization</div>
+      <div class="field-row">
+        <div class="field">
+          <div class="field-label">Date Format</div>
+          <div class="select-box">MMM DD, YYYY <i class="fa-solid fa-chevron-down"></i></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Units of Distance</div>
+          <div class="select-box">Miles <i class="fa-solid fa-chevron-down"></i></div>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">Translation</div>
+        <div class="select-box">English (US) <i class="fa-solid fa-chevron-down"></i></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Regions</div>
+      <div class="region-field">
+        <div class="field-label">Region System</div>
+        <div class="select-wrapper">
+          <div class="select-box" id="regionSelect" onclick="toggleDropdown()">
+            <span id="selectedLabel">Seerist Regions</span>
+            <i class="fa-solid fa-chevron-down" id="selectChevron"></i>
+          </div>
+          <div class="dropdown-menu" id="dropdownMenu">
+            <div class="dropdown-option active" onclick="selectRegion('seerist', 'Seerist Regions', this)">Seerist Regions</div>
+            <div class="dropdown-option" onclick="selectRegion('cocom', 'COCOM Regions', this)">COCOM Regions</div>
+            <div class="dropdown-option" onclick="selectRegion('un', 'UN Regions', this)">UN Regions</div>
+          </div>
+        </div>
+        <div class="region-helper">Defines how countries are grouped in filters and result cards.</div>
+        <div class="region-chips" id="regionChips"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">App Preferences</div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">External source link warning message</div>
+          <div class="setting-desc">Shows a confirmation popup before opening an external link</div>
+        </div>
+        <div class="toggle on"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Security</div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Multi-Factor Authentication</div>
+          <div class="setting-desc">Add an extra layer of security to your account</div>
+        </div>
+        <div class="toggle"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn-cancel">Cancel</button>
+    <button class="btn-save">Save</button>
+  </div>
+</div>
+
+<script>
+  const data = {
+    seerist: { regions: ['Europe', 'Middle East & N. Africa', 'Americas', 'Asia Pacific', 'Sub-Saharan Africa'] },
+    cocom:   { regions: ['USEUCOM', 'USCENTCOM', 'USINDOPACOM', 'USAFRICOM', 'USSOUTHCOM', 'USNORTHCOM'] },
+    un:      { regions: ['Africa', 'Americas', 'Asia', 'Europe', 'Oceania'] },
+  };
+
+  let dropdownOpen = false;
+
+  function toggleDropdown() {
+    dropdownOpen = !dropdownOpen;
+    document.getElementById('dropdownMenu').classList.toggle('open', dropdownOpen);
+    document.getElementById('selectChevron').style.transform = dropdownOpen ? 'rotate(180deg)' : '';
+  }
+
+  function selectRegion(key, label, el) {
+    document.getElementById('selectedLabel').textContent = label;
+    document.querySelectorAll('.dropdown-option').forEach(o => o.classList.remove('active'));
+    el.classList.add('active');
+    toggleDropdown();
+    renderChips(key);
+  }
+
+  function renderChips(key) {
+    document.getElementById('regionChips').innerHTML = data[key].regions
+      .map(r => `<span class="region-chip">${r}</span>`).join('');
+  }
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.select-wrapper')) {
+      dropdownOpen = false;
+      document.getElementById('dropdownMenu').classList.remove('open');
+      document.getElementById('selectChevron').style.transform = '';
+    }
+  });
+
+  renderChips('seerist');
+</script>
+</body>
+</html>

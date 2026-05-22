@@ -1,0 +1,2333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Search Filter</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      background: #f5f7fa;
+      color: #1e293b;
+      min-height: 100vh;
+      padding: 20px 16px;
+    }
+    .page { max-width: 1040px; margin: 0 auto; }
+
+    /* ── Search ── */
+    .search-wrap {
+      display: flex; align-items: center;
+      border: 1px solid #e2e8f0; border-radius: 8px;
+      background: #fff; overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,.07);
+      margin-bottom: 12px;
+    }
+    .search-wrap:focus-within { border-color: #00A651; box-shadow: 0 0 0 3px rgba(0,166,81,.08); }
+    .search-input-area { flex: 1; position: relative; min-width: 0; }
+    .search-input-area i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 13px; pointer-events: none; }
+    .search-input {
+      width: 100%; height: 44px; border: none; outline: none;
+      padding: 0 12px 0 36px;
+      font-size: 14px; font-family: inherit; color: #1e293b;
+      background: transparent;
+    }
+    .search-input::placeholder { color: #94a3b8; }
+
+    /* ── Filter bar ── */
+    .filter-bar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; position: relative; }
+
+    /* Chip */
+    .chip {
+      position: relative; display: inline-flex; align-items: center; gap: 0;
+      border: 1px solid #cbd5e1; border-radius: 6px;
+      background: #fff; font-family: inherit; cursor: pointer;
+      white-space: nowrap; user-select: none; height: 2.125rem;
+      padding: 0 8px 0 12px;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .chip:hover { border-color: #94a3b8; }
+    .chip.open { border-color: #00A651; box-shadow: 0 0 0 2px rgba(0,166,81,.12); }
+    .chip.filtered { border-color: #00A651; background: #f0fdf4; }
+    .chip-cat { font-size: 13px; font-weight: 400; color: #334155; }
+    .chip-sep { display: flex; align-items: center; color: #cbd5e1; font-size: 10px; margin: 0 2px; }
+    .chip-val { display: flex; align-items: center; padding-right: 10px; font-size: 13px; font-weight: 500; color: #334155; max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
+    .cat-section-header {
+      display: flex; align-items: center; gap: 6px;
+      padding: 10px 14px 4px; font-size: 11px; font-weight: 700;
+      color: #475569; text-transform: none; letter-spacing: 0;
+    }
+    .cat-section-header i { font-size: 11px; color: #94a3b8; }
+    .cat-section-sep { margin-top: 4px; padding-top: 12px; border-top: 1px solid #f1f5f9; }
+    .cat-applies-note {
+      padding: 7px 14px 6px; font-size: 11.5px; color: #94a3b8;
+      border-bottom: 1px solid #f1f5f9; line-height: 1.4;
+    }
+    .cat-section-count {
+      margin-left: auto; font-size: 10.5px; font-weight: 500;
+      color: #94a3b8; background: #f1f5f9; border-radius: 999px;
+      padding: 1px 6px;
+    }
+    .chip-count {
+      display: none; align-items: center; justify-content: center;
+      min-width: 18px; height: 18px; padding: 0 5px;
+      background: #00A651; color: #fff;
+      border-radius: 999px; font-size: 10px; font-weight: 700;
+      margin-left: 6px;
+    }
+    .chip.filtered .chip-count { display: inline-flex; }
+    .chip-chevron { display: flex; align-items: center; padding: 0 0 0 6px; color: #94a3b8; font-size: 9px; }
+    .chip-btn {
+      display: inline-flex; align-items: center; gap: 0;
+      border: none; background: transparent; cursor: pointer;
+      font-family: inherit; padding: 0; height: 100%;
+    }
+
+    /* Add filter */
+    .add-filter-btn {
+      position: relative; display: inline-flex; align-items: center; gap: 6px;
+      padding: 0 12px; height: 2.125rem;
+      border: 1px solid #e2e8f0; border-radius: 6px;
+      background: #fff; font-size: 13px; font-weight: 400;
+      font-family: inherit; cursor: pointer; color: #64748b;
+      white-space: nowrap; transition: border-color .15s, color .15s;
+    }
+    .add-filter-btn:hover { border-color: #94a3b8; color: #334155; }
+    .add-filter-btn.open { border-color: #00A651; color: #00A651; box-shadow: 0 0 0 2px rgba(0,166,81,.12); }
+
+    /* Dropdown shell */
+    .dropdown {
+      position: absolute; top: calc(100% + 4px); left: 0;
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.12);
+      z-index: 300; display: none; min-width: 230px; overflow: hidden;
+    }
+    .dropdown.visible { display: block; }
+
+    /* Date dropdown */
+    .date-dd { padding: 14px 14px 0; }
+    .date-field-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; margin-bottom: 6px; }
+    .date-select-wrap { position: relative; margin-bottom: 14px; }
+    .date-select-btn {
+      width: 100%; height: 38px; display: flex; align-items: center; gap: 9px;
+      border: 1px solid #e2e8f0; border-radius: 8px; padding: 0 12px;
+      background: #fff; font-size: 13px; font-family: inherit; color: #94a3b8;
+      cursor: pointer; transition: border-color .15s, box-shadow .15s; text-align: left;
+    }
+    .date-select-btn:hover { border-color: #94a3b8; }
+    .date-select-btn:focus-within { border-color: #00A651; box-shadow: 0 0 0 2px rgba(0,166,81,.1); }
+    .date-select-btn.has-val { color: #1e293b; }
+    .date-select-btn i.cal { color: #94a3b8; font-size: 13px; flex-shrink: 0; }
+    .date-select-btn.has-val i.cal { color: #475569; }
+    .date-select-btn .chev { margin-left: auto; font-size: 9px; color: #cbd5e1; }
+    .date-select-btn input[type="date"] { position: absolute; opacity: 0; width: 100%; height: 100%; left: 0; top: 0; cursor: pointer; }
+
+    .date-divider { height: 1px; background: #f1f5f9; margin: 0 0 12px; }
+    .date-presets-row { display: flex; flex-wrap: wrap; gap: 5px; padding: 0 14px 14px; }
+    .date-chip {
+      display: inline-flex; align-items: center; height: 26px; padding: 0 10px;
+      border: 1px solid #e2e8f0; border-radius: 5px;
+      font-size: 12px; color: #475569; background: #f8fafc;
+      cursor: pointer; white-space: nowrap; transition: border-color .12s, background .12s, color .12s;
+    }
+    .date-chip:hover { border-color: #94a3b8; background: #fff; color: #1e293b; }
+    .date-chip.active { border-color: #00A651; background: #f0fdf4; color: #166534; font-weight: 600; }
+
+    .date-apply-to { border-top: 1px solid #f1f5f9; }
+    .date-apply-to-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; cursor: pointer; user-select: none;
+      transition: background .1s;
+    }
+    .date-apply-to-header:hover { background: #f8fafc; }
+    .date-apply-to-label { font-size: 12px; font-weight: 600; color: #475569; }
+    .date-apply-to-val { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #334155; font-weight: 500; }
+    .date-apply-to-val i { font-size: 9px; color: #94a3b8; transition: transform .15s; }
+    .date-apply-to-val.open i { transform: rotate(180deg); }
+    .date-apply-to-options { display: none; padding: 2px 14px 12px; }
+    .date-apply-to-options.open { display: block; }
+    .date-radio-opt { display: flex; align-items: flex-start; gap: 10px; padding: 7px 2px; cursor: pointer; border-radius: 5px; transition: background .1s; }
+    .date-radio-opt:hover { background: #f8fafc; padding-left: 6px; padding-right: 6px; margin: 0 -4px; }
+    .date-radio-opt input[type="radio"] { accent-color: #00A651; width: 15px; height: 15px; flex-shrink: 0; margin-top: 2px; cursor: pointer; }
+    .date-radio-text { display: flex; flex-direction: column; gap: 2px; }
+    .date-radio-name { font-size: 13px; color: #1e293b; font-weight: 500; }
+    .date-radio-desc { font-size: 11.5px; color: #94a3b8; line-height: 1.4; }
+
+    /* Multi-select (location, content type) */
+    .ms-search-wrap { display: flex; align-items: center; gap: 6px; padding: 8px 10px 6px; border-bottom: 1px solid #f1f5f9; }
+    .ms-search-inner { position: relative; flex: 1; }
+    .ms-search-inner i { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 11px; pointer-events: none; }
+    .ms-search-inner input { width: 100%; padding: 5px 10px 5px 26px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 13px; font-family: inherit; outline: none; color: #334155; }
+    .ms-search-inner input:focus { border-color: #00A651; box-shadow: 0 0 0 1px #00A651; }
+    .ms-select-all { font-size: 12px; color: #64748b; background: none; border: none; cursor: pointer; padding: 0 4px; font-family: inherit; white-space: nowrap; flex-shrink: 0; }
+    .ms-select-all:hover { color: #00A651; }
+    .ms-options { max-height: 300px; overflow-y: auto; padding: 4px; }
+    .ms-options::-webkit-scrollbar { width: 4px; }
+    .ms-options::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+    .ms-option { display: flex; align-items: center; gap: 8px; padding: 7px 10px; cursor: pointer; font-size: 13px; color: #334155; border-radius: 4px; transition: background .12s; }
+    .ms-option:hover { background: #f1f5f9; }
+    .ms-option input[type="checkbox"] { accent-color: #00A651; width: 14px; height: 14px; cursor: pointer; flex-shrink: 0; }
+    .ms-option-label { flex: 1; }
+    .ms-option-count { font-size: 12px; color: #94a3b8; }
+
+
+    /* Add-filter panel */
+    .af-group-header { padding: 10px 14px 3px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+    .af-group-header:hover .af-group-label { color: #64748b; }
+    .af-group-label { font-size: 10.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: #94a3b8; }
+    .af-group-chevron { font-size: 10px; color: #cbd5e1; transition: transform .2s; }
+    .af-group-header.collapsed .af-group-chevron { transform: rotate(-90deg); }
+    .af-group-body { overflow: hidden; }
+    .af-group-body.collapsed { display: none; }
+    .af-group-wrap[hidden] { display: none; }
+    .af-chip-item {
+      display: flex; align-items: center; justify-content: space-between; padding: 8px 14px;
+      font-size: 13px; color: #334155; cursor: pointer; transition: background .12s; user-select: none;
+    }
+    .af-chip-item:hover { background: #f1f5f9; }
+    .af-chip-item.active { color: #00A651; font-weight: 500; background: #f0fdf4; }
+    .af-chip-option-count {
+      font-size: 11.5px; color: #94a3b8; font-weight: 400;
+      margin-left: 8px; flex-shrink: 0;
+    }
+    .af-chip-item.active .af-chip-option-count { color: #16a34a; }
+    /* Count feedback on active filter chips */
+    .chip-result-count { font-size: 11px; color: #94a3b8; font-weight: 500; padding: 0 8px; border-left: 1px solid #e2e8f0; margin-left: 4px; }
+    .chip-dynamic.filtered .chip-result-count { color: #00A651; }
+    .chip-val-display { font-size: 12.5px; color: #94a3b8; font-weight: 400; }
+    .chip.filtered .chip-val-display { color: #0f172a; font-weight: 500; }
+
+    /* Active filters row */
+    .active-filters-row {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      padding: 8px 20px; border-bottom: 1px solid #f1f5f9; background: #fff;
+    }
+    .active-filters-icon { font-size: 11px; color: #00A651; flex-shrink: 0; }
+    .af-badge {
+      background: #00A651; color: #fff; font-size: 10px; font-weight: 700;
+      border-radius: 10px; min-width: 18px; height: 18px; padding: 0 5px;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+
+    @keyframes chipSlideIn {
+      from { opacity: 0; transform: translateY(-4px) scale(0.9); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Hybrid chip: "Severity ∨ Select value ×" */
+    .chip-dynamic { gap: 5px; padding: 5px 6px 5px 10px; overflow: visible; cursor: pointer; animation: chipSlideIn 0.18s ease-out; }
+    .chip-dynamic .dchip-label { font-size: 12px; font-weight: 500; color: #64748b; white-space: nowrap; }
+    .chip-dynamic .dchip-chevron { font-size: 9px; color: #1e293b; transition: transform .2s; flex-shrink: 0; }
+    .chip-dynamic.open .dchip-chevron { transform: rotate(180deg); }
+    .chip-dynamic .dchip-val { font-size: 12px; font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+    .chip-dynamic .dchip-val.empty { color: #94a3b8; font-weight: 400; }
+    .chip-dynamic .chip-remove {
+      margin-left: 2px; padding: 2px 4px; color: #94a3b8; background: none;
+      border: none; cursor: pointer; font-size: 11px; display: flex; align-items: center; flex-shrink: 0;
+    }
+    .chip-dynamic .chip-remove:hover { color: #475569; }
+    /* Result count in chip dropdown options */
+    .ms-option-result { margin-left: auto; font-size: 11px; color: #94a3b8; font-weight: 500; padding-left: 8px; flex-shrink: 0; }
+    .af-divider { height: 1px; background: #f1f5f9; margin: 4px 0; }
+    .af-option { display: flex; align-items: center; gap: 8px; padding: 8px 14px; cursor: pointer; font-size: 13px; color: #334155; transition: background .12s; }
+    .af-option:hover { background: #f1f5f9; }
+    .af-option input[type="checkbox"] { accent-color: #00A651; width: 14px; height: 14px; cursor: pointer; flex-shrink: 0; }
+
+    /* Chip remove button */
+    .chip-remove {
+      display: none; align-items: center; justify-content: center;
+      width: 24px; height: 100%; border: none;
+      background: transparent; color: #94a3b8; font-size: 10px;
+      cursor: pointer; padding: 0; font-family: inherit; flex-shrink: 0;
+      border-radius: 0 5px 5px 0;
+      transition: background .1s, color .1s;
+    }
+    .chip-remove:hover { background: #f1f5f9; color: #334155; }
+    .chip-dynamic .chip-remove { display: flex; }
+
+    /* Applied chips row */
+    .applied-chips-row { display: none; align-items: center; flex-wrap: wrap; gap: 6px; }
+    .applied-chips-row.visible { display: flex; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f1f5f9; }
+    .applied-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 8px 3px 10px;
+      background: #f1f5f9; border: 1px solid #e2e8f0;
+      border-radius: 999px; font-size: 12px; font-weight: 500;
+      color: #334155; white-space: nowrap;
+      transition: background .12s, border-color .12s;
+    }
+    .applied-chip:hover { background: #e9eef4; border-color: #cbd5e1; }
+    .applied-chip-editable { cursor: pointer; }
+    .applied-chip-editable:hover { border-color: #00A651; }
+    .applied-chip-editable:hover .applied-chip-cat { color: #64748b; }
+    .applied-chip-cat { color: #94a3b8; font-weight: 400; }
+    .applied-chip-sep { color: #cbd5e1; margin: 0 2px; font-size: 10px; }
+    .applied-chip-remove {
+      display: flex; align-items: center; justify-content: center;
+      width: 14px; height: 14px; background: transparent; border: none;
+      cursor: pointer; color: #94a3b8; font-size: 9px; padding: 0;
+      border-radius: 50%; flex-shrink: 0; line-height: 1;
+      -webkit-appearance: none; appearance: none;
+      transition: color .12s;
+    }
+    .applied-chip-remove:hover { color: #475569; }
+
+    /* Dynamic filter chips in applied row */
+    .dyn-applied-chip { position: relative; cursor: pointer; overflow: visible; }
+    .dyn-applied-chip:hover { background: #f1f5f9; border-color: #94a3b8; }
+    .dyn-applied-chip.open { border-color: #00A651; box-shadow: 0 0 0 2px rgba(0,166,81,.1); background: #fff; }
+    .dyn-chip-val { font-weight: 600; color: #1e293b; }
+    .dyn-chip-val.empty { font-weight: 400; color: #94a3b8; }
+    .clear-all-btn { font-size: 12px; color: #94a3b8; background: none; border: none; cursor: pointer; font-family: inherit; white-space: nowrap; padding: 3px 6px; }
+    .clear-all-btn:hover { color: #64748b; }
+
+    /* ── Results ── */
+    .results-count { font-size: 12.5px; color: #94a3b8; font-weight: 500; margin-bottom: 12px; letter-spacing: .01em; }
+
+    .result-card {
+      background: #fff; border: 1px solid #e2e8f0; border-left: 3px solid transparent;
+      border-radius: 8px; padding: 14px 16px 12px; margin-bottom: 8px;
+      cursor: pointer; transition: background .1s, border-left-color .1s, box-shadow .15s;
+    }
+    .result-card:hover { background: #fafbfc; box-shadow: 0 2px 8px rgba(0,0,0,.06); border-left-color: #00A651; }
+    .result-card.active { border-left-color: #00A651; background: #f0fdf4; }
+
+    .eyebrow { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+    .ct-icon { color: #64748b; font-size: 11px; flex-shrink: 0; }
+    .eyebrow-meta { font-size: 11px; color: #475569; flex: 1; }
+
+    .status-badge { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 20px; flex-shrink: 0; border: 1px solid; }
+    .status-unverified { border-color: #cbd5e1; color: #64748b; background: #fff; }
+    .status-future     { border-color: #93c5fd; color: #1d4ed8; background: #eff6ff; }
+    .status-verified   { border-color: #86efac; color: #15803d; background: #f0fdf4; }
+    .status-breaking   { border-color: #fca5a5; color: #b91c1c; background: #fff1f2; }
+
+    .card-title { font-size: 13px; font-weight: 600; color: #0f172a; line-height: 1.4; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .card-meta-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .loc-pill { display: flex; align-items: center; gap: 4px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; padding: 2px 8px; font-size: 11px; color: #334155; }
+    .loc-more { font-size: 11px; color: #64748b; background: #f1f5f9; border-radius: 20px; padding: 2px 7px; }
+
+    .sev-tag { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+    .sev-high   { background: #fff1f2; color: #be123c; }
+    .sev-medium { background: #fff7ed; color: #c2410c; }
+    .sev-low    { background: #f0fdf4; color: #15803d; }
+
+    /* Location — dd-trigger / dd-menu variant */
+    .dd-trigger {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 6px 12px; height: 2.125rem;
+      border: 1px solid #e2e8f0; border-radius: 6px;
+      font-size: 12.5px; font-weight: 500; color: #374151;
+      background: #fff; cursor: pointer; position: relative;
+      font-family: inherit; user-select: none; white-space: nowrap;
+      transition: border-color .15s, background .15s, box-shadow .15s;
+    }
+    .dd-trigger:hover { border-color: #94a3b8; background: #f8fafc; }
+    .dd-trigger.active {
+      border-color: #00A651; color: #00A651;
+      background: #f0fdf4; box-shadow: 0 0 0 3px rgba(0,166,81,.08);
+    }
+    .dd-trigger .dd-badge {
+      background: #00A651; color: #fff; font-size: 10px; font-weight: 700;
+      border-radius: 10px; min-width: 18px; height: 18px; padding: 0 5px;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .dd-chevron { font-size: 9px; color: #94a3b8; transition: transform .2s; }
+    .dd-trigger.open .dd-chevron { transform: rotate(180deg); }
+    .dd-menu {
+      display: none; position: absolute; top: calc(100% + 6px); left: 0;
+      width: 240px; background: #fff; border: 1px solid #e8ecf0;
+      border-radius: 10px; box-shadow: 0 12px 32px rgba(0,0,0,.13);
+      z-index: 300;
+    }
+    .dd-trigger.open > .dd-menu { display: block; }
+    .dd-search-wrap {
+      padding: 10px 10px 8px; border-bottom: 1px solid #f1f5f9; position: relative;
+    }
+    .dd-search {
+      width: 100%; height: 30px; border: 1px solid #e2e8f0; border-radius: 6px;
+      padding: 0 8px 0 28px; font-size: 12px; font-family: inherit;
+      color: #1e293b; background: #f8fafc; outline: none;
+      transition: border-color .15s;
+    }
+    .dd-search:focus { border-color: #00A651; background: #fff; }
+    .dd-search-icon {
+      position: absolute; left: 19px; top: 50%; transform: translateY(-50%);
+      color: #94a3b8; font-size: 10px; pointer-events: none;
+    }
+    .dd-list { max-height: 220px; overflow-y: auto; padding: 4px 0; }
+    .dd-list::-webkit-scrollbar { width: 4px; }
+    .dd-list::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+    .dd-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 7px 12px; cursor: pointer; transition: background .1s;
+    }
+    .dd-item:hover { background: #f8fafc; }
+    .dd-item.active { background: #f0fdf4; }
+    .dd-checkbox {
+      width: 15px; height: 15px; border: 1.5px solid #cbd5e1; border-radius: 4px;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      transition: border-color .15s, background .15s;
+    }
+    .dd-item.active .dd-checkbox { background: #00A651; border-color: #00A651; }
+    .dd-item.active .dd-checkbox::after {
+      content: ''; display: block;
+      width: 8px; height: 5px;
+      border-left: 2px solid #fff; border-bottom: 2px solid #fff;
+      transform: rotate(-45deg) translateY(-1px);
+    }
+    .dd-item-label { font-size: 12.5px; color: #374151; }
+    .dd-item.active .dd-item-label { color: #1e293b; font-weight: 500; }
+
+    /* Geo panel dropdown */
+    .dd-menu { width: 320px; }
+    .geo-tabs {
+      display: flex; border-bottom: 1px solid #e2e8f0;
+    }
+    .geo-tab {
+      flex: 1; padding: 10px 0; font-size: 12.5px; font-weight: 500;
+      color: #64748b; text-align: center; cursor: pointer;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      transition: color .15s, border-color .15s; user-select: none;
+    }
+    .geo-tab.active { color: #00A651; border-bottom-color: #00A651; }
+    .geo-tab .geo-tab-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: #00A651; color: #fff; font-size: 10px; font-weight: 700;
+      border-radius: 10px; min-width: 16px; height: 16px; padding: 0 4px;
+      margin-left: 5px;
+    }
+    .geo-tab-pane { display: none; }
+    .geo-tab-pane.active { display: block; }
+    .geo-sub-tabs { display: flex; border-bottom: 1px solid #e2e8f0; padding: 0 2px; }
+    .geo-sub-tab {
+      padding: 8px 12px; font-size: 12px; font-weight: 500; color: #64748b;
+      cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+      white-space: nowrap; transition: color .15s, border-color .15s; user-select: none;
+    }
+    .geo-sub-tab.active { color: #00A651; border-bottom-color: #00A651; }
+    .geo-tab-count { font-size: 11px; color: #94a3b8; margin-left: 3px; }
+    .geo-list { padding: 4px 0; max-height: 240px; overflow-y: auto; }
+    .geo-list::-webkit-scrollbar { width: 4px; }
+    .geo-list::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+    .geo-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 14px; cursor: pointer; transition: background .1s;
+    }
+    .geo-item:hover { background: #f8fafc; }
+    .geo-item.selected { background: #f0fdf4; }
+    .geo-checkbox {
+      width: 16px; height: 16px; border: 1.5px solid #cbd5e1; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      transition: border-color .15s, background .15s;
+    }
+    .geo-item.selected .geo-checkbox { background: #00A651; border-color: #00A651; }
+    .geo-item.selected .geo-checkbox::after {
+      content: ''; width: 9px; height: 6px;
+      border-left: 2px solid #fff; border-bottom: 2px solid #fff;
+      transform: rotate(-45deg) translateY(-1px); display: block;
+    }
+    .geo-icon { color: #94a3b8; font-size: 13px; }
+    .geo-item.selected .geo-icon { color: #00A651; }
+    .geo-label { font-size: 13px; color: #1e293b; flex: 1; }
+    .geo-footer {
+      display: none; align-items: center; justify-content: space-between;
+      padding: 8px 14px; border-top: 1px solid #f1f5f9;
+    }
+    .geo-footer.active { display: flex; }
+    .geo-clear-btn {
+      font-size: 12px; font-weight: 500; color: #64748b; background: none;
+      border: none; cursor: pointer; padding: 4px 8px; border-radius: 4px;
+      transition: color .15s; font-family: inherit;
+    }
+    .geo-clear-btn:hover { color: #1e293b; }
+
+    /* Define on map */
+    .define-map-section {
+      padding: 10px 12px 11px;
+      border-top: 2px solid #f1f5f9;
+      background: #fafbfc;
+    }
+    .define-map-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+    }
+    .define-map-label {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 600; color: #374151;
+    }
+    .define-map-label i { color: #64748b; }
+    .define-map-clear {
+      background: none; border: none; cursor: pointer; padding: 0;
+      font-size: 11.5px; color: #94a3b8; font-family: inherit;
+      transition: color .12s; display: none;
+    }
+    .define-map-clear:hover { color: #ef4444; }
+    .define-map-clear.visible { display: block; }
+    .define-map-btns { display: flex; gap: 6px; margin-bottom: 8px; }
+    .define-map-btn {
+      flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 0 10px; height: 30px;
+      border: 1px solid #e2e8f0; border-radius: 6px;
+      background: #fff; color: #374151;
+      font-size: 12px; font-weight: 500; font-family: inherit;
+      cursor: pointer; white-space: nowrap;
+      transition: border-color .12s, background .12s, color .12s;
+    }
+    .define-map-btn:hover { border-color: #00A651; color: #00A651; background: #f0fdf4; }
+    .define-map-btn i { font-size: 11px; }
+    .define-map-notice {
+      display: flex; align-items: flex-start; gap: 5px;
+      font-size: 11px; color: #94a3b8; line-height: 1.45;
+    }
+    .define-map-notice i { color: #f59e0b; font-size: 10px; margin-top: 2px; flex-shrink: 0; }
+
+    /* Map tab toast */
+    .map-toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: #0f172a; color: #fff;
+      padding: 10px 16px 10px 12px; border-radius: 8px;
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 500;
+      box-shadow: 0 4px 20px rgba(0,0,0,.25);
+      z-index: 9999; opacity: 0;
+      transition: transform .28s ease, opacity .28s ease;
+      white-space: nowrap; pointer-events: none;
+    }
+    .map-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .map-toast i { color: #00A651; font-size: 14px; }
+
+    /* Dropdown clear-all */
+    .ms-dd-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 7px 12px 5px;
+    }
+    .ms-dd-topbar-label { font-size: 11.5px; font-weight: 600; color: #64748b; }
+    .ms-clear-all {
+      background: none; border: none; cursor: pointer; padding: 0;
+      font-size: 11.5px; color: #94a3b8; font-family: inherit;
+      transition: color .12s;
+    }
+    .ms-clear-all:hover { color: #ef4444; }
+
+    /* Saved searches tabs */
+    .saved-dd-tabs {
+      display: flex; border-bottom: 1px solid #e2e8f0;
+      overflow-x: auto; scroll-behavior: smooth;
+    }
+    .saved-dd-tabs::-webkit-scrollbar { display: none; }
+    .saved-dd-tab {
+      flex-shrink: 0; padding: 9px 11px; font-size: 12px; font-weight: 500;
+      color: #64748b; cursor: pointer; border-bottom: 2px solid transparent;
+      margin-bottom: -1px; white-space: nowrap;
+      transition: color .15s, border-color .15s; user-select: none;
+    }
+    .saved-dd-tab:hover { color: #334155; }
+    .saved-dd-tab.active { color: #00A651; border-bottom-color: #00A651; }
+
+    /* Add Filter search */
+    .af-search-wrap {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 10px 7px; border-bottom: 1px solid #f1f5f9; position: sticky; top: 0; background: #fff; z-index: 1;
+    }
+    .af-search-wrap i { color: #94a3b8; font-size: 12px; flex-shrink: 0; }
+    .af-search-wrap input {
+      flex: 1; border: none; outline: none; font-size: 13px;
+      font-family: inherit; color: #1e293b; background: transparent;
+    }
+    .af-search-wrap input::placeholder { color: #b0b8c4; }
+
+    /* Assets pane */
+    .asset-search-wrap { padding: 10px 12px 8px; border-bottom: 1px solid #f1f5f9; position: relative; }
+    .asset-search {
+      width: 100%; height: 30px; border: 1px solid #e2e8f0; border-radius: 6px;
+      padding: 0 8px 0 28px; font-size: 12px; font-family: inherit;
+      color: #1e293b; background: #f8fafc; outline: none; transition: border-color .15s;
+    }
+    .asset-search:focus { border-color: #00A651; background: #fff; }
+    .asset-search-icon {
+      position: absolute; left: 21px; top: 50%; transform: translateY(-50%);
+      color: #94a3b8; font-size: 10px; pointer-events: none;
+    }
+    .asset-filter-row {
+      display: flex; gap: 6px; padding: 8px 12px; border-bottom: 1px solid #f1f5f9; flex-wrap: wrap;
+    }
+    .asset-filter-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border: 1px solid #e2e8f0; border-radius: 5px;
+      font-size: 12px; font-weight: 500; color: #64748b; background: #f8fafc;
+      cursor: pointer; user-select: none; transition: border-color .12s, color .12s, background .12s;
+    }
+    .asset-filter-pill:hover { border-color: #94a3b8; color: #374151; }
+    .asset-filter-pill.active { border-color: #00A651; color: #00A651; background: #f0fdf4; }
+    .asset-filter-pill i { font-size: 8px; color: #cbd5e1; }
+    .asset-select-all-row {
+      display: flex; align-items: center; gap: 8px; padding: 8px 14px;
+      border-bottom: 1px solid #f1f5f9; cursor: pointer; user-select: none;
+      transition: background .1s;
+    }
+    .asset-select-all-row:hover { background: #f8fafc; }
+    .result-checkbox {
+      width: 15px; height: 15px; border: 1.5px solid #cbd5e1; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      transition: border-color .15s, background .15s;
+    }
+    .result-item.selected .result-checkbox { background: #00A651; border-color: #00A651; }
+    .result-item.selected .result-checkbox::after {
+      content: ''; width: 8px; height: 5px;
+      border-left: 2px solid #fff; border-bottom: 2px solid #fff;
+      transform: rotate(-45deg) translateY(-1px); display: block;
+    }
+    .asset-select-all-row.all-sel .result-checkbox { background: #00A651; border-color: #00A651; }
+    .asset-select-all-row.all-sel .result-checkbox::after {
+      content: ''; width: 8px; height: 5px;
+      border-left: 2px solid #fff; border-bottom: 2px solid #fff;
+      transform: rotate(-45deg) translateY(-1px); display: block;
+    }
+    .asset-select-all-row.partial .result-checkbox { border-color: #00A651; position: relative; }
+    .asset-select-all-row.partial .result-checkbox::after {
+      content: ''; width: 8px; height: 2px; background: #00A651;
+      border-radius: 1px; display: block;
+    }
+    .asset-results-list { max-height: 190px; overflow-y: auto; }
+    .asset-results-list::-webkit-scrollbar { width: 4px; }
+    .asset-results-list::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+    .result-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 14px; cursor: pointer; transition: background .1s;
+    }
+    .result-item:hover { background: #f8fafc; }
+    .result-item.selected { background: #f0fdf4; }
+    .result-icon {
+      width: 26px; height: 26px; border-radius: 6px; background: #f1f5f9;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-size: 12px;
+    }
+    .result-info { flex: 1; min-width: 0; }
+    .result-name { font-size: 12.5px; font-weight: 500; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .result-meta { font-size: 11px; color: #94a3b8; margin-top: 1px; }
+
+    /* overlay */
+    .overlay { position: fixed; inset: 0; z-index: 200; display: none; }
+    .overlay.active { display: block; }
+
+    /* ── Toolbar card ── */
+    .toolbar-card {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 10px;
+      padding: 14px 16px; margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+      overflow: visible;
+    }
+    .toolbar-card .search-wrap { margin-bottom: 10px; }
+    .toolbar-card .filter-bar  { margin-bottom: 0; }
+
+    /* Saved searches row */
+    .saved-row { margin-bottom: 10px; }
+    .saved-state { display: flex; align-items: center; gap: 8px; min-height: 33px; }
+    .saved-state[hidden] { display: none; }
+
+    .saved-searches-btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 0 11px; height: 33px; flex-shrink: 0;
+      border: 1px solid #e2e8f0; border-radius: 6px;
+      font-size: 13px; font-weight: 500; color: #334155;
+      background: #fff; cursor: pointer; font-family: inherit; white-space: nowrap;
+      transition: border-color .15s;
+    }
+    .saved-searches-btn:hover { border-color: #94a3b8; }
+    .saved-searches-btn i { font-size: 9px; color: #94a3b8; }
+
+    .saved-divider { width: 1px; height: 20px; background: #e2e8f0; flex-shrink: 0; }
+
+    .recent-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #94a3b8; white-space: nowrap; }
+
+    .recent-tags { display: flex; align-items: center; gap: 6px; overflow: hidden; flex: 1; }
+    .recent-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 999px;
+      font-size: 12px; color: #475569;
+      background: #f8fafc; border: 1px solid #e2e8f0;
+      cursor: pointer; white-space: nowrap;
+      transition: background .12s, border-color .12s;
+    }
+    .recent-tag:hover { background: #f1f5f9; border-color: #cbd5e1; }
+    .recent-tag i { color: #94a3b8; font-size: 10px; }
+
+    .saved-spacer { flex: 1; }
+
+    .saved-name { font-size: 14px; font-weight: 600; color: #0f172a; white-space: nowrap; }
+    .modified-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: #FEF3C7; color: #D97706; white-space: nowrap; }
+
+    .saved-icon-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border: none; background: transparent;
+      color: #94a3b8; cursor: pointer; border-radius: 6px; font-size: 12px;
+      transition: background .12s, color .12s; flex-shrink: 0;
+    }
+    .saved-icon-btn:hover { background: #f1f5f9; color: #475569; }
+
+    .saved-actions { display: flex; align-items: center; gap: 6px; }
+    .saved-btn {
+      display: inline-flex; align-items: center;
+      padding: 0 13px; height: 31px; border-radius: 6px;
+      font-size: 13px; font-weight: 500; font-family: inherit;
+      cursor: pointer; border: 1px solid #e2e8f0;
+      background: #fff; color: #475569; white-space: nowrap;
+      transition: background .12s, border-color .12s, color .12s;
+    }
+    .saved-btn:hover { border-color: #94a3b8; color: #0f172a; }
+    .saved-btn-primary { background: #00A651; color: #fff; border-color: #00A651; }
+    .saved-btn-primary:hover { background: #009248; border-color: #009248; color: #fff; }
+    .saved-btn-save-as-new { color: #00A651; border-color: #00A651; }
+    .saved-btn-save-as-new:hover { background: #f0fdf4; border-color: #009248; color: #009248; }
+
+    .ms-nested-group-header {
+      padding: 8px 14px 3px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .06em; color: #94a3b8;
+    }
+    .ms-nested-group-header:first-child { padding-top: 4px; }
+    .ms-group-parent .ms-option-label { font-weight: 600; color: #1e293b; }
+    .ms-group-children { padding-left: 12px; }
+    .ct-sub-group { margin: 2px 14px 4px 28px; }
+    .ct-sub-group .ms-option { padding: 5px 10px 5px 8px; }
+    .ct-sub-group .ms-option-label { font-size: 12px; color: #64748b; }
+    .ct-sub-group .ms-option-count { font-size: 11px; color: #94a3b8; }
+
+    /* Search right buttons */
+    .search-right {
+      display: flex; align-items: center; gap: 5px;
+      padding: 0 8px; flex-shrink: 0;
+      border-left: 1px solid #e8ecf1;
+    }
+    .keyword-builder-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 0 10px; height: 28px;
+      background: #fff; color: #374151;
+      border: 1px solid #e2e8f0; border-radius: 6px;
+      font-size: 12px; font-weight: 500; font-family: inherit;
+      cursor: pointer; white-space: nowrap;
+      transition: border-color .12s, background .12s, color .12s;
+    }
+    .keyword-builder-btn:hover { background: #f8fafc; border-color: #94a3b8; color: #0f172a; }
+    .keyword-builder-btn .kb-info { font-size: 11px; color: #c8d0da; }
+    .keyword-builder-btn:hover .kb-info { color: #94a3b8; }
+    .search-x-btn {
+      width: 24px; height: 24px; border: none; background: transparent;
+      color: #94a3b8; cursor: pointer; border-radius: 4px; font-size: 12px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .12s, color .12s;
+    }
+    .search-x-btn:hover { background: #f1f5f9; color: #475569; }
+
+    /* Results inline */
+    .results-inline { margin-left: auto; font-size: 12.5px; color: #64748b; font-weight: 500; white-space: nowrap; }
+    .results-inline[hidden] { display: none !important; }
+
+    /* Saved searches dropdown */
+    .saved-row { position: relative; }
+    .saved-dd-panel {
+      display: none; position: absolute; top: calc(100% + 6px); left: 0;
+      width: 320px; background: #fff; border: 1px solid #e2e8f0;
+      border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.12);
+      z-index: 500; overflow: hidden;
+    }
+    .saved-dd-panel.open { display: block; }
+    .saved-dd-search {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 12px; border-bottom: 1px solid #f1f5f9;
+    }
+    .saved-dd-search i { color: #94a3b8; font-size: 12px; flex-shrink: 0; }
+    .saved-dd-search input {
+      flex: 1; border: none; outline: none; font-size: 13px;
+      font-family: inherit; color: #1e293b; background: transparent;
+    }
+    .saved-dd-search input::placeholder { color: #94a3b8; }
+    .saved-dd-section { padding: 6px 0; }
+    .saved-dd-section-label {
+      font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .06em; color: #94a3b8; padding: 4px 12px 2px;
+    }
+    .saved-dd-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 12px; cursor: pointer;
+      transition: background .1s;
+    }
+    .saved-dd-item:hover { background: #f8fafc; }
+    .saved-dd-item i { color: #94a3b8; font-size: 12px; flex-shrink: 0; }
+    .saved-dd-item span { font-size: 13px; color: #334155; }
+    .saved-dd-footer {
+      border-top: 1px solid #e2e8f0; padding: 10px 12px;
+      display: flex; align-items: center;
+    }
+    .saved-view-all-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 10px; border: 1px solid #e2e8f0;
+      border-radius: 6px; background: transparent;
+      font-size: 12px; font-weight: 500; color: #64748b;
+      font-family: inherit; cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+    .saved-view-all-btn:hover { border-color: #94a3b8; color: #334155; }
+
+    /* State switcher */
+    .state-switcher {
+      position: fixed; bottom: 24px; right: 24px; z-index: 1000;
+      display: flex; align-items: center; gap: 8px;
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 999px;
+      padding: 6px 6px 6px 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.14);
+    }
+    .state-switcher-label { font-size: 11px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+    .state-btns { display: flex; gap: 3px; }
+    .state-btn {
+      width: 30px; height: 30px; border-radius: 999px;
+      border: 1px solid #e2e8f0; background: #f8fafc;
+      font-size: 12px; font-weight: 600; color: #64748b; font-family: inherit;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background .12s, border-color .12s, color .12s;
+    }
+    .state-btn:hover { border-color: #94a3b8; color: #334155; background: #fff; }
+    .state-btn.active { background: #0f172a; border-color: #0f172a; color: #fff; }
+  </style>
+</head>
+<body>
+<div class="overlay" id="overlay"></div>
+
+
+<div class="page">
+
+  <div class="toolbar-card">
+
+    <!-- Saved searches row -->
+    <div class="saved-row">
+
+      <!-- Dropdown panel (shared) -->
+      <div class="saved-dd-panel" id="savedDdPanel">
+        <!-- Tabs -->
+        <div class="saved-dd-tabs">
+          <div class="saved-dd-tab active" data-tab="all">All</div>
+          <div class="saved-dd-tab" data-tab="favorites">Favorites</div>
+          <div class="saved-dd-tab" data-tab="saved">Saved Search</div>
+          <div class="saved-dd-tab" data-tab="org">Organization</div>
+          <div class="saved-dd-tab" data-tab="seerist">Seerist</div>
+        </div>
+        <!-- Shared search -->
+        <div class="saved-dd-search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="savedDdSearch" placeholder="Find a saved search…" />
+        </div>
+        <!-- All pane -->
+        <div class="saved-dd-pane" id="saved-pane-all">
+          <div class="saved-dd-section">
+            <div class="saved-dd-section-label">Favorites</div>
+            <div class="saved-dd-item" data-name="Middle East Conflict Monitor"><i class="fa-solid fa-star" style="color:#f59e0b;"></i><span>Middle East Conflict Monitor</span></div>
+            <div class="saved-dd-item" data-name="Africa Elections 2025"><i class="fa-solid fa-star" style="color:#f59e0b;"></i><span>Africa Elections 2025</span></div>
+          </div>
+          <div class="saved-dd-section">
+            <div class="saved-dd-section-label">Saved Search</div>
+            <div class="saved-dd-item" data-name="Sudan Humanitarian Crisis"><i class="fa-solid fa-bookmark"></i><span>Sudan Humanitarian Crisis</span></div>
+          </div>
+          <div class="saved-dd-section">
+            <div class="saved-dd-section-label">Organization</div>
+            <div class="saved-dd-item" data-name="Global Risk Monitor"><i class="fa-solid fa-building"></i><span>Global Risk Monitor</span></div>
+          </div>
+        </div>
+        <!-- Favorites pane -->
+        <div class="saved-dd-pane" id="saved-pane-favorites" hidden>
+          <div class="saved-dd-section">
+            <div class="saved-dd-item" data-name="Middle East Conflict Monitor"><i class="fa-solid fa-star" style="color:#f59e0b;"></i><span>Middle East Conflict Monitor</span></div>
+            <div class="saved-dd-item" data-name="Africa Elections 2025"><i class="fa-solid fa-star" style="color:#f59e0b;"></i><span>Africa Elections 2025</span></div>
+          </div>
+        </div>
+        <!-- Saved Search pane -->
+        <div class="saved-dd-pane" id="saved-pane-saved" hidden>
+          <div class="saved-dd-section">
+            <div class="saved-dd-item" data-name="Middle East Conflict Monitor"><i class="fa-solid fa-bookmark"></i><span>Middle East Conflict Monitor</span></div>
+            <div class="saved-dd-item" data-name="Africa Elections 2025"><i class="fa-solid fa-bookmark"></i><span>Africa Elections 2025</span></div>
+            <div class="saved-dd-item" data-name="Sudan Humanitarian Crisis"><i class="fa-solid fa-bookmark"></i><span>Sudan Humanitarian Crisis</span></div>
+          </div>
+        </div>
+        <!-- Organization pane -->
+        <div class="saved-dd-pane" id="saved-pane-org" hidden>
+          <div class="saved-dd-section">
+            <div class="saved-dd-item" data-name="Global Risk Monitor"><i class="fa-solid fa-building"></i><span>Global Risk Monitor</span></div>
+            <div class="saved-dd-item" data-name="APAC Security Watch"><i class="fa-solid fa-building"></i><span>APAC Security Watch</span></div>
+            <div class="saved-dd-item" data-name="Europe Political Risk"><i class="fa-solid fa-building"></i><span>Europe Political Risk</span></div>
+          </div>
+        </div>
+        <!-- Seerist pane -->
+        <div class="saved-dd-pane" id="saved-pane-seerist" hidden>
+          <div class="saved-dd-section">
+            <div class="saved-dd-item" data-name="Global Conflict Tracker"><i class="fa-solid fa-shield-halved" style="color:#00A651;"></i><span>Global Conflict Tracker</span></div>
+            <div class="saved-dd-item" data-name="Maritime Threat Monitor"><i class="fa-solid fa-shield-halved" style="color:#00A651;"></i><span>Maritime Threat Monitor</span></div>
+            <div class="saved-dd-item" data-name="Cyber Threat Intelligence"><i class="fa-solid fa-shield-halved" style="color:#00A651;"></i><span>Cyber Threat Intelligence</span></div>
+            <div class="saved-dd-item" data-name="Political Stability Index"><i class="fa-solid fa-shield-halved" style="color:#00A651;"></i><span>Political Stability Index</span></div>
+          </div>
+        </div>
+        <div class="saved-dd-footer">
+          <button class="saved-view-all-btn">View All</button>
+        </div>
+      </div>
+
+      <!-- State 1: Default -->
+      <div class="saved-state" data-state="1">
+        <button class="saved-searches-btn">Saved Searches <i class="fa-solid fa-chevron-down"></i></button>
+      </div>
+
+      <!-- State 2: Active search, no saved search -->
+      <div class="saved-state" data-state="2" hidden>
+        <button class="saved-searches-btn">Saved Searches <i class="fa-solid fa-chevron-down"></i></button>
+        <div class="saved-spacer"></div>
+        <div class="saved-actions">
+          <button class="saved-btn">Clear</button>
+          <button class="saved-btn saved-btn-primary">Save</button>
+        </div>
+      </div>
+
+      <!-- State 3: Saved search loaded, no changes -->
+      <div class="saved-state" data-state="3" hidden>
+        <button class="saved-searches-btn">Saved Searches <i class="fa-solid fa-chevron-down"></i></button>
+        <div class="saved-divider"></div>
+        <span class="saved-name">Middle East Conflict Monitor</span>
+        <button class="saved-icon-btn" title="Rename"><i class="fa-solid fa-pen"></i></button>
+        <button class="saved-icon-btn" title="Alerts"><i class="fa-solid fa-bell"></i></button>
+        <button class="saved-icon-btn" title="Share"><i class="fa-solid fa-arrow-up-right-from-square"></i></button>
+        <button class="saved-icon-btn" title="Delete"><i class="fa-solid fa-trash"></i></button>
+        <div class="saved-spacer"></div>
+        <div class="saved-actions">
+          <button class="saved-btn">Clear</button>
+          <button class="saved-btn saved-btn-primary">Save</button>
+        </div>
+      </div>
+
+      <!-- State 4: Saved search modified -->
+      <div class="saved-state" data-state="4" hidden>
+        <button class="saved-searches-btn">Saved Searches <i class="fa-solid fa-chevron-down"></i></button>
+        <div class="saved-divider"></div>
+        <span class="saved-name">Middle East Conflict Monitor</span>
+        <span class="modified-badge">Modified</span>
+        <button class="saved-icon-btn" title="Rename"><i class="fa-solid fa-pen"></i></button>
+        <button class="saved-icon-btn" title="Alerts"><i class="fa-solid fa-bell"></i></button>
+        <button class="saved-icon-btn" title="Share"><i class="fa-solid fa-arrow-up-right-from-square"></i></button>
+        <button class="saved-icon-btn" title="Delete"><i class="fa-solid fa-trash"></i></button>
+        <div class="saved-spacer"></div>
+        <div class="saved-actions">
+          <button class="saved-btn">Clear</button>
+          <button class="saved-btn">Undo Changes</button>
+          <button class="saved-btn saved-btn-save-as-new">Save as New</button>
+          <button class="saved-btn saved-btn-primary">Save</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="search-wrap">
+      <div class="search-input-area">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input class="search-input" type="text" placeholder="Search by keyword  (protest AND election NOT sanctions)" />
+      </div>
+      <div class="search-right">
+        <button class="keyword-builder-btn" title="Keyword Builder">Keyword Builder</button>
+        <button class="keyword-builder-btn" title="Search syntax help" style="padding:0 8px;"><i class="fa-solid fa-circle-info kb-info"></i></button>
+        <button class="search-x-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+    </div>
+
+  <div style="position:relative;">
+    <div class="filter-bar" id="filterBar">
+
+      <!-- Date -->
+      <div class="chip" id="chip-date" onclick="event.stopPropagation(); openDd('dd-date',this)">
+        <span class="chip-cat">Date</span>
+        <span class="chip-sep" id="date-sep" hidden>·</span>
+        <span class="chip-val" id="date-val"></span>
+        <span id="date-count" style="display:none;"></span>
+        <i class="fa-solid fa-chevron-down chip-chevron"></i>
+        <div class="dropdown" id="dd-date" style="min-width:290px;">
+          <div class="date-dd">
+            <div class="date-field-label">From</div>
+            <div class="date-select-wrap">
+              <button class="date-select-btn" id="date-from-btn">
+                <i class="fa-regular fa-calendar cal"></i>
+                <span id="date-from-label">Start Date</span>
+                <i class="fa-solid fa-chevron-down chev"></i>
+                <input type="date" id="date-from" />
+              </button>
+            </div>
+            <div class="date-field-label">To</div>
+            <div class="date-select-wrap">
+              <button class="date-select-btn" id="date-to-btn">
+                <i class="fa-regular fa-calendar cal"></i>
+                <span id="date-to-label">End Date</span>
+                <i class="fa-solid fa-chevron-down chev"></i>
+                <input type="date" id="date-to" />
+              </button>
+            </div>
+          </div>
+          <div class="date-divider"></div>
+          <div class="date-presets-row">
+            <span class="date-chip" data-val="Last Hour">Last Hour</span>
+            <span class="date-chip" data-val="Last 24 hours">Last 24 hours</span>
+            <span class="date-chip" data-val="Last 7 days">Last 7 days</span>
+            <span class="date-chip" data-val="Next 7 days">Next 7 days</span>
+            <span class="date-chip" data-val="Last 30 days">Last 30 days</span>
+            <span class="date-chip" data-val="Next 30 days">Next 30 days</span>
+          </div>
+          <div class="date-apply-to">
+            <div class="date-apply-to-header" id="applyToHeader">
+              <span class="date-apply-to-label">Apply To</span>
+              <span class="date-apply-to-val" id="applyToVal">Event Date <i class="fa-solid fa-chevron-down"></i></span>
+            </div>
+            <div class="date-apply-to-options" id="applyToOptions">
+              <label class="date-radio-opt">
+                <input type="radio" name="applyTo" value="eventDate" checked />
+                <div class="date-radio-text">
+                  <span class="date-radio-name">Event Date</span>
+                  <span class="date-radio-desc">The date the event occurred.</span>
+                </div>
+              </label>
+              <label class="date-radio-opt">
+                <input type="radio" name="applyTo" value="firstPublished" />
+                <div class="date-radio-text">
+                  <span class="date-radio-name">First Published</span>
+                  <span class="date-radio-desc">When the content was published on Seerist.</span>
+                </div>
+              </label>
+              <label class="date-radio-opt">
+                <input type="radio" name="applyTo" value="lastPublished" />
+                <div class="date-radio-text">
+                  <span class="date-radio-name">Last Published</span>
+                  <span class="date-radio-desc">The most recent publication date.</span>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Location -->
+      <div class="dd-trigger" id="dd-loc-trigger">
+        Location
+        <span class="dd-badge" id="location-count" style="display:none;"></span>
+        <i class="fa-solid fa-chevron-down dd-chevron"></i>
+        <div class="dd-menu" id="dd-location">
+          <!-- Top-level tabs -->
+          <div class="geo-tabs">
+            <div class="geo-tab active" data-pane="geographies">Geographies <span class="geo-tab-badge" id="geo-tab-badge" style="display:none;"></span></div>
+            <div class="geo-tab" data-pane="assets">Assets</div>
+          </div>
+
+          <!-- Geographies pane -->
+          <div class="geo-tab-pane active" id="pane-geographies">
+            <div class="dd-search-wrap">
+              <i class="fa-solid fa-magnifying-glass dd-search-icon"></i>
+              <input class="dd-search" type="text" id="loc-search" placeholder="Search geographies…" />
+            </div>
+            <div class="geo-sub-tabs">
+              <div class="geo-sub-tab active" data-tab="all">All</div>
+              <div class="geo-sub-tab" data-tab="regions">Regions <span class="geo-tab-count">7</span></div>
+              <div class="geo-sub-tab" data-tab="countries">Countries <span class="geo-tab-count">224</span></div>
+            </div>
+            <div class="geo-list" id="loc-list">
+              <div class="geo-item" data-val="Global"><div class="geo-checkbox"></div><i class="fa-solid fa-globe geo-icon"></i><span class="geo-label">Global</span></div>
+              <div class="geo-item" data-val="Middle East"><div class="geo-checkbox"></div><i class="fa-solid fa-earth-africa geo-icon"></i><span class="geo-label">Middle East</span></div>
+              <div class="geo-item" data-val="Europe"><div class="geo-checkbox"></div><i class="fa-solid fa-earth-europe geo-icon"></i><span class="geo-label">Europe</span></div>
+              <div class="geo-item" data-val="Africa"><div class="geo-checkbox"></div><i class="fa-solid fa-earth-africa geo-icon"></i><span class="geo-label">Africa</span></div>
+              <div class="geo-item" data-val="Asia Pacific"><div class="geo-checkbox"></div><i class="fa-solid fa-earth-asia geo-icon"></i><span class="geo-label">Asia Pacific</span></div>
+              <div class="geo-item" data-val="North America"><div class="geo-checkbox"></div><i class="fa-solid fa-earth-americas geo-icon"></i><span class="geo-label">North America</span></div>
+              <div class="geo-item" data-val="Latin America"><div class="geo-checkbox"></div><i class="fa-solid fa-earth-americas geo-icon"></i><span class="geo-label">Latin America</span></div>
+            </div>
+            <div class="geo-footer">
+              <span id="loc-selected-count" style="font-size:12px;color:#64748b;display:none;">0 selected</span>
+              <button class="geo-clear-btn" id="loc-clear-btn" style="display:none;">Clear</button>
+            </div>
+          </div>
+
+          <!-- Assets pane -->
+          <div class="geo-tab-pane" id="pane-assets">
+            <div class="asset-search-wrap">
+              <i class="fa-solid fa-magnifying-glass asset-search-icon"></i>
+              <input class="asset-search" type="text" id="asset-search" placeholder="Search assets…" />
+            </div>
+            <div class="asset-filter-row">
+              <div class="dd-trigger asset-dd" id="dd-asset-type">
+                <span id="asset-type-label">Type</span>
+                <span class="dd-badge" id="asset-type-badge" style="display:none;"></span>
+                <i class="fa-solid fa-chevron-down dd-chevron"></i>
+                <div class="dd-menu" id="asset-type-menu" style="width:180px; top:calc(100% + 4px);">
+                  <div class="dd-list" style="max-height:160px;">
+                    <div class="dd-item" data-asset-type="House"><div class="dd-checkbox"></div><span class="dd-item-label">House</span></div>
+                    <div class="dd-item" data-asset-type="Office"><div class="dd-checkbox"></div><span class="dd-item-label">Office</span></div>
+                    <div class="dd-item" data-asset-type="Marina"><div class="dd-checkbox"></div><span class="dd-item-label">Marina</span></div>
+                    <div class="dd-item" data-asset-type="Port"><div class="dd-checkbox"></div><span class="dd-item-label">Port</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="dd-trigger asset-dd" id="dd-asset-country">
+                <span id="asset-country-label">Country</span>
+                <span class="dd-badge" id="asset-country-badge" style="display:none;"></span>
+                <i class="fa-solid fa-chevron-down dd-chevron"></i>
+                <div class="dd-menu" id="asset-country-menu" style="width:180px; top:calc(100% + 4px);">
+                  <div class="dd-list" style="max-height:160px;">
+                    <div class="dd-item" data-asset-country="Egypt"><div class="dd-checkbox"></div><span class="dd-item-label">Egypt</span></div>
+                    <div class="dd-item" data-asset-country="UAE"><div class="dd-checkbox"></div><span class="dd-item-label">UAE</span></div>
+                    <div class="dd-item" data-asset-country="Kenya"><div class="dd-checkbox"></div><span class="dd-item-label">Kenya</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="asset-select-all-row" id="asset-select-all">
+              <div class="result-checkbox" id="asset-all-cb"></div>
+              <span style="font-size:12.5px;font-weight:500;color:#374151;">Select all</span>
+              <span style="font-size:11.5px;color:#94a3b8;" id="asset-count-label">· 6 results</span>
+            </div>
+            <div class="asset-results-list" id="asset-list">
+              <div class="result-item" data-val="asset:Alexandria Site"><div class="result-checkbox"></div><div class="result-icon"><i class="fa-solid fa-building" style="color:#3b82f6;"></i></div><div class="result-info"><div class="result-name">Alexandria Site</div><div class="result-meta">House · Egypt</div></div></div>
+              <div class="result-item" data-val="asset:Alexandria Station"><div class="result-checkbox"></div><div class="result-icon"><i class="fa-solid fa-building" style="color:#3b82f6;"></i></div><div class="result-info"><div class="result-name">Alexandria Station</div><div class="result-meta">House · Egypt</div></div></div>
+              <div class="result-item" data-val="asset:Alexandria Port"><div class="result-checkbox"></div><div class="result-icon"><i class="fa-solid fa-anchor" style="color:#0891b2;"></i></div><div class="result-info"><div class="result-name">Alexandria Port</div><div class="result-meta">House · Egypt</div></div></div>
+              <div class="result-item" data-val="asset:Dubai Terminal"><div class="result-checkbox"></div><div class="result-icon"><i class="fa-solid fa-anchor" style="color:#0891b2;"></i></div><div class="result-info"><div class="result-name">Dubai Terminal</div><div class="result-meta">Marina · UAE</div></div></div>
+              <div class="result-item" data-val="asset:Cairo HQ"><div class="result-checkbox"></div><div class="result-icon"><i class="fa-solid fa-building" style="color:#8b5cf6;"></i></div><div class="result-info"><div class="result-name">Cairo HQ</div><div class="result-meta">Office · Egypt</div></div></div>
+              <div class="result-item" data-val="asset:Nairobi Office"><div class="result-checkbox"></div><div class="result-icon"><i class="fa-solid fa-building" style="color:#8b5cf6;"></i></div><div class="result-info"><div class="result-name">Nairobi Office</div><div class="result-meta">Office · Kenya</div></div></div>
+            </div>
+            <div class="geo-footer">
+              <span id="asset-selected-count" style="font-size:12px;color:#64748b;display:none;">0 selected</span>
+              <button class="geo-clear-btn" id="asset-clear-btn" style="display:none;">Clear</button>
+            </div>
+          </div>
+
+          <!-- Define on map -->
+          <div class="define-map-section">
+            <div class="define-map-header">
+              <div class="define-map-label">
+                <i class="fa-solid fa-map-location-dot"></i>
+                Define on map
+              </div>
+              <button class="define-map-clear" id="define-map-clear-btn">Clear area</button>
+            </div>
+            <div class="define-map-btns">
+              <button class="define-map-btn" id="define-polygon-btn">
+                <i class="fa-solid fa-draw-polygon"></i> Draw polygon
+              </button>
+              <button class="define-map-btn" id="define-current-view-btn">
+                <i class="fa-solid fa-expand"></i> Current view
+              </button>
+            </div>
+            <div class="define-map-notice">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              Switching to Map tab — your current tab will change.
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Content Type -->
+      <div class="chip" id="chip-contentType" onclick="event.stopPropagation(); openDd('dd-contentType',this)">
+        <span class="chip-cat">Content Type</span>
+        <span class="chip-count" id="contentType-count"></span>
+        <i class="fa-solid fa-chevron-down chip-chevron"></i>
+        <div class="dropdown" id="dd-contentType" style="min-width:250px;">
+          <div class="ms-dd-topbar">
+            <span class="ms-dd-topbar-label">Content Type</span>
+            <button class="ms-clear-all" id="clear-contentType">Clear all</button>
+          </div>
+          <div class="ms-options">
+            <label class="ms-option"><input type="checkbox" data-filter="contentType" data-val="Analysis" /><span class="ms-option-label">Analysis</span><span class="ms-option-count">418</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="contentType" data-val="DiscoverAI" /><span class="ms-option-label">DiscoverAI</span><span class="ms-option-count">1,203</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="contentType" data-val="Evacuation Changes" /><span class="ms-option-label">Evacuation Changes</span><span class="ms-option-count">43</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="contentType" data-val="Events" /><span class="ms-option-label">Events</span><span class="ms-option-count">2,847</span></label>
+            <div class="ct-sub-group">
+              <label class="ms-option"><input type="checkbox" data-filter="status" data-val="Future" /><span class="ms-option-label">Future</span><span class="ms-option-count">218</span></label>
+              <label class="ms-option"><input type="checkbox" data-filter="status" data-val="Unverified" /><span class="ms-option-label">Unverified</span><span class="ms-option-count">1,426</span></label>
+              <label class="ms-option"><input type="checkbox" data-filter="status" data-val="Verified" /><span class="ms-option-label">Verified</span><span class="ms-option-count">1,203</span></label>
+            </div>
+            <label class="ms-option"><input type="checkbox" data-filter="contentType" data-val="News &amp; Social" /><span class="ms-option-label">News &amp; Social</span><span class="ms-option-count">18,492</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="contentType" data-val="Risk Rating Changes" /><span class="ms-option-label">Risk Rating Changes</span><span class="ms-option-count">76</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category -->
+      <div class="chip" id="chip-category" onclick="event.stopPropagation(); openDd('dd-category',this)">
+        <span class="chip-cat">Category</span>
+        <span class="chip-count" id="category-count"></span>
+        <i class="fa-solid fa-chevron-down chip-chevron"></i>
+        <div class="dropdown" id="dd-category" style="min-width:260px; max-height:420px; overflow-y:auto;">
+          <div class="ms-search-wrap">
+            <div class="ms-search-inner" style="flex:1;">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="category-search" placeholder="Search categories…" />
+            </div>
+            <button class="ms-clear-all" id="clear-category" style="flex-shrink:0;">Clear</button>
+          </div>
+          <div class="cat-applies-note">Applies to Events and News &amp; Social.</div>
+          <div class="ms-options" id="category-options">
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Anniversary" /><span class="ms-option-label">Anniversary</span><span class="ms-option-count">84</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Conflict / Military" /><span class="ms-option-label">Conflict / Military</span><span class="ms-option-count">712</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Crime" /><span class="ms-option-label">Crime</span><span class="ms-option-count">431</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Cyber" /><span class="ms-option-label">Cyber</span><span class="ms-option-count">93</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Disaster" /><span class="ms-option-label">Disaster</span><span class="ms-option-count">156</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Geopolitical" /><span class="ms-option-label">Geopolitical</span><span class="ms-option-count">288</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Health" /><span class="ms-option-label">Health</span><span class="ms-option-count">74</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Holiday" /><span class="ms-option-label">Holiday</span><span class="ms-option-count">41</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Hostile Communication" /><span class="ms-option-label">Hostile Communication</span><span class="ms-option-count">29</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Maritime" /><span class="ms-option-label">Maritime</span><span class="ms-option-count">118</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Official Actions" /><span class="ms-option-label">Official Actions</span><span class="ms-option-count">204</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Political" /><span class="ms-option-label">Political</span><span class="ms-option-count">375</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Sporting / Cultural / Other" /><span class="ms-option-label">Sporting / Cultural / Other</span><span class="ms-option-count">67</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Terrorism" /><span class="ms-option-label">Terrorism</span><span class="ms-option-count">263</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Transport" /><span class="ms-option-label">Transport</span><span class="ms-option-count">52</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Unrest" /><span class="ms-option-label">Unrest</span><span class="ms-option-count">189</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Business" /><span class="ms-option-label">Business</span><span class="ms-option-count">2,341</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Culture" /><span class="ms-option-label">Culture</span><span class="ms-option-count">1,102</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Diplomacy" /><span class="ms-option-label">Diplomacy</span><span class="ms-option-count">874</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Economy" /><span class="ms-option-label">Economy</span><span class="ms-option-count">1,956</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Environment" /><span class="ms-option-label">Environment</span><span class="ms-option-count">543</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Human Rights" /><span class="ms-option-label">Human Rights</span><span class="ms-option-count">392</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Military" /><span class="ms-option-label">Military</span><span class="ms-option-count">1,287</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Politics" /><span class="ms-option-label">Politics</span><span class="ms-option-count">2,104</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Religion" /><span class="ms-option-label">Religion</span><span class="ms-option-count">318</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Science" /><span class="ms-option-label">Science</span><span class="ms-option-count">224</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Society" /><span class="ms-option-label">Society</span><span class="ms-option-count">761</span></label>
+            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Technology" /><span class="ms-option-label">Technology</span><span class="ms-option-count">983</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add filter -->
+      <div class="add-filter-btn" id="addFilterBtn">
+        <i class="fa-solid fa-plus" style="font-size:11px;"></i>
+        Add filter
+        <span class="af-badge" id="af-badge" style="display:none;"></span>
+        <div class="dropdown" id="dd-addFilter" style="min-width:260px; max-height:460px; overflow-y:auto;">
+          <div class="af-search-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="afSearch" placeholder="Search filters…" />
+          </div>
+          <div class="af-group-wrap" data-ct="Analysis">
+            <div class="af-group-header collapsed"><span class="af-group-label">Analysis</span><i class="fa-solid fa-chevron-down af-group-chevron"></i></div>
+            <div class="af-group-body collapsed">
+              <div class="af-chip-item" data-af="riskType">Risk Type</div>
+              <div class="af-chip-item" data-af="tags">Tag</div>
+            </div>
+            <div class="af-divider"></div>
+          </div>
+          <div class="af-group-wrap" data-ct="DiscoverAI">
+            <div class="af-group-header collapsed"><span class="af-group-label">DiscoverAI</span><i class="fa-solid fa-chevron-down af-group-chevron"></i></div>
+            <div class="af-group-body collapsed">
+              <div class="af-chip-item" data-af="tags">Tag</div>
+            </div>
+            <div class="af-divider"></div>
+          </div>
+          <div class="af-group-wrap" data-ct="Events">
+            <div class="af-group-header"><span class="af-group-label">Events</span><i class="fa-solid fa-chevron-down af-group-chevron"></i></div>
+            <div class="af-group-body">
+              <div class="af-chip-item" data-af="assetType">Asset Type</div>
+              <div class="af-chip-item" data-af="attackType">Attack Type</div>
+              <div class="af-chip-item" data-af="locationPrecision">Location Precision</div>
+              <div class="af-chip-item" data-af="perpetrator">Perpetrator</div>
+              <div class="af-chip-item" data-af="sector">Sector</div>
+              <div class="af-chip-item" data-af="severity">Severity</div>
+              <div class="af-chip-item" data-af="status">Status</div>
+            </div>
+            <div class="af-divider"></div>
+          </div>
+          <div class="af-group-wrap" data-ct="News & Social">
+            <div class="af-group-header collapsed"><span class="af-group-label">News &amp; Social</span><i class="fa-solid fa-chevron-down af-group-chevron"></i></div>
+            <div class="af-group-body collapsed">
+              <div class="af-chip-item" data-af="countryFocus">Country of Focus</div>
+              <div class="af-chip-item" data-af="countryOrigin">Country of Origin</div>
+              <div class="af-chip-item" data-af="emotion">Emotions</div>
+              <div class="af-chip-item" data-af="language">Language</div>
+              <div class="af-chip-item" data-af="misinformation">Misinformation Susceptibility</div>
+              <div class="af-chip-item" data-af="sourceReliability">Reliability</div>
+              <div class="af-chip-item" data-af="sensitive">Sensitive</div>
+              <div class="af-chip-item" data-af="sentiment">Sentiment</div>
+              <div class="af-chip-item" data-af="socialAuthenticity">Social Authenticity</div>
+              <div class="af-chip-item" data-af="socialNumbers">Social Numbers</div>
+              <div class="af-chip-item" data-af="sourcePlatform">Source Platform</div>
+              <div class="af-chip-item" data-af="sourceType">Source Type</div>
+            </div>
+            <div class="af-divider"></div>
+          </div>
+          <div class="af-group-wrap" data-ct="Risk Rating Changes,Evacuation Changes">
+            <div class="af-group-header collapsed"><span class="af-group-label">Risk Rating / Evacuation Changes</span><i class="fa-solid fa-chevron-down af-group-chevron"></i></div>
+            <div class="af-group-body collapsed">
+              <div class="af-chip-item" data-af="riskDirection">Direction</div>
+              <div class="af-chip-item" data-af="riskType">Risk Type</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <span class="results-inline" id="resultsInline" hidden>10,000 Results</span>
+    </div>
+
+    <!-- Applied chips (real) -->
+    <div class="applied-chips-row" id="appliedChipsRow"></div>
+
+    <!-- Demo chips shown for states 2–4 -->
+    <div class="applied-chips-row" id="demoChipsRow" hidden>
+      <span class="applied-chip"><span class="applied-chip-cat">Date</span><span class="applied-chip-sep">·</span>Last 30 days<button class="applied-chip-remove"><i class="fa-solid fa-xmark"></i></button></span>
+      <span class="applied-chip"><span class="applied-chip-cat">Location</span><span class="applied-chip-sep">·</span>Middle East<button class="applied-chip-remove"><i class="fa-solid fa-xmark"></i></button></span>
+      <span class="applied-chip"><span class="applied-chip-cat">Location</span><span class="applied-chip-sep">·</span>Africa<button class="applied-chip-remove"><i class="fa-solid fa-xmark"></i></button></span>
+      <span class="applied-chip"><span class="applied-chip-cat">Content Type</span><span class="applied-chip-sep">·</span>Events<button class="applied-chip-remove"><i class="fa-solid fa-xmark"></i></button></span>
+      <span class="applied-chip"><span class="applied-chip-cat">Content Type</span><span class="applied-chip-sep">·</span>Analysis<button class="applied-chip-remove"><i class="fa-solid fa-xmark"></i></button></span>
+    </div>
+  </div>
+
+  </div><!-- /toolbar-card -->
+
+  <!-- Results -->
+  <div class="results-count" id="resultsCount">6 results</div>
+
+  <div class="result-card">
+    <div class="eyebrow">
+      <i class="fa-solid fa-shield-halved ct-icon"></i>
+      <span class="eyebrow-meta">Apr 11, 2025 &bull; Events</span>
+      <span class="status-badge status-verified">Verified</span>
+    </div>
+    <div class="card-title">Armed robbery targeting foreign nationals reported near embassy district in Nairobi</div>
+    <div class="card-meta-row">
+      <div class="loc-pill">🇰🇪 Kenya</div>
+      <span class="sev-tag sev-high">High Severity</span>
+    </div>
+  </div>
+
+  <div class="result-card">
+    <div class="eyebrow">
+      <i class="fa-solid fa-bolt ct-icon"></i>
+      <span class="eyebrow-meta">Apr 10, 2025 &bull; Events</span>
+      <span class="status-badge status-unverified">Unverified</span>
+    </div>
+    <div class="card-title">Power grid instability reported across three provinces in northeastern Brazil following equipment failure</div>
+    <div class="card-meta-row">
+      <div class="loc-pill">🇧🇷 Brazil</div>
+      <span class="sev-tag sev-medium">Medium Severity</span>
+    </div>
+  </div>
+
+  <div class="result-card">
+    <div class="eyebrow">
+      <i class="fa-regular fa-file-lines ct-icon"></i>
+      <span class="eyebrow-meta">Apr 9, 2025 &bull; Analysis</span>
+      <span class="status-badge status-future">Future</span>
+    </div>
+    <div class="card-title">Quarterly risk outlook: Gulf states governance shifts and their impact on regional travel safety</div>
+    <div class="card-meta-row">
+      <div class="loc-pill">🇸🇦 Saudi Arabia</div>
+      <div class="loc-pill">🇦🇪 UAE</div>
+      <div class="loc-more">+3</div>
+      <span class="sev-tag sev-low">Low Severity</span>
+    </div>
+  </div>
+
+  <div class="result-card">
+    <div class="eyebrow">
+      <i class="fa-solid fa-calendar-days ct-icon"></i>
+      <span class="eyebrow-meta">Apr 8, 2025 &bull; Events</span>
+      <span class="status-badge status-breaking">Breaking</span>
+    </div>
+    <div class="card-title">Clashes between security forces and demonstrators reported in central Jakarta; roads blocked</div>
+    <div class="card-meta-row">
+      <div class="loc-pill">🇮🇩 Indonesia</div>
+      <span class="sev-tag sev-high">High Severity</span>
+    </div>
+  </div>
+
+  <div class="result-card">
+    <div class="eyebrow">
+      <i class="fa-solid fa-chart-line ct-icon"></i>
+      <span class="eyebrow-meta">Apr 7, 2025 &bull; Great Power Competition</span>
+      <span class="status-badge status-unverified">Unverified</span>
+    </div>
+    <div class="card-title">Escalation scenario: Red Sea shipping disruption extends into Q3, impacting European energy imports</div>
+    <div class="card-meta-row">
+      <div class="loc-pill">🇾🇪 Yemen</div>
+      <div class="loc-pill">🇸🇦 Saudi Arabia</div>
+      <div class="loc-more">+4</div>
+      <span class="sev-tag sev-medium">Medium Severity</span>
+    </div>
+  </div>
+
+  <div class="result-card">
+    <div class="eyebrow">
+      <i class="fa-solid fa-plane ct-icon"></i>
+      <span class="eyebrow-meta">Apr 6, 2025 &bull; Events</span>
+      <span class="status-badge status-future">Future</span>
+    </div>
+    <div class="card-title">Visa-on-arrival reinstated for 47 nationalities entering Vietnam effective 1 May 2025</div>
+    <div class="card-meta-row">
+      <div class="loc-pill">🇻🇳 Vietnam</div>
+      <span class="sev-tag sev-low">Low Severity</span>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+  const overlay = document.getElementById('overlay');
+  let openDdId = null;
+
+  // Filter selections
+  const sel = { location: new Set(), contentType: new Set(), status: new Set() };
+  const FILTER_DEFS = {
+    // Top-level chip
+    category:           { label: 'Category', nested: true, groups: [
+      { label: 'Events', options: ['Anniversary','Conflict / Military','Crime','Cyber','Disaster','Geopolitical','Health','Holiday','Hostile Communication','Maritime','Official Actions','Political','Sporting / Cultural / Other','Terrorism','Transport','Unrest'] },
+      { label: 'News & Social', options: ['Business','Culture','Diplomacy','Economy','Environment','Human Rights','Military','Politics','Religion','Science','Society','Technology'] },
+    ]},
+    // Events
+    assetType:          { label: 'Asset Type',                   options: ['African union','Agriculture / Processing facility','Airport','Apparel','Army','ATM','Bank branch','Bar','Bridge','Brokerage','Buddhist asset','Bus','Cargo aircraft','Cargo vessel','Cash in transit','Central government','Christian asset','Clinic','Coal plant','Combatant','Commercial aircraft','Community centre','Courthouse','Dam','Educational research facility','Embassy and consulate','EU','Expatriate','Factory','Gas plant','Guard','Hindu asset','Hotel','Hydro plant','Immigrant','Infrastructure','Jewish asset','Laboratory','Land / Property','Legal','Library','Livestock','Local government','Medical research facility','Military aircraft','Military barrack','Military base','Mining site','Ministry','Monument','Museum','Muslim asset','NATO','Nightclub','Nuclear power plant','Office building','Oil / Gas terminal','Other religious asset','Park','Parliament','Passenger vessel','Personnel','Pipeline','Place of worship','Police station','Policeman','Political party / group','Port / Terminal','Presidential palace','Printed Press','Prison and Detention facility','Public official','Pump station','Pylon / Wire','Radio tower / Antenna','Railway station','Railway track','Refinery','Refugee','Residence','Restaurant','Road','School','Shop / Store','Shopping Mall','Sikh asset','Solar plant','Soldier','Square','Stadium','Stock exchange','Sub-Station','Subway','Television','Theatre / Concert hall','Train','Tunnel','UN','University','Unknown','Vehicle','Warehouse','Water supply','Wind Farm',"Women's care clinic",'Zoo'] },
+    attackType:         { label: 'Attack Type',                  options: ['Active Assailant','Airstrike','Arson / Firebomb','Artillery','Assassination','Blockades','Capture','Car bomb','CBRN','Drone','Grenade','Gun (firearm)','Hijacking','Hostage','IED / Homemade','Kidnap','Knife / bladed weapon','Landmine','Letter bomb','MANPAD','Military drone','Missile / Rocket','Mortar','Naval mine','Protest (demonstration)','Riot','Roadside bomb','Robbery','RPG','Sit-in','Sticks / beating','Strike','Suicide bomber','Vandalism','Vehicle ramming'] },
+    locationPrecision:  { label: 'Location Precision',           options: ['Asset / Building','City / Estimated','Country','State / Province','Street / Neighborhood','Unknown / None'] },
+    perpetrator:        { label: 'Perpetrator',                  options: ['Anarchists','Animal rights activists','Anti-capitalists','Armed opposition group','Common criminals','Environmentalists','Ethnic militants','Indigenous activists','Islamist extremists','Labour / Trade unions','Leftist guerrillas','Local community groups','Organised criminals','Religious extremists','Right to life activists','Right-wing extremists','Security forces','Unknown'] },
+    sector:             { label: 'Sector',                       options: ['Agriculture','Aviation','Construction','Education','Entertainment','Financial','Government','Healthcare','Hospitality','International institutions','Law enforcement / Legal','Manufacturing','Marine','Media','Military','Mining',"NGO's",'Oil and Gas','Pharmaceuticals','Power','Private Property','Public spaces','Rail','Religious','Retail','Road','Telecommunications','Unknown'] },
+    severity:           { label: 'Severity',                     options: ['High','Medium','Low'] },
+    status:             { label: 'Status',                       options: ['Future','Unverified','Verified'] },
+    // Analysis & DiscoverAI
+    riskType:           { label: 'Risk Type', nested: true, groups: [
+      { label: 'Political', options: ['Contracts','Foreign Relations','Geopolitical Risk','Institutional','Political Stability','Regulatory Integrity','Sovereignty'] },
+      { label: 'Operational', options: ['Infrastructure','Labor'] },
+      { label: 'Security', options: ['Civil Unrest','Crime','Direct Action','Kidnap','War'] },
+      { label: 'Maritime', options: [] },
+      { label: 'Cyber', options: [] },
+    ]},
+    tags:               { label: 'Tag',                          options: ['Accelerating','Activism','Active','AI / Emerging Technology','Big Picture','China-US Competition','Climate Change','Daily','Dark Web','Deep Web','Decreased','Detention','Disinformation','Energy Issues','EU','Evacuation','Extortion','Global Economy','Global Issue','Increased','Israel-Hamas Conflict','Middle East Conflict','Monthly','Monthly Outlook','New','Open Source Intelligence','Sanctions','Seerist Weekly Report','Social Media Intelligence','Taiwan Geopolitics','Ukraine Crisis','US Elections','Weekly'] },
+    // News & Social
+    countryFocus:       { label: 'Country of Focus',             options: ['Afghanistan','Algeria','Australia','Brazil','Canada','China','Egypt','France','Germany','India','Indonesia','Iran','Iraq','Israel','Italy','Japan','Jordan','Kenya','Malaysia','Mexico','Nigeria','Pakistan','Poland','Russia','Saudi Arabia','Singapore','South Korea','Spain','Taiwan','Turkey','Ukraine','United Kingdom','United States','Vietnam'] },
+    countryOrigin:      { label: 'Country of Origin',            options: ['Afghanistan','Algeria','Australia','Brazil','Canada','China','Egypt','France','Germany','India','Indonesia','Iran','Iraq','Israel','Italy','Japan','Jordan','Kenya','Malaysia','Mexico','Nigeria','Pakistan','Poland','Russia','Saudi Arabia','Singapore','South Korea','Spain','Taiwan','Turkey','Ukraine','United Kingdom','United States','Vietnam'] },
+    emotion:            { label: 'Emotions',                     options: ['Anger','Disgust','Fear','Joy','Sadness','Surprise','(not set)'] },
+    language:           { label: 'Language',                     options: ['Arabic','Chinese','English','French','German','Hebrew','Hindi','Indonesian','Japanese','Malay','Persian','Portuguese','Russian','Spanish','Turkish','Ukrainian','Urdu'] },
+    misinformation:     { label: 'Misinformation Susceptibility',options: ['Issue Specific','Select all'] },
+    sourceReliability:  { label: 'Reliability',                  options: ['High','Medium','Low','Unrated'] },
+    sensitive:          { label: 'Sensitive',                    options: ['Yes','No'] },
+    sentiment:          { label: 'Sentiment',                    options: ['Negative','Neutral','Positive'] },
+    socialAuthenticity: { label: 'Social Authenticity',          options: ['Authentic','Inauthentic','(Not set)'] },
+    socialNumbers:      { label: 'Social Numbers',               options: ['High >100k','Medium 10–100k','Low <10k'] },
+    sourcePlatform:     { label: 'Source Platform',              options: ['4chan','Bluesky','Discord','Facebook','Gettr','Instagram','LinkedIn','Mastodon','Parler','Reddit','Rumble','Telegram','TikTok','Truth Social','Tumblr','VK','WeChat','WhatsApp','X (Twitter)','YouTube'] },
+    sourceType:         { label: 'Source Type',                  options: ['Academic / Think Tank','Activist / Extremist','Forum','Humanitarian','Journalistic','Labor Union','Official / Government','Other','Political','State-Controlled Media'] },
+    // Risk Rating Changes / Evacuation Changes
+    riskDirection:      { label: 'Direction',                    options: ['Increased','Decreased'] },
+  };
+  Object.keys(FILTER_DEFS).forEach(k => { sel[k] = new Set(); });
+
+  function closeDd() {
+    if (!openDdId) return;
+    const prev = document.getElementById(openDdId);
+    if (prev) { prev.classList.remove('visible'); prev.style.display = ''; }
+    document.querySelectorAll('.chip.open, .add-filter-btn.open, .dyn-applied-chip.open').forEach(el => el.classList.remove('open'));
+    document.getElementById('dd-loc-trigger')?.classList.remove('open');
+    document.querySelectorAll('.asset-dd.open').forEach(t => t.classList.remove('open'));
+    openDdId = null;
+  }
+  function openDd(ddId, triggerEl) {
+    if (openDdId === ddId) { closeDd(); return; }
+    if (openDdId) closeDd();
+    const dd = document.getElementById(ddId);
+    if (!dd) return;
+    dd.style.display = 'block';
+    if (triggerEl) {
+      const r = triggerEl.getBoundingClientRect();
+      dd.style.position = 'fixed';
+      dd.style.top = (r.bottom + 4) + 'px';
+      dd.style.left = r.left + 'px';
+      dd.style.zIndex = '9999';
+    }
+    dd.classList.add('visible');
+    triggerEl?.classList.add('open');
+    openDdId = ddId;
+  }
+
+  document.addEventListener('click', e => {
+    if (!openDdId) return;
+    if (!e.target.closest('.chip') && !e.target.closest('.add-filter-btn') && !e.target.closest('.dd-trigger') && !e.target.closest('.dropdown') && !e.target.closest('.dyn-applied-chip')) closeDd();
+  });
+  document.querySelectorAll('.dropdown').forEach(dd => dd.addEventListener('click', e => e.stopPropagation()));
+  document.getElementById('dd-location').addEventListener('click', e => e.stopPropagation());
+  overlay.addEventListener('click', closeDd);
+
+  // Move static chip dropdowns to body so they aren't clipped by the chip's inline-flex stacking context
+  document.querySelectorAll('.chip > .dropdown').forEach(dd => document.body.appendChild(dd));
+
+  // Add Filter trigger
+  document.getElementById('addFilterBtn').addEventListener('click', function(e) { e.stopPropagation(); openDd('dd-addFilter', this); });
+
+  document.getElementById('category-search').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('#category-options .ms-option').forEach(o => {
+      o.style.display = o.querySelector('.ms-option-label').textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+    document.querySelectorAll('#category-options .ms-nested-group-header').forEach(h => {
+      const sibs = [];
+      let s = h.nextElementSibling;
+      while (s && !s.classList.contains('ms-nested-group-header')) { sibs.push(s); s = s.nextElementSibling; }
+      h.style.display = sibs.some(el => el.style.display !== 'none') ? '' : 'none';
+    });
+  });
+
+  document.querySelectorAll('.af-group-header').forEach(header => {
+    header.addEventListener('click', function(e) {
+      e.stopPropagation();
+      this.classList.toggle('collapsed');
+      this.nextElementSibling.classList.toggle('collapsed');
+    });
+  });
+
+  // Inject option counts into af-chip-items
+  document.querySelectorAll('.af-chip-item[data-af]').forEach(item => {
+    const def = FILTER_DEFS[item.dataset.af];
+    if (!def) return;
+    const count = def.nested && def.groups
+      ? def.groups.reduce((s, g) => s + g.options.length, 0)
+      : (def.options || []).length;
+    item.insertAdjacentHTML('beforeend', `<span class="af-chip-option-count">${count} options</span>`);
+  });
+
+  // Content-type → Add Filter panel filtering
+  const CT_GROUP_MAP = {
+    'DiscoverAI':          ['DiscoverAI'],
+    'Events':              ['Events'],
+    'Analysis':            ['Analysis'],
+    'News & Social':       ['News & Social'],
+    'Risk Rating Changes': ['Risk Rating Changes,Evacuation Changes'],
+    'Evacuation Changes':  ['Risk Rating Changes,Evacuation Changes'],
+  };
+  function filterAddPanel() {
+    const active = sel.contentType;
+    document.querySelectorAll('.af-group-wrap').forEach(wrap => {
+      if (active.size === 0) { wrap.hidden = false; return; }
+      const cts = wrap.dataset.ct.split(',');
+      wrap.hidden = !cts.some(ct => active.has(ct));
+    });
+  }
+
+  // Location dd-trigger toggle
+  document.getElementById('dd-loc-trigger').addEventListener('click', function(e) {
+    e.stopPropagation();
+    const isOpen = this.classList.contains('open');
+    closeDd();
+    if (!isOpen) { this.classList.add('open'); openDdId = 'dd-loc-open'; }
+  });
+
+  // Date: from/to inputs
+  function fmtDate(val) {
+    if (!val) return null;
+    const d = new Date(val + 'T00:00:00');
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+  document.getElementById('date-from').addEventListener('change', function() {
+    const lbl = document.getElementById('date-from-label');
+    const btn = document.getElementById('date-from-btn');
+    lbl.textContent = fmtDate(this.value) || 'Start Date';
+    btn.classList.toggle('has-val', !!this.value);
+    updateDateChip();
+  });
+  document.getElementById('date-to').addEventListener('change', function() {
+    const lbl = document.getElementById('date-to-label');
+    const btn = document.getElementById('date-to-btn');
+    lbl.textContent = fmtDate(this.value) || 'End Date';
+    btn.classList.toggle('has-val', !!this.value);
+    updateDateChip();
+  });
+
+  // Date preset chips
+  document.querySelectorAll('.date-chip').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      // Clear manual dates
+      document.getElementById('date-from').value = '';
+      document.getElementById('date-from-label').textContent = 'Start Date';
+      document.getElementById('date-from-btn').classList.remove('has-val');
+      document.getElementById('date-to').value = '';
+      document.getElementById('date-to-label').textContent = 'End Date';
+      document.getElementById('date-to-btn').classList.remove('has-val');
+      updateDateChip(el.dataset.val);
+    });
+  });
+
+  function setChipVal(key, label) {
+    const sep = document.getElementById(`${key}-sep`);
+    const val = document.getElementById(`${key}-val`);
+    if (sep) sep.hidden = !label;
+    if (val) val.textContent = label || '';
+  }
+
+  function updateDateChip(preset) {
+    const chip = document.getElementById('chip-date');
+    const countEl = document.getElementById('date-count');
+    const from = document.getElementById('date-from').value;
+    const to = document.getElementById('date-to').value;
+    let label = preset || null;
+    if (!label && (from || to)) label = [fmtDate(from), fmtDate(to)].filter(Boolean).join(' → ');
+    if (label) {
+      countEl.textContent = '1';
+      chip.classList.add('filtered');
+      setChipVal('date', label);
+      if (currentState === 1) switchState(2); else if (currentState === 3) switchState(4);
+      setAppliedChip('date', label, () => {
+        chip.classList.remove('filtered');
+        setChipVal('date', null);
+        countEl.textContent = '';
+        document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('active'));
+        document.getElementById('date-from').value = '';
+        document.getElementById('date-from-label').textContent = 'Start Date';
+        document.getElementById('date-from-btn').classList.remove('has-val');
+        document.getElementById('date-to').value = '';
+        document.getElementById('date-to-label').textContent = 'End Date';
+        document.getElementById('date-to-btn').classList.remove('has-val');
+      }, 'Date', () => openDd('dd-date', chip));
+    } else {
+      countEl.textContent = '';
+      chip.classList.remove('filtered');
+      setChipVal('date', null);
+      removeAppliedChip('date');
+    }
+  }
+
+  // Apply To toggle
+  document.getElementById('applyToHeader').addEventListener('click', e => {
+    e.stopPropagation();
+    const opts = document.getElementById('applyToOptions');
+    const val = document.getElementById('applyToVal');
+    opts.classList.toggle('open');
+    val.classList.toggle('open');
+  });
+  document.querySelectorAll('input[name="applyTo"]').forEach(r => {
+    r.addEventListener('change', function() {
+      const labels = { eventDate: 'Event Date', firstPublished: 'First Published', lastPublished: 'Last Published' };
+      document.getElementById('applyToVal').innerHTML = `${labels[this.value]} <i class="fa-solid fa-chevron-down"></i>`;
+    });
+  });
+
+  // Multi-select checkboxes
+  document.querySelectorAll('input[data-filter]').forEach(cb => {
+    cb.addEventListener('change', function() {
+      const key = this.dataset.filter;
+      const val = this.dataset.val;
+      if (this.checked) sel[key].add(val); else sel[key].delete(val);
+      updateChipCount(key);
+      if (key === 'contentType') filterAddPanel();
+    });
+  });
+
+  // Applied chips row
+  const appliedRow = document.getElementById('appliedChipsRow');
+  const appliedMap = {}; // key → { el, onRemove }
+
+  function setAppliedChip(key, label, onRemove, categoryLabel, onOpen) {
+    removeAppliedChip(key);
+    const el = document.createElement('span');
+    el.className = 'applied-chip' + (onOpen ? ' applied-chip-editable' : '');
+    el.dataset.key = key;
+    const display = categoryLabel
+      ? `<span class="applied-chip-cat">${categoryLabel}</span><span class="applied-chip-sep">·</span>${label}`
+      : label;
+    el.innerHTML = `${display}<button class="applied-chip-remove"><i class="fa-solid fa-xmark"></i></button>`;
+    el.querySelector('.applied-chip-remove').addEventListener('click', e => {
+      e.stopPropagation();
+      onRemove();
+      removeAppliedChip(key);
+    });
+    if (onOpen) {
+      el.addEventListener('click', e => {
+        if (e.target.closest('.applied-chip-remove')) return;
+        onOpen();
+      });
+    }
+    appliedMap[key] = el;
+    appliedRow.appendChild(el);
+    appliedRow.classList.add('visible');
+  }
+
+  function removeAppliedChip(key) {
+    if (appliedMap[key]) { appliedMap[key].remove(); delete appliedMap[key]; }
+    if (!Object.keys(appliedMap).length) appliedRow.classList.remove('visible');
+  }
+
+  function updateChipCount(key) {
+    const chip = document.getElementById(`chip-${key}`);
+    const countEl = document.getElementById(`${key}-count`);
+    if (!chip) return;
+
+    const items = [...(sel[key] || [])];
+
+    const grouped = items.length === 1 ? items[0]
+      : items.length === 2 ? items.join(', ')
+      : `${items[0]} +${items.length - 1}`;
+
+    if (items.length) {
+      if (countEl) countEl.textContent = items.length;
+      chip.classList.add('filtered');
+      setChipVal(key, grouped);
+      if (currentState === 1) switchState(2); else if (currentState === 3) switchState(4);
+      const catLabel = key === 'category' ? 'Category' : 'Content Type';
+      const ddId = key === 'category' ? 'dd-category' : 'dd-contentType';
+      setAppliedChip(key, grouped, () => {
+        sel[key]?.forEach(val => {
+          const cb = document.querySelector(`input[data-filter="${key}"][data-val="${val}"]`);
+          if (cb) cb.checked = false;
+        });
+        sel[key]?.clear();
+        chip.classList.remove('filtered');
+        setChipVal(key, null);
+        if (countEl) countEl.textContent = '';
+        if (key === 'contentType') filterAddPanel();
+      }, catLabel, () => openDd(ddId, chip));
+    } else {
+      if (countEl) countEl.textContent = '';
+      chip.classList.remove('filtered');
+      setChipVal(key, null);
+      removeAppliedChip(key);
+      if (key === 'contentType') filterAddPanel();
+    }
+  }
+
+  // Add filter: create dynamic chip with inline multi-select
+  document.querySelectorAll('.af-chip-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const key = this.dataset.af;
+      const def = FILTER_DEFS[key];
+      if (!def) return;
+      const chipId = `dchip-${key}`;
+      if (this.classList.contains('active')) {
+        document.getElementById(chipId)?.remove();
+        this.classList.remove('active');
+        syncActiveFiltersRow();
+      } else {
+        closeDd();
+        if (!document.getElementById(chipId)) createDynamicChip(key, def, chipId);
+        this.classList.add('active');
+        syncActiveFiltersRow();
+        // Open the chip's value picker so it's immediately visible
+        const newChip = document.getElementById(chipId);
+        if (newChip) openDd(`dd-dyn-${key}`, newChip);
+      }
+    });
+  });
+
+  function syncActiveFiltersRow() {
+    const n = document.querySelectorAll('.dyn-applied-chip').length;
+    const badge = document.getElementById('af-badge');
+    badge.textContent = n;
+    badge.style.display = n > 0 ? 'inline-flex' : 'none';
+    if (n > 0) { if (currentState === 1) switchState(2); else if (currentState === 3) switchState(4); }
+  }
+
+  function fakeCount(str) {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+    return ((Math.abs(h) % 38000) + 200).toLocaleString();
+  }
+
+
+  function createDynamicChip(key, def, chipId) {
+    const chip = document.createElement('div');
+    chip.className = 'applied-chip dyn-applied-chip';
+    chip.id = chipId;
+    const ddId = `dd-dyn-${key}`;
+
+    const renderOpts = opts => opts.map(o =>
+      `<label class="ms-option" style="display:flex;align-items:center;">
+        <input type="checkbox" />
+        <span class="ms-option-label">${o}</span>
+        <span class="ms-option-result">${fakeCount(key + o)}</span>
+      </label>`
+    ).join('');
+    const renderChildOpts = (opts, gi) => opts.map(o =>
+      `<label class="ms-option" style="display:flex;align-items:center;">
+        <input type="checkbox" class="child-cb" data-gi="${gi}" />
+        <span class="ms-option-label">${o}</span>
+        <span class="ms-option-result">${fakeCount(key + o)}</span>
+      </label>`
+    ).join('');
+    const optsHtml = def.nested && def.groups
+      ? def.groups.map((g, gi) =>
+          g.options.length === 0
+            ? `<label class="ms-option" style="display:flex;align-items:center;">
+                <input type="checkbox" class="child-cb" data-gi="${gi}" />
+                <span class="ms-option-label">${g.label}</span>
+                <span class="ms-option-result">${fakeCount(key + g.label)}</span>
+               </label>`
+            : `<label class="ms-option ms-group-parent" style="display:flex;align-items:center;">
+                <input type="checkbox" class="parent-cb" data-gi="${gi}" />
+                <span class="ms-option-label">${g.label}</span>
+                <span class="ms-option-result">${fakeCount(key + g.label)}</span>
+               </label>
+               <div class="ms-group-children" data-gi="${gi}">
+                 ${renderChildOpts(g.options, gi)}
+               </div>`
+        ).join('')
+      : renderOpts(def.options || []);
+
+    chip.innerHTML = `
+      <span class="applied-chip-cat">${def.label}</span>
+      <span class="applied-chip-sep">·</span>
+      <span class="dyn-chip-val empty" id="${key}-dval">Select value</span>
+      <button class="applied-chip-remove" id="dremove-${key}"><i class="fa-solid fa-xmark"></i></button>
+      <div class="dropdown" id="${ddId}" style="min-width:260px; max-height:380px; overflow-y:auto; top: calc(100% + 6px); left: 0;">
+        <div class="ms-search-wrap" style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
+          <div class="ms-search-inner" style="flex:1;">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Search ${def.label.toLowerCase()}…" />
+          </div>
+          <button class="ms-clear-all dyn-clear-btn" style="flex-shrink:0;">Clear</button>
+        </div>
+        <div class="ms-options">${optsHtml}</div>
+      </div>`;
+
+    // Append to applied chips row
+    const appliedRow = document.getElementById('appliedChipsRow');
+    appliedRow.appendChild(chip);
+    appliedRow.classList.add('visible');
+
+    chip.addEventListener('click', function(e) {
+      if (e.target.closest('.applied-chip-remove')) return;
+      e.stopPropagation();
+      openDd(ddId, chip);
+    });
+    chip.querySelector('.dropdown').addEventListener('click', e => e.stopPropagation());
+    chip.querySelector('.applied-chip-remove').addEventListener('click', e => {
+      e.stopPropagation();
+      chip.remove();
+      document.querySelector(`.af-chip-item[data-af="${key}"]`)?.classList.remove('active');
+      closeDd();
+      syncActiveFiltersRow();
+      if (!appliedRow.querySelector('.applied-chip')) appliedRow.classList.remove('visible');
+    });
+
+    function updateDynChipLabel() {
+      const selector = (def.nested && def.groups) ? '.child-cb:checked' : '.ms-option input:checked';
+      const checked = [...chip.querySelectorAll(selector)]
+        .map(i => i.closest('.ms-option').querySelector('.ms-option-label').textContent);
+      const valEl = chip.querySelector(`#${key}-dval`);
+      if (checked.length === 0) {
+        valEl.textContent = 'Select value';
+        valEl.classList.add('empty');
+      } else {
+        const shown = checked.slice(0, 2).join(', ');
+        const extra = checked.length > 2 ? ` +${checked.length - 2}` : '';
+        valEl.textContent = shown + extra;
+        valEl.classList.remove('empty');
+      }
+    }
+
+    // Parent-child checkbox sync for nested filters (e.g. Risk Type)
+    if (def.nested && def.groups) {
+      def.groups.forEach((g, gi) => {
+        if (g.options.length === 0) {
+          const cb = chip.querySelector(`.child-cb[data-gi="${gi}"]`);
+          if (cb) cb.addEventListener('change', () => updateDynChipLabel());
+          return;
+        }
+        const parentCb = chip.querySelector(`.parent-cb[data-gi="${gi}"]`);
+        const childrenWrap = chip.querySelector(`.ms-group-children[data-gi="${gi}"]`);
+        if (!parentCb || !childrenWrap) return;
+        const childCbs = [...childrenWrap.querySelectorAll('.child-cb')];
+        function syncParent() {
+          const n = childCbs.filter(c => c.checked).length;
+          parentCb.checked = n === childCbs.length;
+          parentCb.indeterminate = n > 0 && n < childCbs.length;
+        }
+        parentCb.addEventListener('change', function() {
+          childCbs.forEach(c => { c.checked = this.checked; });
+          updateDynChipLabel();
+        });
+        childCbs.forEach(cb => cb.addEventListener('change', () => { syncParent(); updateDynChipLabel(); }));
+      });
+    } else {
+      chip.querySelectorAll('.ms-option input').forEach(cb => cb.addEventListener('change', () => updateDynChipLabel()));
+    }
+
+    chip.querySelector('.dyn-clear-btn').addEventListener('click', e => {
+      e.stopPropagation();
+      chip.querySelectorAll('.ms-option input').forEach(cb => { cb.checked = false; cb.indeterminate = false; });
+      chip.querySelector('.ms-search-inner input').value = '';
+      chip.querySelectorAll('.ms-option, .ms-group-children').forEach(o => o.style.display = '');
+      updateDynChipLabel();
+    });
+
+    chip.querySelector('.ms-search-inner input').addEventListener('input', function() {
+      const q = this.value.toLowerCase();
+      if (def.nested && def.groups) {
+        def.groups.forEach((g, gi) => {
+          const wrap = chip.querySelector(`.ms-group-children[data-gi="${gi}"]`);
+          const parentRow = chip.querySelector(`.parent-cb[data-gi="${gi}"]`)?.closest('.ms-option');
+          let anyVisible = false;
+          wrap.querySelectorAll('.ms-option').forEach(o => {
+            const match = !q || o.querySelector('.ms-option-label').textContent.toLowerCase().includes(q);
+            o.style.display = match ? '' : 'none';
+            if (match) anyVisible = true;
+          });
+          if (parentRow) parentRow.style.display = anyVisible || !q ? '' : 'none';
+          wrap.style.display = anyVisible || !q ? '' : 'none';
+        });
+      } else {
+        chip.querySelectorAll('.ms-option').forEach(o => {
+          o.style.display = o.querySelector('.ms-option-label').textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+      }
+    });
+  }
+
+  // Location dd-variant
+  function syncLocationChip() {
+    const trigger = document.getElementById('dd-loc-trigger');
+    const badge = document.getElementById('location-count');
+    const items = [...sel.location];
+    if (items.length) {
+      badge.textContent = items.length;
+      badge.style.display = '';
+      trigger.classList.add('active');
+      if (currentState === 1) switchState(2); else if (currentState === 3) switchState(4);
+      const grouped = items.length === 1 ? items[0]
+        : items.length === 2 ? items.join(', ')
+        : `${items[0]} +${items.length - 1}`;
+      setAppliedChip('location', grouped, () => {
+        sel.location.clear();
+        document.querySelectorAll('#dd-location .geo-item.selected').forEach(i => i.classList.remove('selected'));
+        updateLocFooter();
+        syncLocationChip();
+      }, 'Location', () => {
+        const isOpen = trigger.classList.contains('open');
+        closeDd();
+        if (!isOpen) { trigger.classList.add('open'); openDdId = 'dd-loc-open'; }
+      });
+    } else {
+      badge.style.display = 'none';
+      badge.textContent = '';
+      trigger.classList.remove('active');
+      removeAppliedChip('location');
+    }
+  }
+
+  function updateLocFooter() {
+    const n = sel.location.size;
+    const count = document.getElementById('loc-selected-count');
+    const clearBtn = document.getElementById('loc-clear-btn');
+    const badge = document.getElementById('geo-tab-badge');
+    if (count) { count.style.display = n ? '' : 'none'; count.textContent = `${n} selected`; }
+    if (clearBtn) clearBtn.style.display = n ? '' : 'none';
+    if (badge) { badge.style.display = n ? '' : 'none'; badge.textContent = n; }
+    document.querySelector('#pane-geographies .geo-footer')?.classList.toggle('active', n > 0);
+  }
+
+  // Location top-level tab switching
+  document.querySelectorAll('.geo-tab').forEach(tab => {
+    tab.addEventListener('click', function(e) {
+      e.stopPropagation();
+      document.querySelectorAll('.geo-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.geo-tab-pane').forEach(p => p.classList.remove('active'));
+      this.classList.add('active');
+      document.getElementById('pane-' + this.dataset.pane)?.classList.add('active');
+    });
+  });
+
+  document.querySelectorAll('#dd-location .geo-item').forEach(item => {
+    item.addEventListener('click', function() {
+      const val = this.dataset.val;
+      if (this.classList.contains('selected')) {
+        this.classList.remove('selected');
+        sel.location.delete(val);
+      } else {
+        this.classList.add('selected');
+        sel.location.add(val);
+      }
+      updateLocFooter();
+      syncLocationChip();
+    });
+  });
+
+  document.getElementById('loc-search').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('#pane-geographies .geo-item').forEach(item => {
+      item.style.display = item.querySelector('.geo-label').textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  });
+
+  document.getElementById('loc-clear-btn').addEventListener('click', function(e) {
+    e.stopPropagation();
+    document.querySelectorAll('#dd-location .geo-item.selected').forEach(i => i.classList.remove('selected'));
+    sel.location.clear();
+    updateLocFooter();
+    syncLocationChip();
+  });
+
+  // Asset nested dd-triggers
+  const assetSel = { type: new Set(), country: new Set() };
+
+  document.querySelectorAll('.asset-dd').forEach(trigger => {
+    trigger.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const isOpen = this.classList.contains('open');
+      document.querySelectorAll('.asset-dd').forEach(t => t.classList.remove('open'));
+      if (!isOpen) this.classList.add('open');
+    });
+  });
+  document.querySelectorAll('.asset-dd .dd-menu').forEach(m => m.addEventListener('click', e => e.stopPropagation()));
+
+  // Close asset nested dropdowns when clicking elsewhere inside location menu
+  document.getElementById('pane-assets')?.addEventListener('click', function(e) {
+    if (!e.target.closest('.asset-dd')) document.querySelectorAll('.asset-dd.open').forEach(t => t.classList.remove('open'));
+  });
+
+  document.querySelectorAll('[data-asset-type]').forEach(item => {
+    item.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const val = this.dataset.assetType;
+      this.classList.toggle('active');
+      if (this.classList.contains('active')) assetSel.type.add(val); else assetSel.type.delete(val);
+      syncAssetFilter('type');
+    });
+  });
+
+  document.querySelectorAll('[data-asset-country]').forEach(item => {
+    item.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const val = this.dataset.assetCountry;
+      this.classList.toggle('active');
+      if (this.classList.contains('active')) assetSel.country.add(val); else assetSel.country.delete(val);
+      syncAssetFilter('country');
+    });
+  });
+
+  function syncAssetFilter(dim) {
+    const badge = document.getElementById(`asset-${dim}-badge`);
+    const n = assetSel[dim].size;
+    if (badge) { badge.textContent = n; badge.style.display = n ? '' : 'none'; }
+    const trigger = document.getElementById(`dd-asset-${dim}`);
+    if (trigger) trigger.classList.toggle('active', n > 0);
+    filterAssetList();
+  }
+
+  function filterAssetList() {
+    document.querySelectorAll('#asset-list .result-item').forEach(item => {
+      const [itemType, itemCountry] = item.querySelector('.result-meta').textContent.split(' · ').map(s => s.trim());
+      const typeOk = assetSel.type.size === 0 || assetSel.type.has(itemType);
+      const countryOk = assetSel.country.size === 0 || assetSel.country.has(itemCountry);
+      item.style.display = (typeOk && countryOk) ? '' : 'none';
+    });
+    const visible = [...document.querySelectorAll('#asset-list .result-item')].filter(i => i.style.display !== 'none');
+    const lbl = document.getElementById('asset-count-label');
+    if (lbl) lbl.textContent = `· ${visible.length} result${visible.length !== 1 ? 's' : ''}`;
+  }
+
+  // Asset results
+  function updateAssetUI() {
+    const items = [...document.querySelectorAll('#asset-list .result-item')];
+    const n = items.filter(i => i.classList.contains('selected')).length;
+    const countEl = document.getElementById('asset-selected-count');
+    const clearBtn = document.getElementById('asset-clear-btn');
+    const allRow = document.getElementById('asset-select-all');
+    if (countEl) { countEl.style.display = n ? '' : 'none'; countEl.textContent = `${n} selected`; }
+    if (clearBtn) clearBtn.style.display = n ? '' : 'none';
+    if (allRow) {
+      allRow.classList.toggle('all-sel', n === items.length && n > 0);
+      allRow.classList.toggle('partial', n > 0 && n < items.length);
+    }
+    updateLocFooter();
+  }
+
+  document.querySelectorAll('#asset-list .result-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const val = this.dataset.val;
+      if (this.classList.contains('selected')) {
+        this.classList.remove('selected'); sel.location.delete(val);
+      } else {
+        this.classList.add('selected'); sel.location.add(val);
+      }
+      updateAssetUI(); syncLocationChip();
+    });
+  });
+
+  document.getElementById('asset-select-all')?.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const items = document.querySelectorAll('#asset-list .result-item');
+    const allSel = [...items].every(i => i.classList.contains('selected'));
+    items.forEach(item => {
+      if (allSel) { item.classList.remove('selected'); sel.location.delete(item.dataset.val); }
+      else { item.classList.add('selected'); sel.location.add(item.dataset.val); }
+    });
+    updateAssetUI(); syncLocationChip();
+  });
+
+  document.getElementById('asset-clear-btn')?.addEventListener('click', function(e) {
+    e.stopPropagation();
+    document.querySelectorAll('#asset-list .result-item.selected').forEach(i => {
+      i.classList.remove('selected'); sel.location.delete(i.dataset.val);
+    });
+    updateAssetUI(); syncLocationChip();
+  });
+
+  document.getElementById('asset-search')?.addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('#asset-list .result-item').forEach(item => {
+      item.style.display = item.querySelector('.result-name').textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  });
+
+  // Card active state
+  document.querySelectorAll('.result-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.result-card.active').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+    });
+  });
+
+  // ── Toolbar interactivity ──
+  const savedStates   = document.querySelectorAll('.saved-state');
+  const resultsInline = document.getElementById('resultsInline');
+  const demoChips     = document.getElementById('demoChipsRow');
+  const savedDdPanel  = document.getElementById('savedDdPanel');
+  const savedDdSearch = document.getElementById('savedDdSearch');
+  const searchInput   = document.querySelector('.search-input');
+  let currentState    = 1;
+
+  function switchState(n) {
+    currentState = n;
+    const s = String(n);
+    savedStates.forEach(el => { el.hidden = el.dataset.state !== s; });
+    const hasResults = n !== 1;
+    resultsInline.hidden = !hasResults;
+    demoChips.hidden = !hasResults;
+  }
+
+  function resetAll() {
+    closeDd();
+    closeSavedDd();
+
+    // Clear search input
+    if (searchInput) searchInput.value = '';
+
+    // Uncheck all filter checkboxes
+    document.querySelectorAll('input[data-filter]').forEach(cb => { cb.checked = false; });
+
+    // Clear all sel sets
+    Object.keys(sel).forEach(k => sel[k].clear());
+
+    // Clear date presets + inputs
+    document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('active'));
+    ['date-from','date-to'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    document.getElementById('date-from-label').textContent = 'Start Date';
+    document.getElementById('date-to-label').textContent = 'End Date';
+    document.getElementById('date-from-btn')?.classList.remove('has-val');
+    document.getElementById('date-to-btn')?.classList.remove('has-val');
+
+    // Reset chip filter bar states
+    ['chip-date','chip-contentType','chip-category'].forEach(id => {
+      document.getElementById(id)?.classList.remove('filtered','open');
+    });
+    ['date','contentType','category'].forEach(k => setChipVal(k, null));
+    document.getElementById('date-count').textContent = '';
+    document.getElementById('contentType-count').textContent = '';
+    document.getElementById('category-count').textContent = '';
+
+    // Clear location
+    document.querySelectorAll('#dd-location .geo-item.selected').forEach(i => i.classList.remove('selected'));
+    document.getElementById('dd-loc-trigger')?.classList.remove('active','open');
+    document.getElementById('location-count').style.display = 'none';
+    document.getElementById('location-count').textContent = '';
+    updateLocFooter();
+
+    // Clear assets
+    document.querySelectorAll('[data-asset-type].active,[data-asset-country].active').forEach(i => i.classList.remove('active'));
+    document.querySelectorAll('#asset-list .result-item.selected').forEach(i => i.classList.remove('selected'));
+    assetSel.type.clear(); assetSel.country.clear();
+    syncAssetFilter('type'); syncAssetFilter('country');
+    updateAssetUI();
+
+    // Remove all applied chips
+    Object.keys(appliedMap).forEach(k => removeAppliedChip(k));
+
+    // Remove all dynamic Add-Filter chips
+    document.querySelectorAll('.dyn-applied-chip').forEach(c => c.remove());
+    document.querySelectorAll('.af-chip-item.active').forEach(i => i.classList.remove('active'));
+    document.getElementById('af-badge').style.display = 'none';
+    document.getElementById('af-badge').textContent = '0';
+
+    // Reset Add Filter panel visibility
+    filterAddPanel();
+
+    switchState(1);
+  }
+
+  function loadSavedSearch(name) {
+    document.querySelectorAll('.saved-name').forEach(el => el.textContent = name);
+    switchState(3);
+    closeSavedDd();
+  }
+
+  function openSavedDd() {
+    savedDdPanel.classList.add('open');
+    savedDdSearch.value = '';
+    // Reset to All tab
+    document.querySelectorAll('.saved-dd-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector('.saved-dd-tab[data-tab="all"]')?.classList.add('active');
+    document.querySelectorAll('.saved-dd-pane').forEach(p => p.hidden = true);
+    const allPane = document.getElementById('saved-pane-all');
+    if (allPane) allPane.hidden = false;
+    document.querySelectorAll('.saved-dd-item').forEach(i => i.style.display = '');
+    savedDdSearch.focus();
+  }
+  function closeSavedDd() { savedDdPanel.classList.remove('open'); }
+  function filterSavedDdItems(q) {
+    const activePane = document.querySelector('.saved-dd-pane:not([hidden])');
+    const scope = activePane || savedDdPanel;
+    scope.querySelectorAll('.saved-dd-item').forEach(item => {
+      item.style.display = item.dataset.name.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+    });
+  }
+
+  // Saved Searches buttons → toggle dropdown
+  document.querySelectorAll('.saved-searches-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      savedDdPanel.classList.contains('open') ? closeSavedDd() : openSavedDd();
+    });
+  });
+
+  // Dropdown filter
+  savedDdSearch.addEventListener('input', () => filterSavedDdItems(savedDdSearch.value));
+
+  // Dropdown item → load saved search (State 3)
+  document.querySelectorAll('.saved-dd-item').forEach(item => {
+    item.addEventListener('click', () => loadSavedSearch(item.dataset.name));
+  });
+
+  // Clear → State 1
+  document.querySelectorAll('.saved-actions').forEach(group => {
+    group.addEventListener('click', e => {
+      const btn = e.target.closest('.saved-btn');
+      if (!btn) return;
+      const t = btn.textContent.trim();
+      if (t === 'Clear') { resetAll(); }
+      else if (t === 'Save') loadSavedSearch('My Saved Search');
+      else if (t === 'Undo Changes') switchState(3);
+      else if (t === 'Save as New') loadSavedSearch('New Saved Search');
+    });
+  });
+
+  // Delete icon → State 1
+  document.querySelectorAll('.saved-icon-btn[title="Delete"]').forEach(btn => {
+    btn.addEventListener('click', () => switchState(1));
+  });
+
+  // × button → clear + State 1
+  document.querySelector('.search-x-btn')?.addEventListener('click', () => { resetAll(); });
+
+  // Search input typing → state transitions
+  searchInput?.addEventListener('input', () => {
+    if (currentState === 1 && searchInput.value.length > 0) switchState(2);
+    else if (currentState === 2 && searchInput.value.length === 0) switchState(1);
+    else if (currentState === 3) switchState(4);
+  });
+
+  // Saved search tab switching
+  document.querySelectorAll('.saved-dd-tab').forEach(tab => {
+    tab.addEventListener('click', function(e) {
+      e.stopPropagation();
+      document.querySelectorAll('.saved-dd-tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      document.querySelectorAll('.saved-dd-pane').forEach(p => p.hidden = true);
+      const pane = document.getElementById(`saved-pane-${this.dataset.tab}`);
+      if (pane) pane.hidden = false;
+      // Re-apply search filter for the new pane
+      filterSavedDdItems(savedDdSearch.value);
+    });
+  });
+
+  // Close dropdown on outside click
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.saved-row')) closeSavedDd();
+  });
+
+  // ── Define on map ──────────────────────────────────────
+  let mapAreaDefined = false;
+  function showMapToast(mode) {
+    const toast = document.getElementById('mapTabToast');
+    const label = mode === 'polygon' ? 'Draw polygon on Map tab' : 'Use current map view';
+    toast.querySelector('.toast-msg').textContent = label + ' — this will switch your active tab.';
+    toast.classList.add('show');
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => toast.classList.remove('show'), 4500);
+    mapAreaDefined = true;
+    document.getElementById('define-map-clear-btn').classList.add('visible');
+  }
+  document.getElementById('define-polygon-btn').addEventListener('click', e => {
+    e.stopPropagation(); closeDd(); showMapToast('polygon');
+  });
+  document.getElementById('define-current-view-btn').addEventListener('click', e => {
+    e.stopPropagation(); closeDd(); showMapToast('current-view');
+  });
+  document.getElementById('define-map-clear-btn').addEventListener('click', e => {
+    e.stopPropagation();
+    mapAreaDefined = false;
+    document.getElementById('define-map-clear-btn').classList.remove('visible');
+  });
+
+  // ── Clear-all buttons ──────────────────────────────────
+  function clearFilterKey(key) {
+    (sel[key] || new Set()).forEach(val => {
+      const cb = document.querySelector(`input[data-filter="${key}"][data-val="${val}"]`);
+      if (cb) cb.checked = false;
+    });
+    if (sel[key]) sel[key].clear();
+    updateChipCount(key);
+    if (key === 'contentType') filterAddPanel();
+  }
+  document.getElementById('clear-contentType').addEventListener('click', e => {
+    e.stopPropagation();
+    clearFilterKey('contentType');
+    clearFilterKey('status');
+  });
+  document.getElementById('clear-category').addEventListener('click', e => {
+    e.stopPropagation();
+    clearFilterKey('category');
+    const catSearch = document.getElementById('category-search');
+    if (catSearch) catSearch.value = '';
+    document.querySelectorAll('#category-options .ms-option').forEach(o => o.style.display = '');
+    document.querySelectorAll('#category-options .ms-nested-group-header').forEach(h => h.style.display = '');
+  });
+
+  // ── Add Filter search ──────────────────────────────────
+  document.getElementById('afSearch').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('.af-group-wrap').forEach(wrap => {
+      if (wrap.hidden) return;
+      let anyVisible = false;
+      wrap.querySelectorAll('.af-chip-item').forEach(item => {
+        const match = !q || item.textContent.toLowerCase().includes(q);
+        item.style.display = match ? '' : 'none';
+        if (match) anyVisible = true;
+      });
+      wrap.querySelector('.af-group-header').style.display = anyVisible ? '' : 'none';
+      const body = wrap.querySelector('.af-group-body');
+      if (!anyVisible) {
+        body.style.display = 'none';
+      } else if (q) {
+        body.style.display = 'block'; // expand collapsed groups when search finds matches
+      } else {
+        body.style.display = ''; // restore CSS/collapsed state when search is cleared
+      }
+    });
+  });
+
+</script>
+
+<div class="map-toast" id="mapTabToast">
+  <i class="fa-solid fa-map-location-dot"></i>
+  <span class="toast-msg"></span>
+</div>
+
+</body>
+</html>

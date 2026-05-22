@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Seerist – Trend View</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --fg-higher: #1e293b; --fg-mid: #64748b; --fg-low: #94a3b8;
+  --bg: #fff; --bg-subtle: #f8fafc; --border: #e2e8f0;
+  --primary: #00A651; --primary-light: #e6f7ee;
+}
+body { font-family: 'Inter', system-ui, sans-serif; font-size: 13px; color: var(--fg-higher); background: #f1f5f9; display: flex; height: 100vh; overflow: hidden; }
+.sidebar { width: 240px; flex-shrink: 0; background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; height: 100%; }
+.sidebar-logo { padding: 14px; border-bottom: 1px solid var(--border); }
+.nav-section { padding: 7px; }
+.nav-heading { display: flex; align-items: center; justify-content: space-between; padding: 9px 10px; font-size: 11px; font-weight: 600; color: var(--fg-low); text-transform: uppercase; letter-spacing:.06em; cursor:pointer; border-radius:6px; }
+.nav-item { display:flex; align-items:center; gap:9px; padding:9px 10px; border-radius:6px; cursor:pointer; color:var(--fg-mid); font-size:13px; }
+.nav-item:hover { background:var(--bg-subtle); color:var(--fg-higher); }
+.nav-item.active { background:var(--primary-light); color:var(--primary); font-weight:600; }
+.nav-item i { font-size:12px; width:14px; text-align:center; }
+.nav-sep { height:1px; background:var(--border); margin:4px 10px; }
+.sidebar-user { margin-top:auto; border-top:1px solid var(--border); padding:12px 14px; display:flex; align-items:center; gap:10px; }
+.user-avatar { width:28px; height:28px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; }
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.top-filters { background:var(--bg); border-bottom:1px solid var(--border); padding:12px 16px; display:flex; flex-direction:column; gap:10px; flex-shrink:0; }
+.filter-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.seg-btn-group { display:flex; border:1px solid var(--border); border-radius:6px; overflow:hidden; }
+.seg-btn { padding:6px 13px; font-size:12px; font-weight:500; background:var(--bg); border:none; cursor:pointer; color:var(--fg-mid); }
+.seg-btn.active { background:var(--bg-subtle); color:var(--fg-higher); font-weight:600; }
+.seg-btn+.seg-btn { border-left:1px solid var(--border); }
+.search-box { flex:1; min-width:180px; display:flex; align-items:center; gap:8px; border:1px solid var(--border); border-radius:6px; padding:0 10px; height:38px; background:var(--bg); }
+.search-box i { color:var(--fg-low); font-size:12px; }
+.search-box input { flex:1; border:none; outline:none; font-size:13px; color:var(--fg-higher); background:transparent; }
+.kw-btn { display:flex; align-items:center; gap:6px; padding:0 12px; height:38px; background:#1e293b; color:#fff; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; }
+.filter-dropdown { position:relative; }
+.filter-btn { display:flex; align-items:center; gap:6px; padding:0 10px; height:33px; border:1px solid var(--border); border-radius:6px; background:var(--bg); font-size:12px; font-weight:500; cursor:pointer; white-space:nowrap; color:var(--fg-higher); }
+.filter-btn:hover, .filter-btn.open { border-color:#94a3b8; }
+.filter-btn .badge { background:var(--primary); color:#fff; border-radius:10px; padding:1px 6px; font-size:10px; font-weight:700; }
+.dropdown-menu { position:absolute; top:calc(100% + 4px); left:0; background:var(--bg); border:1px solid var(--border); border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,.1); z-index:100; min-width:160px; padding:4px; display:none; }
+.dropdown-menu.open { display:block; }
+.dropdown-item { padding:7px 10px; border-radius:6px; cursor:pointer; font-size:12px; color:var(--fg-higher); display:flex; align-items:center; gap:8px; }
+.dropdown-item:hover { background:var(--bg-subtle); }
+.dropdown-item.selected { color:var(--primary); font-weight:600; }
+.dropdown-item.selected::after { content:'✓'; margin-left:auto; }
+.btn-ghost { display:flex; align-items:center; gap:5px; padding:0 12px; height:33px; border:1px solid var(--border); border-radius:6px; background:var(--bg); font-size:12px; font-weight:500; cursor:pointer; color:var(--fg-higher); white-space:nowrap; }
+.btn-primary { background:var(--primary); color:#fff; border:none; border-radius:6px; padding:0 14px; height:33px; font-size:12px; font-weight:600; cursor:pointer; }
+.sep-v { width:1px; height:22px; background:var(--border); }
+.spacer { flex:1; }
+/* CONTENT TYPE TABS */
+.ct-label { font-size:11px; font-weight:600; color:var(--fg-low); white-space:nowrap; }
+.ct-tabs { display:flex; gap:4px; flex-wrap:wrap; }
+.ct-tab { padding:5px 13px; border-radius:20px; border:1px solid var(--border); background:var(--bg); font-size:12px; font-weight:500; cursor:pointer; color:var(--fg-mid); transition:all .12s; white-space:nowrap; }
+.ct-tab:hover { border-color:#94a3b8; color:var(--fg-higher); }
+.ct-tab.active { background:var(--primary); color:#fff; border-color:var(--primary); font-weight:600; }
+/* TABS */
+.view-tabs-bar { background:var(--bg); border-bottom:1px solid var(--border); padding:0 16px; display:flex; align-items:center; flex-shrink:0; }
+.view-tab { display:flex; align-items:center; gap:6px; padding:12px 16px; font-size:13px; font-weight:500; color:var(--fg-mid); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:color .15s; }
+.view-tab:hover { color:var(--fg-higher); }
+.view-tab.active { color:var(--primary); border-bottom-color:var(--primary); font-weight:600; }
+.view-tab i { font-size:12px; }
+.tab-panels { flex:1; overflow:hidden; position:relative; }
+.tab-panel { position:absolute; inset:0; display:none; }
+.tab-panel.active { display:flex; }
+.list-panel { flex-direction:column; overflow-y:auto; padding:16px; gap:8px; }
+.map-panel { background:#e8f0e8; align-items:center; justify-content:center; flex-direction:column; gap:12px; color:var(--fg-mid); }
+.map-panel i { font-size:48px; color:#94a3b8; }
+#panel-trend { flex-direction:row; }
+.split-list { width:340px; flex-shrink:0; border-right:1px solid var(--border); overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:8px; }
+.split-list::-webkit-scrollbar { width:4px; }
+.split-list::-webkit-scrollbar-thumb { background:#e2e8f0; border-radius:4px; }
+.split-charts { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:16px; min-width:0; }
+.split-charts::-webkit-scrollbar { width:4px; }
+.split-charts::-webkit-scrollbar-thumb { background:#e2e8f0; border-radius:4px; }
+#charts-container { display:flex; flex-direction:column; gap:32px; }
+/* RESULT CARD */
+.result-card { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:10px 10px 10px 40px; position:relative; cursor:pointer; transition:border-color .15s; flex-shrink:0; }
+.result-card:hover { border-color:#cbd5e1; }
+.card-icon { position:absolute; left:10px; top:11px; width:22px; height:22px; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:10px; }
+.card-meta { font-size:11px; color:var(--fg-low); margin-bottom:3px; display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+.card-title { font-size:12px; font-weight:500; line-height:1.45; margin-bottom:5px; }
+.card-tags { display:flex; gap:4px; flex-wrap:wrap; }
+.epill { display:inline-flex; align-items:center; gap:3px; padding:1px 6px; border-radius:8px; font-size:10px; font-weight:500; }
+.count-note { text-align:center; padding:10px; font-size:11px; color:var(--fg-low); }
+/* CHART CARD */
+.chart-card { background:var(--bg); border:1px solid var(--border); border-radius:10px; display:flex; flex-direction:column; overflow:hidden; flex-shrink:0; }
+.chart-card.collapsed .chart-body-wrap { display:none; }
+.chart-header { display:flex; align-items:center; justify-content:space-between; padding:12px 14px 10px; gap:10px; flex-wrap:wrap; }
+.chart-title { font-size:14px; font-weight:700; }
+.chart-controls { display:flex; align-items:center; gap:6px; }
+.mode-switcher { display:flex; background:var(--bg-subtle); border:1px solid var(--border); border-radius:8px; padding:2px; gap:2px; }
+.mode-btn { padding:4px 10px; border-radius:6px; font-size:12px; font-weight:500; color:var(--fg-mid); cursor:pointer; border:none; background:transparent; white-space:nowrap; transition:background .15s; }
+.mode-btn.active { background:var(--bg); color:var(--fg-higher); font-weight:600; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+.subtype-switcher { display:flex; border:1px solid var(--border); border-radius:6px; overflow:hidden; }
+.subtype-btn { width:28px; height:26px; display:flex; align-items:center; justify-content:center; background:var(--bg); border:none; cursor:pointer; color:var(--fg-low); font-size:11px; }
+.subtype-btn+.subtype-btn { border-left:1px solid var(--border); }
+.subtype-btn.active { background:var(--bg-subtle); color:var(--fg-higher); }
+.icon-btn { width:28px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:6px; border:none; background:transparent; cursor:pointer; color:var(--fg-low); font-size:12px; }
+.icon-btn:hover { background:var(--bg-subtle); }
+.collapse-btn i { transition:transform .25s; }
+.chart-card.collapsed .collapse-btn i { transform:rotate(180deg); }
+.active-filters { display:flex; align-items:center; gap:6px; padding:7px 14px; flex-wrap:wrap; border-bottom:1px solid var(--border); }
+.active-filters.hidden { display:none; }
+.filter-label { font-size:11px; color:var(--fg-low); font-weight:500; }
+.filter-chip { display:inline-flex; align-items:center; gap:5px; padding:3px 8px 3px 9px; border-radius:10px; font-size:11px; font-weight:600; border:1.5px solid transparent; }
+.filter-chip .chip-x { opacity:.55; cursor:pointer; font-size:9px; margin-left:1px; }
+.filter-chip .chip-x:hover { opacity:1; }
+.clear-btn { font-size:11px; color:var(--fg-low); cursor:pointer; text-decoration:underline; }
+.chart-body-wrap { display:flex; flex-direction:column; }
+.chart-body { display:flex; align-items:center; justify-content:center; transition:opacity .3s; }
+.chart-body.loading { opacity:.4; }
+.chart-body.dist-pie { padding:12px 60px 4px; height:260px; }
+.chart-body.dist-pie canvas { max-height:230px; width:auto !important; }
+.chart-body.dist-bar, .chart-body.ot-bar, .chart-body.ot-line, .chart-body.ot-area { padding:12px 16px 4px; height:200px; }
+.chart-body.dist-bar canvas, .chart-body.ot-bar canvas, .chart-body.ot-line canvas, .chart-body.ot-area canvas { height:100% !important; width:100% !important; }
+.chart-legend { display:flex; align-items:center; justify-content:center; gap:5px; padding:6px 14px 12px; flex-wrap:wrap; }
+.legend-chip { display:inline-flex; align-items:center; gap:5px; padding:3px 9px 3px 8px; border-radius:20px; border:1.5px solid var(--border); background:var(--bg); cursor:pointer; font-size:12px; font-weight:500; color:var(--fg-higher); user-select:none; transition:border-color .12s, opacity .12s; }
+.legend-chip:hover { border-color:#94a3b8; background:var(--bg-subtle); }
+.legend-chip.off { opacity:.35; border-style:dashed; }
+.legend-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.chart-hints { display:flex; align-items:center; justify-content:center; gap:6px; padding:4px 14px 6px; flex-wrap:wrap; }
+.hint-pill { display:inline-flex; align-items:center; gap:4px; font-size:11px; color:var(--fg-low); background:var(--bg-subtle); border-radius:20px; padding:3px 9px; border:1px solid var(--border); white-space:nowrap; }
+/* CHART TYPE TAG */
+.chart-type-tag { display:inline-flex; align-items:center; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; white-space:nowrap; }
+/* CHART META */
+.chart-meta { display:flex; align-items:center; gap:8px; padding:0 14px 10px; flex-wrap:wrap; }
+.chart-meta.hidden { display:none; }
+.spike-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600; }
+.spike-badge.up   { background:#f0fdf4; color:#16a34a; }
+.spike-badge.down { background:#fef2f2; color:#dc2626; }
+.meta-context { display:inline-flex; align-items:center; gap:4px; padding:2px 8px 2px 6px; border-radius:10px; font-size:11px; font-weight:500; background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; white-space:nowrap; }
+.meta-context i { font-size:9px; }
+/* LIST COUNT BAR */
+.list-count-bar { padding:8px 12px 6px; font-size:12px; color:var(--fg-mid); border-bottom:1px solid var(--border); flex-shrink:0; display:flex; align-items:center; background:var(--bg); }
+.list-count-bar strong { color:var(--fg-higher); }
+.list-count-bar.filtered strong { color:var(--primary); }
+/* SENTIMENT SPECIAL */
+.sentiment-body { padding:16px; flex-direction:column; gap:10px; height:auto !important; }
+.sent-bar { display:flex; width:100%; height:48px; border-radius:8px; overflow:hidden; gap:2px; }
+.sent-seg { display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; transition:opacity .2s; min-width:0; gap:2px; }
+.sent-seg.dim { opacity:.3; }
+.sent-label { font-size:11px; font-weight:600; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.3); white-space:nowrap; overflow:hidden; }
+.sent-pct { font-size:10px; color:rgba(255,255,255,.85); }
+/* FILTER-AWAY BANNER */
+.filter-away-banner { display:flex; align-items:center; gap:10px; background:#fffbeb; border:1px solid #fcd34d; border-radius:8px; padding:10px 14px; font-size:12px; color:#92400e; flex-shrink:0; }
+.filter-away-banner i { color:#f59e0b; flex-shrink:0; }
+.filter-away-banner span { flex:1; line-height:1.4; }
+/* TOAST */
+.toast-wrap { position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
+.toast { background:#1e293b; color:#fff; padding:10px 16px; border-radius:8px; font-size:12px; display:flex; align-items:center; gap:10px; box-shadow:0 4px 16px rgba(0,0,0,.2); pointer-events:auto; animation:toastIn .25s ease forwards; }
+.toast.out { animation:toastOut .3s ease forwards; }
+.toast i { color:#94a3b8; }
+.toast .toast-text strong { display:block; margin-bottom:1px; }
+.toast .toast-text span { color:#94a3b8; font-size:11px; }
+@keyframes toastIn  { from{opacity:0;transform:translateY(-12px)} to{opacity:1;transform:translateY(0)} }
+@keyframes toastOut { from{opacity:1;transform:translateY(0)} to{opacity:0;transform:translateY(-8px)} }
+.ctooltip { position:fixed; background:#1e293b; color:#fff; padding:7px 11px; border-radius:8px; font-size:12px; pointer-events:none; z-index:9999; box-shadow:0 4px 16px rgba(0,0,0,.2); display:none; }
+.ctooltip strong { display:block; margin-bottom:2px; }
+.ctooltip span { color:#94a3b8; font-size:11px; }
+</style>
+<style>
+.handoff-toggle{position:fixed;top:0;left:0;right:0;height:48px;background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;gap:4px;z-index:9999;font-family:'Inter',system-ui,sans-serif;}
+.handoff-toggle a{display:inline-flex;align-items:center;gap:5px;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;color:#64748b;transition:all .12s;}
+.handoff-toggle a.active{background:#111;color:#fff;}
+.handoff-toggle a:not(.active):hover{background:#f3f4f6;color:#111;}
+body{padding-top:48px;}
+</style>
+</head>
+<body><div id="seerist-back" style="display:none;"><a href="https://seerist-design.surge.sh" style="display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#374151;text-decoration:none;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7.5 2L3.5 6L7.5 10" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="width:6px;height:6px;border-radius:50%;background:#00A651;display:inline-block"></span>Seerist Design</a></div>
+<div class="handoff-toggle"><a href="https://seerist-design.surge.sh" style="position:absolute;left:20px;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#6b7280;text-decoration:none;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7.5 2L3.5 6L7.5 10" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="width:6px;height:6px;border-radius:50%;background:#00A651;display:inline-block"></span>Back</a>
+  <a href="v4.html" class="active">Design</a>
+  <a href="specs.html">Documentation</a>
+  <a href="v4-post-eos.html">Post EOS</a>
+</div>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg viewBox="0 0 140 32" height="32">
+      <rect width="32" height="32" rx="6" fill="#00A651"/>
+      <text x="9" y="23" font-family="Inter,sans-serif" font-size="17" font-weight="800" fill="white">S</text>
+      <text x="40" y="22" font-family="Inter,sans-serif" font-size="14" font-weight="700" fill="#4d4d4d">SEERIST</text>
+    </svg>
+  </div>
+  <div class="nav-section">
+    <div class="nav-heading">Explore <i class="fa-solid fa-angle-down"></i></div>
+    <div class="nav-item"><i class="fa-solid fa-house"></i>Latest</div>
+    <div class="nav-item active"><i class="fa-solid fa-magnifying-glass"></i>Search</div>
+    <div class="nav-item"><i class="fa-solid fa-map"></i>Map</div>
+    <div class="nav-item"><i class="fa-solid fa-desktop"></i>Monitor</div>
+  </div>
+  <div class="nav-sep"></div>
+  <div class="nav-section">
+    <div class="nav-heading">Tools <i class="fa-solid fa-angle-down"></i></div>
+    <div class="nav-item"><i class="fa-solid fa-bell"></i>Alerts</div>
+    <div class="nav-item"><i class="fa-solid fa-folder"></i>Content Folders</div>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-avatar">A</div>
+    <span style="font-size:13px;font-weight:500;flex:1">Amy Elsner</span>
+    <i class="fa-solid fa-angle-up" style="color:var(--fg-low)"></i>
+  </div>
+</aside>
+<div class="main">
+  <div class="top-filters">
+    <div class="filter-row">
+      <div class="seg-btn-group">
+        <button class="seg-btn">Natural Language</button>
+        <button class="seg-btn active">Keyword Search</button>
+      </div>
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="searchInput" value="protest AND election NOT sanctions" />
+        <i class="fa-solid fa-circle-info" style="color:var(--fg-low)"></i>
+      </div>
+      <button class="kw-btn"><i class="fa-solid fa-keyboard"></i>Keyword Builder</button>
+    </div>
+
+    <div class="filter-row">
+      <div class="filter-dropdown">
+        <button class="filter-btn" id="btn-date"><span id="lbl-date">Last 30 days</span><i class="fa-solid fa-chevron-down"></i></button>
+        <div class="dropdown-menu" id="dd-date">
+          <div class="dropdown-item" data-val="Last 7 days">Last 7 days</div>
+          <div class="dropdown-item" data-val="Last 14 days">Last 14 days</div>
+          <div class="dropdown-item selected" data-val="Last 30 days">Last 30 days</div>
+          <div class="dropdown-item" data-val="Last 90 days">Last 90 days</div>
+        </div>
+      </div>
+      <div class="sep-v"></div>
+      <span id="resultsCount" style="font-size:13px;color:var(--fg-mid)"><strong>—</strong></span>
+      <div class="spacer"></div>
+      <button class="btn-ghost" id="btn-clear-all">Clear filters</button>
+      <button class="btn-primary">Save Search</button>
+    </div>
+  </div>
+  <div class="view-tabs-bar">
+    <div class="view-tab" data-tab="list"><i class="fa-solid fa-list"></i>List</div>
+    <div class="view-tab" data-tab="map"><i class="fa-solid fa-map"></i>Map</div>
+    <div class="view-tab active" data-tab="trend"><i class="fa-solid fa-chart-line"></i>Trend</div>
+  </div>
+  <div class="tab-panels">
+    <div class="tab-panel list-panel" id="panel-list"><div id="list-cards-only"></div></div>
+    <div class="tab-panel map-panel" id="panel-map">
+      <i class="fa-solid fa-map"></i>
+      <p style="font-size:14px;font-weight:600;color:var(--fg-mid)">Map view</p>
+    </div>
+    <div class="tab-panel active" id="panel-trend">
+      <div class="split-list">
+        <div class="list-count-bar" id="list-count-bar"><span id="list-count-text"><strong>—</strong></span></div>
+        <div id="list-cards"></div>
+      </div>
+      <div class="split-charts">
+        <div class="filter-away-banner" id="chart-filter-warning" style="display:none">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>Chart selections only apply here — switching to List or Map shows all results.</span>
+        </div>
+        <div id="charts-container"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast-wrap" id="toastWrap"></div>
+<div class="ctooltip" id="ctooltip"><strong id="tt-label"></strong><span id="tt-sub"></span></div>
+
+<script>
+// ── SERIES ────────────────────────────────────────────────────────────────────
+const CONTENT_TYPE_S = [
+  {label:'Events',      c:'#f87171',h:'#ef4444'},
+  {label:'News',        c:'#60a5fa',h:'#3b82f6'},
+  {label:'Social Media',c:'#c084fc',h:'#a855f7'},
+  {label:'DiscoverAI',  c:'#4ade80',h:'#22c55e'},
+  {label:'Analysis',    c:'#fb923c',h:'#f97316'},
+  {label:'RR Changes',  c:'#2dd4bf',h:'#14b8a6'},
+];
+const CATEGORY_S = [
+  {label:'Conflict & Security', c:'#f87171',h:'#ef4444'},
+  {label:'Politics',            c:'#fb923c',h:'#f97316'},
+  {label:'Economy',             c:'#facc15',h:'#eab308'},
+  {label:'Environment',         c:'#4ade80',h:'#22c55e'},
+  {label:'Health & Social',     c:'#60a5fa',h:'#3b82f6'},
+  {label:'Technology & Cyber',  c:'#c084fc',h:'#a855f7'},
+];
+const EVT_CATEGORY_S = [
+  {label:'Conflict',      c:'#f87171',h:'#ef4444'},
+  {label:'Terrorism',     c:'#dc2626',h:'#b91c1c'},
+  {label:'Unrest',        c:'#fb923c',h:'#f97316'},
+  {label:'Disasters',     c:'#4ade80',h:'#22c55e'},
+  {label:'Crime',         c:'#facc15',h:'#eab308'},
+  {label:'Health',        c:'#60a5fa',h:'#3b82f6'},
+  {label:'Transportation',c:'#2dd4bf',h:'#14b8a6'},
+  {label:'Elections',     c:'#c084fc',h:'#a855f7'},
+  {label:'Coup',          c:'#f472b6',h:'#ec4899'},
+];
+const STATUS_S = [
+  {label:'Verified',   c:'#4ade80',h:'#22c55e'},
+  {label:'Breaking',   c:'#f87171',h:'#ef4444'},
+  {label:'Future',     c:'#60a5fa',h:'#3b82f6'},
+  {label:'Unverified', c:'#facc15',h:'#eab308'},
+];
+const SEVERITY_S = [
+  {label:'High',   c:'#f87171',h:'#ef4444'},
+  {label:'Medium', c:'#facc15',h:'#eab308'},
+  {label:'Low',    c:'#4ade80',h:'#22c55e'},
+];
+const ATTACK_S = [
+  {label:'Bombing',    c:'#f87171',h:'#ef4444'},
+  {label:'Shooting',   c:'#fb923c',h:'#f97316'},
+  {label:'Cyber',      c:'#c084fc',h:'#a855f7'},
+  {label:'Protest',    c:'#60a5fa',h:'#3b82f6'},
+  {label:'Riot',       c:'#facc15',h:'#eab308'},
+  {label:'Kidnapping', c:'#2dd4bf',h:'#14b8a6'},
+];
+const PERP_S = [
+  {label:'State Actor',     c:'#f87171',h:'#ef4444'},
+  {label:'Non-State Actor', c:'#fb923c',h:'#f97316'},
+  {label:'Criminal Group',  c:'#facc15',h:'#eab308'},
+  {label:'Unknown',         c:'#c084fc',h:'#a855f7'},
+];
+const SECTOR_S = [
+  {label:'Government', c:'#f87171',h:'#ef4444'},
+  {label:'Military',   c:'#fb923c',h:'#f97316'},
+  {label:'Energy',     c:'#facc15',h:'#eab308'},
+  {label:'Transport',  c:'#4ade80',h:'#22c55e'},
+  {label:'Finance',    c:'#60a5fa',h:'#3b82f6'},
+  {label:'Healthcare', c:'#c084fc',h:'#a855f7'},
+];
+const LOCATION_S = [
+  {label:'Asset/Building', c:'#4ade80',h:'#22c55e'},
+  {label:'Street',         c:'#60a5fa',h:'#3b82f6'},
+  {label:'City',           c:'#fb923c',h:'#f97316'},
+  {label:'Region/State',   c:'#facc15',h:'#eab308'},
+  {label:'Country',        c:'#c084fc',h:'#a855f7'},
+  {label:'None',           c:'#f472b6',h:'#ec4899'},
+];
+const EMOTION_S = [
+  {label:'Anger',    c:'#f87171',h:'#ef4444'},
+  {label:'Disgust',  c:'#fb923c',h:'#f97316'},
+  {label:'Fear',     c:'#facc15',h:'#eab308'},
+  {label:'Joy',      c:'#4ade80',h:'#22c55e'},
+  {label:'Sadness',  c:'#60a5fa',h:'#3b82f6'},
+  {label:'Surprise', c:'#c084fc',h:'#a855f7'},
+];
+const SENTIMENT_S = [
+  {label:'Positive', c:'#4ade80',h:'#22c55e'},
+  {label:'Negative', c:'#f87171',h:'#ef4444'},
+  {label:'Neutral',  c:'#60a5fa',h:'#3b82f6'},
+];
+const OSINT_SOURCE_S = [
+  {label:'News',         c:'#60a5fa',h:'#3b82f6'},
+  {label:'Social Media', c:'#c084fc',h:'#a855f7'},
+  {label:'Blog',         c:'#2dd4bf',h:'#14b8a6'},
+  {label:'Report',       c:'#f472b6',h:'#ec4899'},
+];
+const RELIABILITY_S = [
+  {label:'High',       c:'#4ade80',h:'#22c55e'},
+  {label:'Medium',     c:'#60a5fa',h:'#3b82f6'},
+  {label:'Low',        c:'#facc15',h:'#eab308'},
+  {label:'Unverified', c:'#f87171',h:'#ef4444'},
+];
+const TOPIC_S = [
+  {label:'Conflict',      c:'#f87171',h:'#ef4444'},
+  {label:'Terrorism',     c:'#dc2626',h:'#b91c1c'},
+  {label:'Unrest',        c:'#fb923c',h:'#f97316'},
+  {label:'Disasters',     c:'#4ade80',h:'#22c55e'},
+  {label:'Crime',         c:'#facc15',h:'#eab308'},
+  {label:'Health',        c:'#60a5fa',h:'#3b82f6'},
+  {label:'Transportation',c:'#2dd4bf',h:'#14b8a6'},
+  {label:'Travel',        c:'#c084fc',h:'#a855f7'},
+];
+const TREND_S = [
+  {label:'New',          c:'#4ade80',h:'#22c55e'},
+  {label:'Accelerating', c:'#60a5fa',h:'#3b82f6'},
+  {label:'Stable',       c:'#fb923c',h:'#f97316'},
+  {label:'Declining',    c:'#f87171',h:'#ef4444'},
+];
+const RISK_TYPE_S = [
+  {label:'Security',   c:'#f87171',h:'#ef4444'},
+  {label:'Political',  c:'#fb923c',h:'#f97316'},
+  {label:'Operational',c:'#facc15',h:'#eab308'},
+  {label:'Cyber',      c:'#60a5fa',h:'#3b82f6'},
+  {label:'Maritime',   c:'#2dd4bf',h:'#14b8a6'},
+];
+
+// ── ALL CHARTS ────────────────────────────────────────────────────────────────
+const TAG_GRAY = {color:'#64748b', bg:'#f1f5f9'};
+const TAG_ALL  = {label:'All',           ...TAG_GRAY};
+const TAG_EVT  = {label:'Events',        ...TAG_GRAY};
+const TAG_OST  = {label:'News · Social', ...TAG_GRAY};
+const TAG_AI   = {label:'DiscoverAI',    ...TAG_GRAY};
+const TAG_ANL  = {label:'Analysis',      ...TAG_GRAY};
+const TAG_RR   = {label:'RR Changes',    ...TAG_GRAY};
+
+const ALL_CHARTS = [
+  {key:'allCT',  title:'Distribution by Content Type', field:'contentType',    series:CONTENT_TYPE_S, hasByDay:true,  defMode:'distribution', defSub:'bar',  typeTag:TAG_ALL},
+  {key:'allCat', title:'Distribution by Category',     field:'category',       series:CATEGORY_S,     hasByDay:false, defMode:'distribution', defSub:'bar',  typeTag:TAG_ALL},
+  {key:'evtCat', title:'Events by Category',           field:'evtCategory',    series:EVT_CATEGORY_S, hasByDay:true,  defMode:'overtime',     defSub:'area', typeTag:TAG_EVT},
+  {key:'evtStat',title:'Events by Status',             field:'status',         series:STATUS_S,       hasByDay:false, defMode:'distribution', defSub:'pie',  typeTag:TAG_EVT},
+  {key:'evtSev', title:'Events by Severity',           field:'severity',       series:SEVERITY_S,     hasByDay:false, defMode:'distribution', defSub:'pie',  typeTag:TAG_EVT},
+  {key:'evtAtk', title:'Events by Attack Type',        field:'attackType',     series:ATTACK_S,       hasByDay:false, defMode:'distribution', defSub:'bar',  typeTag:TAG_EVT},
+  {key:'evtPerp',title:'Events by Perpetrator',        field:'perpetrator',    series:PERP_S,         hasByDay:false, defMode:'distribution', defSub:'pie',  typeTag:TAG_EVT},
+  {key:'evtSec', title:'Events by Sector',             field:'sector',         series:SECTOR_S,       hasByDay:false, defMode:'distribution', defSub:'bar',  typeTag:TAG_EVT},
+  {key:'evtLoc', title:'Events by Location Precision', field:'locationPrecision',series:LOCATION_S,   hasByDay:false, defMode:'distribution', defSub:'bar',  typeTag:TAG_EVT},
+  {key:'oSent',  title:'Sentiment',                    field:'sentiment',      series:SENTIMENT_S,    hasByDay:false, defMode:'distribution', defSub:'pie',  typeTag:TAG_OST, special:'sentiment'},
+  {key:'oEmo',   title:'Emotions',                     field:'emotion',        series:EMOTION_S,      hasByDay:true,  defMode:'distribution', defSub:'pie',  typeTag:TAG_OST},
+  {key:'oSrc',   title:'Source Type',                  field:'source',         series:OSINT_SOURCE_S, hasByDay:true,  defMode:'distribution', defSub:'pie',  typeTag:TAG_OST},
+  {key:'oRel',   title:'Source Reliability',           field:'reliability',    series:RELIABILITY_S,  hasByDay:true,  defMode:'distribution', defSub:'bar',  typeTag:TAG_OST},
+  {key:'oTop',   title:'News/Social by Topic',         field:'topic',          series:TOPIC_S,        hasByDay:true,  defMode:'distribution', defSub:'bar',  typeTag:TAG_OST},
+  {key:'aiTop',  title:'DiscoverAI by Topic',          field:'topic',          series:TOPIC_S,        hasByDay:false, defMode:'distribution', defSub:'pie',  typeTag:TAG_AI},
+  {key:'aiTrend',title:'DiscoverAI by New or Accelerating',field:'trend',      series:TREND_S,        hasByDay:false, defMode:'distribution', defSub:'bar',  typeTag:TAG_AI},
+  {key:'anlRisk',title:'Analysis by Risk Type',        field:'riskType',       series:RISK_TYPE_S,    hasByDay:false, defMode:'distribution', defSub:'pie',  typeTag:TAG_ANL},
+  {key:'rrRisk', title:'Changes by Risk Type',         field:'riskType',       series:RISK_TYPE_S,    hasByDay:false, defMode:'distribution', defSub:'bar',  typeTag:TAG_RR},
+];
+
+const WEEKS = ['Mar 1','Mar 8','Mar 15','Mar 22','Mar 29','Apr 5','Apr 12'];
+
+// ── GENERATE DATASET ──────────────────────────────────────────────────────────
+function wPick(weights, seed) {
+  const total = weights.reduce((a,b)=>a+b,0);
+  let v = ((seed * 2654435761) >>> 0) % total;
+  for (let i=0;i<weights.length;i++){v-=weights[i];if(v<0)return i;}
+  return weights.length-1;
+}
+
+const TITLES_EVT = ['Security alert: verified incident reported in key region','Civil unrest escalating near government district','Cyber attack targeting critical infrastructure sector','Explosion reported near transport hub, casualties unknown','Armed group activity detected along border region','Mass protest dispersed by security forces downtown'];
+const TITLES_OST = ['Protest sentiment rising across social media platforms','Election coverage driving negative media cycle this week','Economic anxiety reflected in regional news sources','Climate crisis narrative gaining traction in local media','Health advisory generating widespread online discussion','Technology sector facing increased public scrutiny'];
+const TITLES_AI  = ['Accelerating trend: increased focus on regional security','New topic cluster emerging: economic migration patterns','DiscoverAI detecting shift in climate discourse narrative','Technology regulation debate accelerating across regions','Social cohesion topic declining in monitored channels'];
+const TITLES_ANL = ['Risk rating review: political volatility index updated','Security assessment: threat landscape elevated in region','Economic risk analysis: sanctions impact assessment','Regulatory risk: new compliance requirements flagged'];
+const TITLES_RR  = ['Risk rating change: political risk elevated to HIGH','Security risk downgraded following peace agreement','Economic risk rating adjusted based on new indicators'];
+
+const CATEGORY_MAP = {
+  'Conflict':'Conflict & Security','Terrorism':'Conflict & Security',
+  'Unrest':'Politics','Disasters':'Environment',
+  'Crime':'Conflict & Security','Health':'Health & Social',
+  'Transportation':'Technology & Cyber','Elections':'Politics','Coup':'Politics',
+  'Security':'Conflict & Security','Political':'Politics','Operational':'Economy',
+  'Cyber':'Technology & Cyber','Maritime':'Conflict & Security',
+  'Travel':'Health & Social',
+};
+
+const ALL_RESULTS = (() => {
+  const items = [];
+  let id = 0;
+
+  // Events (30)
+  for (let i=0;i<30;i++,id++) {
+    const wIdx = (id*7+(id%3)*2)%7;
+    const cat  = EVT_CATEGORY_S[wPick([20,15,18,12,14,10,5,4,2],id*13+3)].label;
+    items.push({
+      id, title: TITLES_EVT[id%TITLES_EVT.length],
+      weekIndex:wIdx, dateLabel:WEEKS[wIdx],
+      contentType:'Events', category: CATEGORY_MAP[cat]||'Conflict & Security',
+      evtCategory:cat,
+      status:       STATUS_S[wPick([35,30,20,15],id*11+1)].label,
+      severity:     SEVERITY_S[wPick([15,45,40],id*17+5)].label,
+      attackType:   ATTACK_S[wPick([18,15,20,22,14,11],id*19+7)].label,
+      perpetrator:  PERP_S[wPick([25,35,20,20],id*23+9)].label,
+      sector:       SECTOR_S[wPick([25,15,18,12,18,12],id*29+3)].label,
+      locationPrecision: LOCATION_S[wPick([5,10,30,25,20,10],id*31+7)].label,
+    });
+  }
+
+  // News (20)
+  for (let i=0;i<20;i++,id++) {
+    const wIdx = (id*7+(id%3)*2)%7;
+    const topic = TOPIC_S[wPick([20,15,18,12,14,10,6,5],id*17+5)].label;
+    items.push({
+      id, title: TITLES_OST[id%TITLES_OST.length],
+      weekIndex:wIdx, dateLabel:WEEKS[wIdx],
+      contentType:'News', category: CATEGORY_MAP[topic]||'Politics',
+      emotion:      EMOTION_S[wPick([12,8,18,25,30,7],id*13+7)].label,
+      sentiment:    SENTIMENT_S[wPick([28,45,27],id*11+3)].label,
+      source:       'News',
+      reliability:  RELIABILITY_S[wPick([30,35,20,15],id*23+9)].label,
+      topic,
+    });
+  }
+
+  // Social Media (15)
+  for (let i=0;i<15;i++,id++) {
+    const wIdx = (id*7+(id%3)*2)%7;
+    const topic = TOPIC_S[wPick([18,20,12,15,10,12,8,5].slice(0,8),id*17+5)].label;
+    items.push({
+      id, title: TITLES_OST[id%TITLES_OST.length],
+      weekIndex:wIdx, dateLabel:WEEKS[wIdx],
+      contentType:'Social Media', category: CATEGORY_MAP[topic]||'Politics',
+      emotion:      EMOTION_S[wPick([15,6,20,22,27,10],id*13+7)].label,
+      sentiment:    SENTIMENT_S[wPick([20,55,25],id*11+3)].label,
+      source:       'Social Media',
+      reliability:  RELIABILITY_S[wPick([15,30,30,25],id*23+9)].label,
+      topic,
+    });
+  }
+
+  // DiscoverAI (20)
+  for (let i=0;i<20;i++,id++) {
+    const wIdx = (id*7+(id%3)*2)%7;
+    const topic = TOPIC_S[wPick([15,12,18,20,10,15,5,5].slice(0,8),id*17+5)].label;
+    items.push({
+      id, title: TITLES_AI[id%TITLES_AI.length],
+      weekIndex:wIdx, dateLabel:WEEKS[wIdx],
+      contentType:'DiscoverAI', category: CATEGORY_MAP[topic]||'Politics',
+      topic, trend: TREND_S[wPick([25,30,30,15],id*23+9)].label,
+    });
+  }
+
+  // Analysis (20)
+  for (let i=0;i<20;i++,id++) {
+    const wIdx = (id*7+(id%3)*2)%7;
+    const riskType = RISK_TYPE_S[wPick([30,25,20,15,10],id*19+5)].label;
+    items.push({
+      id, title: TITLES_ANL[id%TITLES_ANL.length],
+      weekIndex:wIdx, dateLabel:WEEKS[wIdx],
+      contentType:'Analysis', category: CATEGORY_MAP[riskType]||'Politics',
+      riskType,
+    });
+  }
+
+  // RR Changes (15)
+  for (let i=0;i<15;i++,id++) {
+    const wIdx = (id*7+(id%3)*2)%7;
+    const riskType = RISK_TYPE_S[wPick([28,22,20,18,12],id*19+5)].label;
+    items.push({
+      id, title: TITLES_RR[id%TITLES_RR.length],
+      weekIndex:wIdx, dateLabel:WEEKS[wIdx],
+      contentType:'RR Changes', category: CATEGORY_MAP[riskType]||'Politics',
+      riskType,
+    });
+  }
+
+  return items;
+})();
+
+// ── APP STATE ─────────────────────────────────────────────────────────────────
+const appState = {
+  activeTab: 'trend',
+  gf: {date:'Last 30 days'},
+  activeResults: [],
+  cf: {},
+  charts: {},
+};
+const instances = {};
+
+function getCurrentCharts() { return ALL_CHARTS; }
+
+function initChartsState() {
+  appState.cf = {};
+  appState.charts = {};
+  ALL_CHARTS.forEach(cfg => {
+    appState.cf[cfg.key] = new Set();
+    appState.charts[cfg.key] = {mode:cfg.defMode, sub:cfg.defSub, hidden:new Set()};
+  });
+}
+
+function computeActiveResults() {
+  const {date} = appState.gf;
+  const minWeek = {'Last 7 days':6,'Last 14 days':5,'Last 30 days':2,'Last 90 days':0}[date]??0;
+  return ALL_RESULTS.filter(r => r.weekIndex >= minWeek);
+}
+
+// ── FILTER HELPERS ────────────────────────────────────────────────────────────
+function getFilteredFor(excludeKey) {
+  const charts = getCurrentCharts();
+  return appState.activeResults.filter(r =>
+    charts.every(cfg => {
+      if (cfg.key === excludeKey) return true;
+      const s = appState.cf[cfg.key];
+      return !s || !s.size || s.has(r[cfg.field]);
+    })
+  );
+}
+function getAllFiltered() { return getFilteredFor(null); }
+function hasAnyChartFilter() { return Object.values(appState.cf).some(s=>s.size>0); }
+
+// ── TOAST / TOOLTIP ───────────────────────────────────────────────────────────
+function showToast(title,sub,icon='fa-rotate-left'){
+  const wrap=document.getElementById('toastWrap');
+  const t=document.createElement('div');t.className='toast';
+  t.innerHTML=`<i class="fa-solid ${icon}"></i><div class="toast-text"><strong>${title}</strong><span>${sub}</span></div>`;
+  wrap.appendChild(t);
+  setTimeout(()=>{t.classList.add('out');t.addEventListener('animationend',()=>t.remove());},3200);
+}
+const tt=document.getElementById('ctooltip');
+function showTT(e,label,sub){document.getElementById('tt-label').textContent=label;document.getElementById('tt-sub').textContent=sub;tt.style.display='block';moveTT(e);}
+function moveTT(e){tt.style.left=(e.clientX+14)+'px';tt.style.top=(e.clientY-38)+'px';}
+function hideTT(){tt.style.display='none';}
+
+// ── SPIKE ─────────────────────────────────────────────────────────────────────
+function computeSpike(key) {
+  const cfg = getCurrentCharts().find(c=>c.key===key);
+  if (!cfg || !cfg.hasByDay) return null;
+  const filtered = getFilteredFor(key);
+  const recent = filtered.filter(r=>r.weekIndex>=5);
+  const prev   = filtered.filter(r=>r.weekIndex>=3&&r.weekIndex<=4);
+  if (!recent.length||!prev.length) return null;
+  const rc={},pc={};
+  recent.forEach(r=>{const v=r[cfg.field];rc[v]=(rc[v]||0)+1;});
+  prev.forEach(r=>{const v=r[cfg.field];pc[v]=(pc[v]||0)+1;});
+  const rt=recent.length,pt=prev.length;
+  let best=null,bestAbs=0;
+  cfg.series.forEach(e=>{
+    const r=(rc[e.label]||0)/rt,p=(pc[e.label]||0)/pt;
+    if(!p)return;
+    const chg=Math.round((r-p)/p*100);
+    if(Math.abs(chg)>bestAbs){bestAbs=Math.abs(chg);best={label:e.label,pct:chg};}
+  });
+  return best;
+}
+
+function updateChartMeta(key) {
+  const el=document.getElementById('meta-'+key);
+  if(!el) return;
+  el.innerHTML='';
+  const spike=computeSpike(key);
+  const cross=getCurrentCharts().filter(c=>c.key!==key&&appState.cf[c.key]&&appState.cf[c.key].size>0);
+  if(spike&&Math.abs(spike.pct)>=10){
+    const dir=spike.pct>0?'up':'down',arrow=spike.pct>0?'↑':'↓';
+    const b=document.createElement('span');
+    b.className=`spike-badge ${dir}`;
+    b.textContent=`${arrow} ${spike.label} ${spike.pct>0?'+':''}${spike.pct}% this week`;
+    el.appendChild(b);
+  }
+  cross.forEach(c=>{
+    const vals=[...appState.cf[c.key]];
+    const display=vals.length>2?`${vals.slice(0,2).join(', ')} +${vals.length-2}`:vals.join(', ');
+    const chip=document.createElement('span');
+    chip.className='meta-context';
+    chip.innerHTML=`<i class="fa-solid fa-filter"></i>${c.title} · ${display}`;
+    el.appendChild(chip);
+  });
+  el.classList.toggle('hidden',!el.children.length);
+}
+
+// ── BUILD CHART DATA ──────────────────────────────────────────────────────────
+function buildData(key) {
+  const cfg=getCurrentCharts().find(c=>c.key===key);
+  if(!cfg) return {labels:[],datasets:[]};
+  const s=appState.charts[key];
+  const active=appState.cf[key];
+  const hidden=s.hidden;
+  const hasAct=active.size>0;
+  const vis=cfg.series.filter(e=>!hidden.has(e.label));
+  const filtered=getFilteredFor(key);
+  const counts={};
+  filtered.forEach(r=>{const v=r[cfg.field];counts[v]=(counts[v]||0)+1;});
+
+  if(s.mode==='distribution'){
+    const colorFn=e=>!hasAct?e.c:active.has(e.label)?e.h:e.c+'44';
+    if(s.sub==='pie') return {labels:vis.map(e=>e.label),datasets:[{data:vis.map(e=>counts[e.label]||0),backgroundColor:vis.map(colorFn),hoverBackgroundColor:vis.map(e=>e.h),borderColor:'#fff',borderWidth:2}]};
+    return {labels:vis.map(e=>e.label),datasets:[{data:vis.map(e=>counts[e.label]||0),backgroundColor:vis.map(colorFn),hoverBackgroundColor:vis.map(e=>e.h),borderRadius:5,borderWidth:0}]};
+  } else {
+    const wc={};
+    filtered.forEach(r=>{const v=r[cfg.field];if(!wc[v])wc[v]=Array(7).fill(0);wc[v][r.weekIndex]++;});
+    const isLine=s.sub==='line'||s.sub==='area',isArea=s.sub==='area';
+    if(!isLine) return {labels:WEEKS,datasets:vis.map(e=>({label:e.label,data:wc[e.label]||Array(7).fill(0),backgroundColor:!hasAct?e.c:active.has(e.label)?e.h:e.c+'44',hoverBackgroundColor:e.h,borderRadius:3,borderWidth:0}))};
+    return {labels:WEEKS,datasets:vis.map(e=>{const isAct=active.has(e.label);return{label:e.label,data:wc[e.label]||Array(7).fill(0),borderColor:!hasAct?e.c:isAct?e.h:e.c+'55',backgroundColor:isArea?e.c+'22':'transparent',pointBackgroundColor:!hasAct?e.c:isAct?e.h:e.c+'55',pointBorderColor:'transparent',pointRadius:isAct?6:3,pointHoverRadius:7,borderWidth:isAct?2.5:1.5,tension:0.4,fill:isArea};})};
+  }
+}
+
+// ── CREATE CHART ──────────────────────────────────────────────────────────────
+function createSentimentChart(key) {
+  const cfg=getCurrentCharts().find(c=>c.key===key);
+  if(!cfg) return;
+  const filtered=getFilteredFor(key);
+  const active=appState.cf[key];
+  const counts={};
+  filtered.forEach(r=>{const v=r[cfg.field];counts[v]=(counts[v]||0)+1;});
+  const total=filtered.length||1;
+  const el=document.getElementById('cb-'+key);
+  if(!el) return;
+  el.className='chart-body sentiment-body';
+  el.innerHTML='';
+  const hasAct=active&&active.size>0;
+  const bar=document.createElement('div');
+  bar.className='sent-bar';
+  SENTIMENT_S.forEach(s=>{
+    const n=counts[s.label]||0;
+    const pct=Math.round(n/total*100);
+    if(!n) return;
+    const seg=document.createElement('div');
+    seg.className='sent-seg'+(hasAct&&!active.has(s.label)?' dim':'');
+    seg.style.cssText=`flex:${n};background:${hasAct&&active.has(s.label)?s.h:hasAct?s.c+'88':s.c};border-radius:6px;`;
+    seg.innerHTML=`<span class="sent-label">${s.label}</span><span class="sent-pct">${pct}%</span>`;
+    seg.addEventListener('click',()=>toggleFilter(key,s.label));
+    seg.addEventListener('mouseenter',e=>showTT(e,s.label,`${n} (${pct}%) — click to filter`));
+    seg.addEventListener('mousemove',moveTT);
+    seg.addEventListener('mouseleave',hideTT);
+    bar.appendChild(seg);
+  });
+  el.appendChild(bar);
+}
+
+function createChart(key) {
+  const cfg=getCurrentCharts().find(c=>c.key===key);
+  if(!cfg) return;
+  if(cfg.special==='sentiment'){createSentimentChart(key);return;}
+  const s=appState.charts[key];
+  const cb=document.getElementById('cb-'+key);
+  if(!cb) return;
+  cb.innerHTML=`<canvas id="canvas-${key}"></canvas>`;
+  const isPie=s.mode==='distribution'&&s.sub==='pie';
+  const type=isPie?'pie':(s.mode==='overtime'&&s.sub!=='bar')?'line':'bar';
+  const cls=s.mode==='distribution'?(s.sub==='pie'?'dist-pie':'dist-bar'):('ot-'+s.sub);
+  cb.className='chart-body '+cls;
+  const canvas=document.getElementById('canvas-'+key);
+  if(instances[key]){instances[key].destroy();instances[key]=null;}
+  instances[key]=new Chart(canvas,{
+    type,data:buildData(key),
+    options:{responsive:true,maintainAspectRatio:isPie,animation:{duration:350,easing:'easeInOutQuart'},plugins:{legend:{display:false},tooltip:{enabled:false}},...(!isPie?{scales:{x:{grid:{color:'#f1f5f9'},ticks:{color:'#94a3b8',font:{size:10}}},y:{grid:{color:'#f1f5f9'},ticks:{color:'#94a3b8',font:{size:10}},beginAtZero:true}}}:{}),onHover(event,els){canvas.style.cursor=els.length?'pointer':'default';}},
+  });
+  canvas.addEventListener('click',e=>{
+    const els=instances[key].getElementsAtEventForMode(e,'nearest',{intersect:true},false);
+    if(!els.length) return;
+    const s2=appState.charts[key];
+    const vis=cfg.series.filter(e=>!s2.hidden.has(e.label));
+    const isPie2=s2.mode==='distribution'&&s2.sub==='pie';
+    let label;
+    if(isPie2) label=vis[els[0].index]?.label;
+    else if(s2.mode==='overtime') label=vis[els[0].datasetIndex]?.label;
+    else label=vis[els[0].index]?.label;
+    if(label) toggleFilter(key,label);
+  });
+  canvas.addEventListener('mousemove',e=>{
+    const els=instances[key].getElementsAtEventForMode(e,'nearest',{intersect:true},false);
+    if(!els.length){hideTT();return;}
+    const s2=appState.charts[key];
+    const vis=cfg.series.filter(e=>!s2.hidden.has(e.label));
+    const isPie2=s2.mode==='distribution'&&s2.sub==='pie';
+    const filt=getFilteredFor(key);
+    const cnts={};filt.forEach(r=>{const v=r[cfg.field];cnts[v]=(cnts[v]||0)+1;});
+    const tot=Object.values(cnts).reduce((a,b)=>a+b,0)||1;
+    let label='',sub='';
+    if(isPie2){const e2=vis[els[0].index];label=e2?.label||'';const n=cnts[label]||0;sub=`${n} (${Math.round(n/tot*100)}%) — click to filter`;}
+    else if(s2.mode==='overtime'){const e2=vis[els[0].datasetIndex];label=e2?.label||'';const wc={};filt.forEach(r=>{const v=r[cfg.field];if(!wc[v])wc[v]=Array(7).fill(0);wc[v][r.weekIndex]++;});const n=(wc[label]||[])[els[0].index]||0;sub=`${n} — ${WEEKS[els[0].index]} · click to filter`;}
+    else{label=vis[els[0].index]?.label||'';const n=cnts[label]||0;sub=`${n} (${Math.round(n/tot*100)}%) — click to filter`;}
+    showTT(e,label,sub);moveTT(e);
+  });
+  canvas.addEventListener('mouseleave',hideTT);
+  canvas.addEventListener('mousemove',moveTT);
+}
+
+// ── REFRESH ───────────────────────────────────────────────────────────────────
+function refreshChart(key) {
+  const cfg=getCurrentCharts().find(c=>c.key===key);
+  if(!cfg) return;
+  if(cfg.special==='sentiment'){createSentimentChart(key);renderFilterChips(key);updateChartMeta(key);return;}
+  const inst=instances[key];if(!inst) return;
+  const s=appState.charts[key];const d=buildData(key);
+  const isPie=s.mode==='distribution'&&s.sub==='pie';
+  if(isPie){inst.data.labels=d.labels;inst.data.datasets[0].data=d.datasets[0].data;inst.data.datasets[0].backgroundColor=d.datasets[0].backgroundColor;inst.data.datasets[0].hoverBackgroundColor=d.datasets[0].hoverBackgroundColor;}
+  else{inst.data.labels=d.labels;inst.data.datasets=d.datasets;}
+  inst.update();renderLegend(key);renderFilterChips(key);updateChartMeta(key);
+}
+function refreshAll(){getCurrentCharts().forEach(c=>refreshChart(c.key));renderResults();updateResultsCount();updateFilterBanners();}
+
+function toggleFilter(key,label){const f=appState.cf[key];f.has(label)?f.delete(label):f.add(label);refreshAll();}
+
+function onGlobalFilterChange(filterKey,val){
+  const hadFilters=hasAnyChartFilter();
+  appState.gf[filterKey]=val;
+  Object.values(appState.cf).forEach(s=>s&&s.clear());
+  appState.activeResults=computeActiveResults();
+  getCurrentCharts().forEach(cfg=>{
+    const cb=document.getElementById('cb-'+cfg.key);
+    if(cb){cb.classList.add('loading');setTimeout(()=>{cb.classList.remove('loading');refreshChart(cfg.key);},350);}
+  });
+  renderResults();updateResultsCount();
+  if(hadFilters) showToast('Chart selections reset','Search changed — charts updated','fa-rotate-left');
+}
+
+// ── LEGEND / CHIPS ────────────────────────────────────────────────────────────
+function renderLegend(key){
+  const cfg=getCurrentCharts().find(c=>c.key===key);
+  if(!cfg||cfg.special==='sentiment') return;
+  const el=document.getElementById('legend-'+key);const s=appState.charts[key];
+  if(!el) return;
+  el.innerHTML='';
+  cfg.series.forEach(e=>{
+    const off=s.hidden.has(e.label);
+    const chip=document.createElement('div');chip.className='legend-chip'+(off?' off':'');
+    chip.innerHTML=`<span class="legend-dot" style="background:${off?'#d1d5db':e.c}"></span>${e.label}`;
+    chip.title=off?'Show':'Hide';
+    chip.addEventListener('click',()=>{if(off)s.hidden.delete(e.label);else{s.hidden.add(e.label);appState.cf[key].delete(e.label);}refreshAll();});
+    el.appendChild(chip);
+  });
+}
+
+function renderFilterChips(key){
+  const cfg=getCurrentCharts().find(c=>c.key===key);if(!cfg) return;
+  const el=document.getElementById('af-'+key);const active=appState.cf[key];
+  if(!el) return;el.innerHTML='';
+  if(!active||!active.size){el.classList.add('hidden');return;}
+  el.classList.remove('hidden');
+  const lbl=document.createElement('span');lbl.className='filter-label';lbl.textContent='Filtered by:';el.appendChild(lbl);
+  active.forEach(label=>{
+    const e=cfg.series.find(x=>x.label===label);if(!e) return;
+    const chip=document.createElement('span');chip.className='filter-chip';
+    chip.style.cssText=`background:${e.c}22;border-color:${e.c}`;
+    chip.innerHTML=`<span class="legend-dot" style="background:${e.c}"></span>${label}<i class="fa-solid fa-xmark chip-x"></i>`;
+    chip.querySelector('.chip-x').addEventListener('click',()=>{active.delete(label);refreshAll();});
+    el.appendChild(chip);
+  });
+  if(active.size>1){const c=document.createElement('span');c.className='clear-btn';c.textContent='Clear all';c.addEventListener('click',()=>{active.clear();refreshAll();});el.appendChild(c);}
+}
+
+// ── RESULTS ───────────────────────────────────────────────────────────────────
+function getCardIcon(r){
+  if(r.contentType==='Events') return {bg:'#fef2f2',color:'#ef4444',icon:'fa-shield-halved'};
+  if(r.contentType==='News') return {bg:'#eff6ff',color:'#3b82f6',icon:'fa-newspaper'};
+  if(r.contentType==='Social Media') return {bg:'#f5f3ff',color:'#a855f7',icon:'fa-hashtag'};
+  if(r.contentType==='DiscoverAI') return {bg:'#f0fdf4',color:'#22c55e',icon:'fa-robot'};
+  if(r.contentType==='Analysis') return {bg:'#fff7ed',color:'#f97316',icon:'fa-chart-bar'};
+  return {bg:'#f0fdfa',color:'#14b8a6',icon:'fa-arrow-trend-up'};
+}
+
+function createCard(r){
+  const {bg,color,icon}=getCardIcon(r);
+  const card=document.createElement('div');card.className='result-card';
+  const tag1=r.evtCategory||r.topic||r.riskType||r.trend||'';
+  const tag2=r.severity||r.source||r.reliability||'';
+  card.innerHTML=`
+    <div class="card-icon" style="background:${bg};color:${color}"><i class="fa-solid ${icon}"></i></div>
+    <div class="card-meta"><span>${r.dateLabel}</span><span style="color:#e2e8f0">·</span><span style="font-size:10px;padding:1px 5px;border-radius:6px;background:${bg};color:${color};font-weight:600">${r.contentType}</span></div>
+    <div class="card-title">${r.title}</div>
+    <div class="card-tags">
+      ${tag1?`<span class="epill" style="background:#f1f5f9">${tag1}</span>`:''}
+      ${tag2?`<span class="epill" style="background:#f1f5f9">${tag2}</span>`:''}
+    </div>`;
+  return card;
+}
+
+function renderResults(){
+  const filtered=getAllFiltered();
+  const listEl=document.getElementById('list-cards');
+  const listOnly=document.getElementById('list-cards-only');
+  if(listEl) listEl.innerHTML='';
+  if(listOnly) listOnly.innerHTML='';
+  filtered.slice(0,30).forEach(r=>listEl&&listEl.appendChild(createCard(r)));
+  if(filtered.length<appState.activeResults.length){const note=document.createElement('div');note.className='count-note';note.textContent=`${filtered.length} of ${appState.activeResults.length} results match`;listEl&&listEl.appendChild(note);}
+  appState.activeResults.slice(0,30).forEach(r=>listOnly&&listOnly.appendChild(createCard(r)));
+}
+
+function updateResultsCount(){
+  const filtered=getAllFiltered();const total=appState.activeResults.length;const isFiltered=filtered.length<total;
+  const el=document.getElementById('resultsCount');
+  if(el) el.innerHTML=isFiltered?`<strong>${filtered.length}</strong> <span style="color:var(--fg-low)">of ${total}</span>`:`<strong>${total}</strong> <span style="color:var(--fg-low)">results</span>`;
+  const bar=document.getElementById('list-count-bar'),txt=document.getElementById('list-count-text');
+  if(bar&&txt){bar.classList.toggle('filtered',isFiltered);txt.innerHTML=isFiltered?`<strong>${filtered.length}</strong> of ${total} results match`:`<strong>${total}</strong> results`;}
+}
+
+// ── BUILD CHART CARDS ─────────────────────────────────────────────────────────
+const DIST_SUBS=[{sub:'pie',icon:'fa-circle-half-stroke',title:'Pie'},{sub:'bar',icon:'fa-chart-bar',title:'Bar'}];
+const OT_SUBS  =[{sub:'bar',icon:'fa-chart-bar',title:'Bar'},{sub:'line',icon:'fa-chart-line',title:'Line'},{sub:'area',icon:'fa-chart-area',title:'Stacked Area'}];
+
+function updateSubSwitcher(key){
+  const s=appState.charts[key];const el=document.getElementById('subtype-'+key);if(!el) return;
+  const types=s.mode==='distribution'?DIST_SUBS:OT_SUBS;
+  if(s.mode==='distribution'&&!['pie','bar'].includes(s.sub)) s.sub='pie';
+  if(s.mode==='overtime'&&!['bar','line','area'].includes(s.sub)) s.sub='bar';
+  el.innerHTML='';
+  types.forEach(t=>{const btn=document.createElement('button');btn.className='subtype-btn'+(t.sub===s.sub?' active':'');btn.dataset.sub=t.sub;btn.title=t.title;btn.innerHTML=`<i class="fa-solid ${t.icon}"></i>`;el.appendChild(btn);});
+}
+
+function buildChartCards(){
+  const container=document.getElementById('charts-container');
+  container.innerHTML='';
+  getCurrentCharts().forEach(cfg=>{
+    const key=cfg.key;const s=appState.charts[key];
+    const card=document.createElement('div');card.className='chart-card';card.id='card-'+key;
+    const subs=s.mode==='distribution'?DIST_SUBS:OT_SUBS;
+    const modeSwitcher=cfg.hasByDay?`
+      <div class="mode-switcher" id="mode-${key}">
+        <button class="mode-btn ${s.mode==='distribution'?'active':''}" data-mode="distribution">Distribution</button>
+        <button class="mode-btn ${s.mode==='overtime'?'active':''}" data-mode="overtime">Over Time</button>
+      </div>
+      <div class="subtype-switcher" id="subtype-${key}">
+        ${subs.map(t=>`<button class="subtype-btn ${t.sub===s.sub?'active':''}" data-sub="${t.sub}" title="${t.title}"><i class="fa-solid ${t.icon}"></i></button>`).join('')}
+      </div>`:'';
+    const bodyContent=cfg.special==='sentiment'
+      ?`<div class="chart-body sentiment-body" id="cb-${key}"></div>`
+      :`<div class="chart-body ${s.mode==='distribution'?(s.sub==='pie'?'dist-pie':'dist-bar'):('ot-'+s.sub)}" id="cb-${key}"><canvas id="canvas-${key}"></canvas></div>
+        <div class="chart-hints"><span class="hint-pill"><i class="fa-solid fa-arrow-pointer"></i>Click to filter</span><span class="hint-pill"><i class="fa-regular fa-eye-slash"></i>Click label to hide</span></div>
+        <div class="chart-legend" id="legend-${key}"></div>`;
+    card.innerHTML=`
+      <div class="chart-header">
+        <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1">
+          <span class="chart-title">${cfg.title}</span>
+          <span class="chart-type-tag" style="background:${cfg.typeTag.bg};color:${cfg.typeTag.color}">${cfg.typeTag.label}</span>
+        </div>
+        <div class="chart-controls">
+          ${modeSwitcher}
+          <button class="icon-btn collapse-btn" data-target="card-${key}"><i class="fa-solid fa-chevron-up"></i></button>
+        </div>
+      </div>
+      <div class="chart-meta hidden" id="meta-${key}"></div>
+      <div class="chart-body-wrap">
+        <div class="active-filters hidden" id="af-${key}"></div>
+        ${bodyContent}
+      </div>`;
+    container.appendChild(card);
+
+    if(cfg.hasByDay){
+      card.querySelector('#mode-'+key)?.addEventListener('click',e=>{
+        const btn=e.target.closest('.mode-btn');if(!btn) return;
+        const mode=btn.dataset.mode;if(appState.charts[key].mode===mode) return;
+        appState.charts[key].mode=mode;appState.charts[key].sub=mode==='distribution'?'pie':'bar';
+        card.querySelectorAll('.mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+        updateSubSwitcher(key);createChart(key);renderLegend(key);renderFilterChips(key);
+      });
+      card.querySelector('#subtype-'+key)?.addEventListener('click',e=>{
+        const btn=e.target.closest('.subtype-btn');if(!btn) return;
+        const sub=btn.dataset.sub;if(appState.charts[key].sub===sub) return;
+        appState.charts[key].sub=sub;
+        card.querySelectorAll('.subtype-btn').forEach(b=>b.classList.toggle('active',b.dataset.sub===sub));
+        createChart(key);renderLegend(key);
+      });
+    }
+    card.querySelector('.collapse-btn').addEventListener('click',()=>document.getElementById('card-'+key).classList.toggle('collapsed'));
+  });
+}
+
+// ── TAB / BANNERS ─────────────────────────────────────────────────────────────
+function switchTab(tab){
+  appState.activeTab=tab;
+  document.querySelectorAll('.view-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+tab));
+  updateFilterBanners();
+}
+function updateFilterBanners(){
+  const el=document.getElementById('chart-filter-warning');
+  if(el) el.style.display=hasAnyChartFilter()?'flex':'none';
+}
+
+// ── DROPDOWN ──────────────────────────────────────────────────────────────────
+function setupDropdown(btnId,ddId,lblId,filterKey,badgeMode){
+  const btn=document.getElementById(btnId),dd=document.getElementById(ddId),lbl=document.getElementById(lblId);
+  btn.addEventListener('click',e=>{e.stopPropagation();dd.classList.toggle('open');btn.classList.toggle('open');});
+  dd.querySelectorAll('.dropdown-item').forEach(item=>{
+    item.addEventListener('click',()=>{
+      dd.querySelectorAll('.dropdown-item').forEach(i=>i.classList.remove('selected'));
+      item.classList.add('selected');const val=item.dataset.val;
+      if(badgeMode) lbl.textContent=val==='all'?'All':val.split(',')[0].replace('Social Media','Social');
+      else lbl.textContent=val;
+      dd.classList.remove('open');btn.classList.remove('open');
+      onGlobalFilterChange(filterKey,val);
+    });
+  });
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+initChartsState();
+appState.activeResults=computeActiveResults();
+buildChartCards();
+getCurrentCharts().forEach(cfg=>{createChart(cfg.key);if(cfg.special!=='sentiment')renderLegend(cfg.key);renderFilterChips(cfg.key);updateChartMeta(cfg.key);});
+renderResults();updateResultsCount();
+
+document.querySelectorAll('.view-tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
+setupDropdown('btn-date','dd-date','lbl-date','date',false);
+
+document.getElementById('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')onGlobalFilterChange('keyword',e.target.value);});
+document.getElementById('btn-clear-all').addEventListener('click',()=>{if(!hasAnyChartFilter())return;Object.values(appState.cf).forEach(s=>s.clear());refreshAll();showToast('Filters cleared','Showing all results','fa-xmark');});
+document.addEventListener('click',()=>{document.querySelectorAll('.dropdown-menu.open').forEach(d=>d.classList.remove('open'));document.querySelectorAll('.filter-btn.open').forEach(b=>b.classList.remove('open'));});
+</script>
+</body>
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seerist Design — Prototypes & Specs</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #fff; color: #0f172a; min-height: 100vh; }
+
+    .grid-wrap { background: #f8fafc; padding: 24px; }
+    .grid-wrap .grid { max-width: 1100px; margin: 0 auto; padding: 0; }
+
+    .header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 20px 24px 16px;
+    }
+    .logo-mark {
+      width: 26px; height: 26px; background: #00A651; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .logo-mark i { color: #fff; font-size: 12px; }
+    .logo-name { font-size: 14px; font-weight: 700; color: #0f172a; }
+    .header-divider { width: 1px; height: 16px; background: #e2e8f0; margin: 0 4px; }
+    .header-sub { font-size: 13px; color: #94a3b8; }
+
+    .filter-bar {
+      display: flex; gap: 2px;
+      padding: 0 24px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .filter-tab {
+      display: flex; align-items: center; gap: 6px;
+      padding: 10px 14px;
+      font-size: 13px; font-weight: 500; color: #64748b;
+      border: none; background: none; cursor: pointer;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      transition: color .15s;
+    }
+    .filter-tab.active { color: #0f172a; border-bottom-color: #0f172a; }
+    .tab-count {
+      min-width: 20px; height: 18px; padding: 0 5px;
+      background: #f1f5f9; border-radius: 999px;
+      font-size: 11px; font-weight: 600;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .filter-tab.active .tab-count { background: #e2e8f0; }
+
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+    .card {
+      border: 1px solid #e2e8f0; border-radius: 12px;
+      overflow: hidden; background: #fff;
+      display: flex; flex-direction: column;
+    }
+    .card[hidden] { display: none; }
+
+    .card-preview {
+      position: relative; height: 140px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .card-preview.blue   { background: #EFF6FF; }
+    .card-preview.amber  { background: #FFFBEB; }
+    .card-preview.purple { background: #F5F3FF; }
+    .card-preview.green  { background: #F0FDF4; }
+
+    .type-badge {
+      position: absolute; top: 10px; left: 10px;
+      font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+      padding: 3px 7px; border-radius: 4px;
+    }
+    .type-badge.prototype   { background: #DBEAFE; color: #1D4ED8; }
+    .type-badge.concept     { background: #FEF3C7; color: #D97706; }
+    .type-badge.exploration { background: #EDE9FE; color: #7C3AED; }
+
+    .preview-icon { font-size: 36px; opacity: .18; }
+    .preview-icon.blue   { color: #3B82F6; }
+    .preview-icon.amber  { color: #D97706; }
+    .preview-icon.purple { color: #7C3AED; }
+    .preview-icon.green  { color: #00A651; }
+
+    .card-body { padding: 14px 16px 16px; display: flex; flex-direction: column; flex: 1; }
+    .card-eyebrow {
+      font-size: 10.5px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .07em; color: #94a3b8; margin-bottom: 5px;
+    }
+    .card-title { font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 6px; line-height: 1.3; }
+    .card-desc  { font-size: 12.5px; color: #64748b; line-height: 1.55; flex: 1; margin-bottom: 14px; }
+
+    .card-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .btn-open {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px;
+      background: #0f172a; color: #fff;
+      font-size: 12.5px; font-weight: 500; font-family: inherit;
+      border: none; border-radius: 6px; cursor: pointer;
+      text-decoration: none; transition: background .15s;
+    }
+    .btn-open:hover { background: #334155; }
+    .btn-open i { font-size: 10px; }
+
+    .btn-specs {
+      display: inline-flex; align-items: center;
+      padding: 6px 12px;
+      background: transparent; color: #475569;
+      font-size: 12.5px; font-weight: 500; font-family: inherit;
+      border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer;
+      text-decoration: none; transition: border-color .15s, color .15s;
+    }
+    .btn-specs:hover { border-color: #94a3b8; color: #0f172a; }
+
+    .badge-monitor {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 10px;
+      background: #f8fafc; color: #64748b;
+      font-size: 11.5px; font-weight: 500;
+      border: 1px solid #e2e8f0; border-radius: 6px;
+    }
+    .badge-monitor i { font-size: 10px; color: #94a3b8; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-mark"><i class="fa-solid fa-shield-halved"></i></div>
+  <span class="logo-name">Seerist</span>
+  <div class="header-divider"></div>
+  <span class="header-sub">Prototypes &amp; Specs</span>
+</div>
+
+<div class="filter-bar">
+  <button class="filter-tab active" data-filter="all">All <span class="tab-count">12</span></button>
+  <button class="filter-tab" data-filter="prototype">Prototype <span class="tab-count">8</span></button>
+  <button class="filter-tab" data-filter="concept">Concept <span class="tab-count">2</span></button>
+  <button class="filter-tab" data-filter="exploration">Exploration <span class="tab-count">2</span></button>
+</div>
+
+<div class="grid-wrap"><div class="grid">
+
+  <div class="card" data-type="prototype">
+    <div class="card-preview blue">
+      <span class="type-badge prototype">Prototype</span>
+      <i class="fa-solid fa-chart-bar preview-icon blue"></i>
+    </div>
+    <div class="card-body">
+      <div class="card-eyebrow">Feature · Data Viz</div>
+      <div class="card-title">Trend View</div>
+      <div class="card-desc">Interactive incident trend chart with Design/Specs toggle and post-EOS variant.</div>
+      <div class="card-actions">
+        <a class="btn-open" href="seerist-trends/v4.html" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open</a>
+        <a class="btn-specs" href="seerist-trends/specs.html" target="_blank">Specs</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-type="concept">
+    <div class="card-preview amber">
+      <span class="type-badge concept">Concept</span>
+      <i class="fa-solid fa-rectangle-list preview-icon amber"></i>
+    </div>
+    <div class="card-body">
+      <div class="card-eyebrow">Feature · Discover</div>
+      <div class="card-title">Preview Content Cards</div>
+      <div class="card-desc">Preview incident content inline without leaving the feed.</div>
+      <div class="card-actions">
+        <a class="btn-open" href="seerist-preview/index.html" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-type="prototype">
+    <div class="card-preview blue">
+      <span class="type-badge prototype">Prototype</span>
+      <i class="fa-solid fa-earth-americas preview-icon blue"></i>
+    </div>
+    <div class="card-body">
+      <div class="card-eyebrow">Feature · Settings</div>
+      <div class="card-title">Region Selection</div>
+      <div class="card-desc">Hierarchical country/region picker modal with save state.</div>
+      <div class="card-actions">
+        <a class="btn-open" href="seerist-region-wf/index.html" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-type="prototype">
+    <div class="card-preview blue">
+      <span class="type-badge prototype">Prototype</span>
+      <i class="fa-solid fa-magnifying-glass preview-icon blue"></i>
+    </div>
+    <div class="card-body">
+      <div class="card-eyebrow">Feature · Search</div>
+      <div class="card-title">Search Library</div>
+      <div class="card-desc">Saved Searches, Organization Library, and Seerist Library with filters, expand, and run states.</div>
+      <div class="card-actions">
+        <a class="btn-open" href="seerist-search-lib/index.html" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-type="prototype">
+    <div class="card-preview blue">
+      <span class="type-badge prototype">Prototype</span>
+      <i class="fa-solid fa-sliders preview-icon blue"></i>
+    </div>
+    <div class="card-body">
+      <div class="card-eyebrow">Feature · Search</div>
+      <div class="card-title">Location Filter</div>
+      <div class="card-desc">Geography and asset filter panel — dropdown variants with region, country, and asset selection.</div>
+      <div class="card-actions">
+        <a class="btn-open" href="seerist-filters/v2.html" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-type="concept">
+    <div class="card-preview amber">
+      <span class="type-badge concept">Concept</span>
+      <i class="fa-solid fa-highlighter preview-icon amber"></i>
+    </div>
+    <div class="card-body">
+      <div class="card-eyebrow">Component · Interaction</div>
+      <div class="card-title">Search Highlight</div>
+      <div class="card-desc">Keyword match highlighting inline across feed items.</div>
+      <div class="card-actions">
+        <a class="btn-open" href="seerist-search-hl/index.html" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open</a>
+        <a class="btn-specs" href="#" target="_blank">Specs</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-type="prototype">
+    <div class="card-preview blue">
+      <span class="type-badge prototype">Prototype</span>
+      <i class="fa-solid fa-map-location-dot preview-icon blue"></i>
+    </div>
+    <div class="card-body">
+      <div class="card-eyebrow">Feature · Map</div>
+      <div class="card-title">Map Markers</div>
+      <div class="card-desc">Marker differentiation with clustering, stacked locations, assets, and layer controls.</div>
+      <div class="card-actions">
+        <a class="btn-open" href="seerist-map-markers/index.html" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-type="exploration">
+    <div class="card-preview purple">
+      <span class="type-badge exploration">Exploration</span>
+      <i class="fa-solid fa-newspaper preview-icon purple"></i>
+    </div>
+    <div class="card-body">
+      <div class="card-eyebrow">Feature · Feed</div>
+      <div class="card-title">Seerist Feed</div>
+      <div class="card-desc">Feed layout exploration — information hierarchy, card density, and content taxonomy.</div>
+      <div class="card-actions">
+        <a class="btn-open" href="seerist-exploration/index.html" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-type="prototype">
+    <div class="card-preview blue">
+      <span class="type-badge prototype">Prototype</span>
+      <i class="fa-solid fa-inbox preview-icon blue"></i>
+    </div>
+    <div class="card-body">
+      <div class="card-eyebrow">Feature · Inbox</div>
+      <div class="card-title">Inbox</div>
+      <div class="card-desc">Notification inbox with read/unread states, alert grouping, and action management.</div>
+      <div class="card-actions">
+        <a class="btn-open" href="seerist-inbox/index.html" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-type="prototype">
+    <div class="card-preview blue">
+      <span class="type-badge prototype">Prototype</span>
+      <i class="fa-solid fa-sliders preview-icon blue"></i>
+    </div>
+    <div class="card-body">
+      <div class="card-eyebrow">Feature · Search</div>
+      <div class="card-title">Search Filter</div>
+      <div class="card-desc">Search results with filter bar, location geo panel, assets, and Add Filter.</div>
+      <div class="card-actions">
+        <a class="btn-open" href="seerist-search/v2.html" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open</a>
+        <span class="badge-monitor"><i class="fa-solid fa-display"></i> On Monitor</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-type="exploration">
+    <div class="card-preview purple">
+      <span class="type-badge exploration">Exploration</span>
+      <i class="fa-solid fa-list preview-icon purple"></i>
+    </div>
+    <div class="card-body">
+      <div class="card-eyebrow">Component · Navigation</div>
+      <div class="card-title">TOC Alternatives</div>
+      <div class="card-desc">Table of contents layout variants for filter navigation and content hierarchy.</div>
+      <div class="card-actions">
+        <a class="btn-open" href="seerist-filters/toc2.html" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open</a>
+      </div>
+    </div>
+  </div>
+
+</div></div>
+
+<script>
+  const tabs = document.querySelectorAll('.filter-tab');
+  const cards = document.querySelectorAll('.card');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const f = tab.dataset.filter;
+      cards.forEach(card => { card.hidden = !(f === 'all' || card.dataset.type === f); });
+    });
+  });
+</script>
+
+</body>
+</html>
