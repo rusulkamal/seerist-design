@@ -1178,34 +1178,137 @@
           </div>
           <div class="cat-applies-note">Applies to Events and News &amp; Social.</div>
           <div class="ms-options" id="category-options">
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Anniversary" /><span class="ms-option-label">Anniversary</span><span class="ms-option-count">84</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Conflict / Military" /><span class="ms-option-label">Conflict / Military</span><span class="ms-option-count">712</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Crime" /><span class="ms-option-label">Crime</span><span class="ms-option-count">431</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Cyber" /><span class="ms-option-label">Cyber</span><span class="ms-option-count">93</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Disaster" /><span class="ms-option-label">Disaster</span><span class="ms-option-count">156</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Geopolitical" /><span class="ms-option-label">Geopolitical</span><span class="ms-option-count">288</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Health" /><span class="ms-option-label">Health</span><span class="ms-option-count">74</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Holiday" /><span class="ms-option-label">Holiday</span><span class="ms-option-count">41</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Hostile Communication" /><span class="ms-option-label">Hostile Communication</span><span class="ms-option-count">29</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Maritime" /><span class="ms-option-label">Maritime</span><span class="ms-option-count">118</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Official Actions" /><span class="ms-option-label">Official Actions</span><span class="ms-option-count">204</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Political" /><span class="ms-option-label">Political</span><span class="ms-option-count">375</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Sporting / Cultural / Other" /><span class="ms-option-label">Sporting / Cultural / Other</span><span class="ms-option-count">67</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Terrorism" /><span class="ms-option-label">Terrorism</span><span class="ms-option-count">263</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Transport" /><span class="ms-option-label">Transport</span><span class="ms-option-count">52</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Unrest" /><span class="ms-option-label">Unrest</span><span class="ms-option-count">189</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Business" /><span class="ms-option-label">Business</span><span class="ms-option-count">2,341</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Culture" /><span class="ms-option-label">Culture</span><span class="ms-option-count">1,102</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Diplomacy" /><span class="ms-option-label">Diplomacy</span><span class="ms-option-count">874</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Economy" /><span class="ms-option-label">Economy</span><span class="ms-option-count">1,956</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Environment" /><span class="ms-option-label">Environment</span><span class="ms-option-count">543</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Human Rights" /><span class="ms-option-label">Human Rights</span><span class="ms-option-count">392</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Military" /><span class="ms-option-label">Military</span><span class="ms-option-count">1,287</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Politics" /><span class="ms-option-label">Politics</span><span class="ms-option-count">2,104</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Religion" /><span class="ms-option-label">Religion</span><span class="ms-option-count">318</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Science" /><span class="ms-option-label">Science</span><span class="ms-option-count">224</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Society" /><span class="ms-option-label">Society</span><span class="ms-option-count">761</span></label>
-            <label class="ms-option"><input type="checkbox" data-filter="category" data-val="Technology" /><span class="ms-option-label">Technology</span><span class="ms-option-count">983</span></label>
+            <div class="ms-nested-group-header">Events</div>
+            <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Anniversary" /><span class="ms-option-label">Anniversary</span><span class="ms-option-count">84</span></label>
+            <div class="hier-group-row">
+              <button class="hier-toggle cat-toggle" type="button"><i class="fa-solid fa-chevron-down hier-chev"></i></button>
+              <label class="ms-option ms-group-parent" style="flex:1;display:flex;align-items:center;">
+                <input type="checkbox" class="cat-parent-cb" data-filter="category" data-val="Conflict / Military" />
+                <span class="ms-option-label">Conflict / Military</span><span class="ms-option-count">712</span>
+              </label>
+            </div>
+            <div class="ms-group-children">
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Airstrike" /><span class="ms-option-label">Airstrike</span><span class="ms-option-count">134</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Artillery" /><span class="ms-option-label">Artillery</span><span class="ms-option-count">89</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Clashes" /><span class="ms-option-label">Clashes</span><span class="ms-option-count">203</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Coup" /><span class="ms-option-label">Coup</span><span class="ms-option-count">12</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Military Operation" /><span class="ms-option-label">Military Operation</span><span class="ms-option-count">274</span></label>
+            </div>
+            <div class="hier-group-row">
+              <button class="hier-toggle cat-toggle" type="button"><i class="fa-solid fa-chevron-down hier-chev"></i></button>
+              <label class="ms-option ms-group-parent" style="flex:1;display:flex;align-items:center;">
+                <input type="checkbox" class="cat-parent-cb" data-filter="category" data-val="Crime" />
+                <span class="ms-option-label">Crime</span><span class="ms-option-count">431</span>
+              </label>
+            </div>
+            <div class="ms-group-children">
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Drugs / Smuggling / Trafficking" /><span class="ms-option-label">Drugs / Smuggling / Trafficking</span><span class="ms-option-count">87</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Kidnapping" /><span class="ms-option-label">Kidnapping</span><span class="ms-option-count">64</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Shooting" /><span class="ms-option-label">Shooting</span><span class="ms-option-count">112</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Theft" /><span class="ms-option-label">Theft</span><span class="ms-option-count">95</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Violence / Robbery / Assault" /><span class="ms-option-label">Violence / Robbery / Assault</span><span class="ms-option-count">73</span></label>
+            </div>
+            <div class="hier-group-row">
+              <button class="hier-toggle cat-toggle" type="button"><i class="fa-solid fa-chevron-down hier-chev"></i></button>
+              <label class="ms-option ms-group-parent" style="flex:1;display:flex;align-items:center;">
+                <input type="checkbox" class="cat-parent-cb" data-filter="category" data-val="Cyber" />
+                <span class="ms-option-label">Cyber</span><span class="ms-option-count">93</span>
+              </label>
+            </div>
+            <div class="ms-group-children">
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Data Breach" /><span class="ms-option-label">Data Breach</span><span class="ms-option-count">28</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="DDoS Attack" /><span class="ms-option-label">DDoS Attack</span><span class="ms-option-count">15</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Espionage" /><span class="ms-option-label">Espionage</span><span class="ms-option-count">19</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Malware" /><span class="ms-option-label">Malware</span><span class="ms-option-count">18</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Ransomware" /><span class="ms-option-label">Ransomware</span><span class="ms-option-count">13</span></label>
+            </div>
+            <div class="hier-group-row">
+              <button class="hier-toggle cat-toggle" type="button"><i class="fa-solid fa-chevron-down hier-chev"></i></button>
+              <label class="ms-option ms-group-parent" style="flex:1;display:flex;align-items:center;">
+                <input type="checkbox" class="cat-parent-cb" data-filter="category" data-val="Disaster" />
+                <span class="ms-option-label">Disaster</span><span class="ms-option-count">156</span>
+              </label>
+            </div>
+            <div class="ms-group-children">
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Earthquake" /><span class="ms-option-label">Earthquake</span><span class="ms-option-count">38</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Flood" /><span class="ms-option-label">Flood</span><span class="ms-option-count">42</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Hurricane / Cyclone" /><span class="ms-option-label">Hurricane / Cyclone</span><span class="ms-option-count">27</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Industrial Accident" /><span class="ms-option-label">Industrial Accident</span><span class="ms-option-count">31</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Wildfire" /><span class="ms-option-label">Wildfire</span><span class="ms-option-count">18</span></label>
+            </div>
+            <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Geopolitical" /><span class="ms-option-label">Geopolitical</span><span class="ms-option-count">288</span></label>
+            <div class="hier-group-row">
+              <button class="hier-toggle cat-toggle" type="button"><i class="fa-solid fa-chevron-down hier-chev"></i></button>
+              <label class="ms-option ms-group-parent" style="flex:1;display:flex;align-items:center;">
+                <input type="checkbox" class="cat-parent-cb" data-filter="category" data-val="Health" />
+                <span class="ms-option-label">Health</span><span class="ms-option-count">74</span>
+              </label>
+            </div>
+            <div class="ms-group-children">
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Disease Outbreak" /><span class="ms-option-label">Disease Outbreak</span><span class="ms-option-count">31</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Pandemic / Epidemic" /><span class="ms-option-label">Pandemic / Epidemic</span><span class="ms-option-count">24</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Public Health Alert" /><span class="ms-option-label">Public Health Alert</span><span class="ms-option-count">19</span></label>
+            </div>
+            <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Holiday" /><span class="ms-option-label">Holiday</span><span class="ms-option-count">41</span></label>
+            <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Hostile Communication" /><span class="ms-option-label">Hostile Communication</span><span class="ms-option-count">29</span></label>
+            <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Maritime" /><span class="ms-option-label">Maritime</span><span class="ms-option-count">118</span></label>
+            <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Official Actions" /><span class="ms-option-label">Official Actions</span><span class="ms-option-count">204</span></label>
+            <div class="hier-group-row">
+              <button class="hier-toggle cat-toggle" type="button"><i class="fa-solid fa-chevron-down hier-chev"></i></button>
+              <label class="ms-option ms-group-parent" style="flex:1;display:flex;align-items:center;">
+                <input type="checkbox" class="cat-parent-cb" data-filter="category" data-val="Political" />
+                <span class="ms-option-label">Political</span><span class="ms-option-count">375</span>
+              </label>
+            </div>
+            <div class="ms-group-children">
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Coup (Political)" /><span class="ms-option-label">Coup</span><span class="ms-option-count">8</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Election" /><span class="ms-option-label">Election</span><span class="ms-option-count">94</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Government Crisis" /><span class="ms-option-label">Government Crisis</span><span class="ms-option-count">67</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Protest / Demonstration" /><span class="ms-option-label">Protest / Demonstration</span><span class="ms-option-count">141</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Referendum" /><span class="ms-option-label">Referendum</span><span class="ms-option-count">65</span></label>
+            </div>
+            <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Sporting / Cultural / Other" /><span class="ms-option-label">Sporting / Cultural / Other</span><span class="ms-option-count">67</span></label>
+            <div class="hier-group-row">
+              <button class="hier-toggle cat-toggle" type="button"><i class="fa-solid fa-chevron-down hier-chev"></i></button>
+              <label class="ms-option ms-group-parent" style="flex:1;display:flex;align-items:center;">
+                <input type="checkbox" class="cat-parent-cb" data-filter="category" data-val="Terrorism" />
+                <span class="ms-option-label">Terrorism</span><span class="ms-option-count">263</span>
+              </label>
+            </div>
+            <div class="ms-group-children">
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Bombing" /><span class="ms-option-label">Bombing</span><span class="ms-option-count">71</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Hostage Taking" /><span class="ms-option-label">Hostage Taking</span><span class="ms-option-count">24</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="IED Attack" /><span class="ms-option-label">IED Attack</span><span class="ms-option-count">58</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Shooting Attack" /><span class="ms-option-label">Shooting Attack</span><span class="ms-option-count">66</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Suicide Attack" /><span class="ms-option-label">Suicide Attack</span><span class="ms-option-count">44</span></label>
+            </div>
+            <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Transport" /><span class="ms-option-label">Transport</span><span class="ms-option-count">52</span></label>
+            <div class="hier-group-row">
+              <button class="hier-toggle cat-toggle" type="button"><i class="fa-solid fa-chevron-down hier-chev"></i></button>
+              <label class="ms-option ms-group-parent" style="flex:1;display:flex;align-items:center;">
+                <input type="checkbox" class="cat-parent-cb" data-filter="category" data-val="Unrest" />
+                <span class="ms-option-label">Unrest</span><span class="ms-option-count">189</span>
+              </label>
+            </div>
+            <div class="ms-group-children">
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Demonstration" /><span class="ms-option-label">Demonstration</span><span class="ms-option-count">78</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="General Strike" /><span class="ms-option-label">General Strike</span><span class="ms-option-count">34</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Protest" /><span class="ms-option-label">Protest</span><span class="ms-option-count">58</span></label>
+              <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Riot" /><span class="ms-option-label">Riot</span><span class="ms-option-count">19</span></label>
+            </div>
+            <div class="ms-nested-group-header cat-section-sep">News &amp; Social</div>
+            <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Business" /><span class="ms-option-label">Business</span><span class="ms-option-count">2,341</span></label>
+            <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Culture" /><span class="ms-option-label">Culture</span><span class="ms-option-count">1,102</span></label>
+            <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Diplomacy" /><span class="ms-option-label">Diplomacy</span><span class="ms-option-count">874</span></label>
+            <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Economy" /><span class="ms-option-label">Economy</span><span class="ms-option-count">1,956</span></label>
+            <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Environment" /><span class="ms-option-label">Environment</span><span class="ms-option-count">543</span></label>
+            <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Human Rights" /><span class="ms-option-label">Human Rights</span><span class="ms-option-count">392</span></label>
+            <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Military" /><span class="ms-option-label">Military</span><span class="ms-option-count">1,287</span></label>
+            <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Politics" /><span class="ms-option-label">Politics</span><span class="ms-option-count">2,104</span></label>
+            <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Religion" /><span class="ms-option-label">Religion</span><span class="ms-option-count">318</span></label>
+            <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Science" /><span class="ms-option-label">Science</span><span class="ms-option-count">224</span></label>
+            <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Society" /><span class="ms-option-label">Society</span><span class="ms-option-count">761</span></label>
+            <label class="ms-option"><input type="checkbox" class="cat-child-cb" data-filter="category" data-val="Technology" /><span class="ms-option-label">Technology</span><span class="ms-option-count">983</span></label>
           </div>
         </div>
       </div>
@@ -1395,7 +1498,7 @@
     // Events
     assetType:          { label: 'Asset Type',                   options: ['African union','Agriculture / Processing facility','Airport','Apparel','Army','ATM','Bank branch','Bar','Bridge','Brokerage','Buddhist asset','Bus','Cargo aircraft','Cargo vessel','Cash in transit','Central government','Christian asset','Clinic','Coal plant','Combatant','Commercial aircraft','Community centre','Courthouse','Dam','Educational research facility','Embassy and consulate','EU','Expatriate','Factory','Gas plant','Guard','Hindu asset','Hotel','Hydro plant','Immigrant','Infrastructure','Jewish asset','Laboratory','Land / Property','Legal','Library','Livestock','Local government','Medical research facility','Military aircraft','Military barrack','Military base','Mining site','Ministry','Monument','Museum','Muslim asset','NATO','Nightclub','Nuclear power plant','Office building','Oil / Gas terminal','Other religious asset','Park','Parliament','Passenger vessel','Personnel','Pipeline','Place of worship','Police station','Policeman','Political party / group','Port / Terminal','Presidential palace','Printed Press','Prison and Detention facility','Public official','Pump station','Pylon / Wire','Radio tower / Antenna','Railway station','Railway track','Refinery','Refugee','Residence','Restaurant','Road','School','Shop / Store','Shopping Mall','Sikh asset','Solar plant','Soldier','Square','Stadium','Stock exchange','Sub-Station','Subway','Television','Theatre / Concert hall','Train','Tunnel','UN','University','Unknown','Vehicle','Warehouse','Water supply','Wind Farm',"Women's care clinic",'Zoo'] },
     attackType:         { label: 'Attack Type',                  options: ['Active Assailant','Airstrike','Arson / Firebomb','Artillery','Assassination','Blockades','Capture','Car bomb','CBRN','Drone','Grenade','Gun (firearm)','Hijacking','Hostage','IED / Homemade','Kidnap','Knife / bladed weapon','Landmine','Letter bomb','MANPAD','Military drone','Missile / Rocket','Mortar','Naval mine','Protest (demonstration)','Riot','Roadside bomb','Robbery','RPG','Sit-in','Sticks / beating','Strike','Suicide bomber','Vandalism','Vehicle ramming'] },
-    locationPrecision:  { label: 'Location Precision',           options: ['Asset / Building','City / Estimated','Country','State / Province','Street / Neighborhood','Unknown / None'] },
+    locationPrecision:  { label: 'Location Precision',           options: ['Asset / Building','Street / Neighborhood','City / Estimated','State / Province','Country','Unknown / None'] },
     perpetrator:        { label: 'Perpetrator',                  options: ['Anarchists','Animal rights activists','Anti-capitalists','Armed opposition group','Common criminals','Environmentalists','Ethnic militants','Indigenous activists','Islamist extremists','Labour / Trade unions','Leftist guerrillas','Local community groups','Organised criminals','Religious extremists','Right to life activists','Right-wing extremists','Security forces','Unknown'] },
     sector:             { label: 'Sector',                       options: ['Agriculture','Aviation','Construction','Education','Entertainment','Financial','Government','Healthcare','Hospitality','International institutions','Law enforcement / Legal','Manufacturing','Marine','Media','Military','Mining',"NGO's",'Oil and Gas','Pharmaceuticals','Power','Private Property','Public spaces','Rail','Religious','Retail','Road','Telecommunications','Unknown'] },
     severity:           { label: 'Severity',                     options: ['High','Medium','Low'] },
@@ -1426,7 +1529,7 @@
     ]},
     sourceType:         { label: 'Source Type',                  options: ['Academic / Think Tank','Activist / Extremist','Forum','Humanitarian','Journalistic','Labor Union','Official / Government','Other','Political','State-Controlled Media','(Not Set)'] },
     // Risk Rating Changes / Evacuation Changes
-    riskDirection:      { label: 'Direction',                    options: ['Increased','Decreased'] },
+    riskDirection:      { label: 'Direction',                    options: ['Decreased','Increased'] },
   };
   Object.keys(FILTER_DEFS).forEach(k => { sel[k] = new Set(); });
 
@@ -1473,14 +1576,40 @@
 
   document.getElementById('category-search').addEventListener('input', function() {
     const q = this.value.toLowerCase();
-    document.querySelectorAll('#category-options .ms-option').forEach(o => {
-      o.style.display = o.querySelector('.ms-option-label').textContent.toLowerCase().includes(q) ? '' : 'none';
+    // Leaf options (direct children of #category-options)
+    document.querySelectorAll('#category-options > .ms-option').forEach(o => {
+      o.style.display = !q || o.querySelector('.ms-option-label').textContent.toLowerCase().includes(q) ? '' : 'none';
     });
+    // Parent groups
+    document.querySelectorAll('#category-options .hier-group-row').forEach(row => {
+      const parentText = row.querySelector('.ms-option-label').textContent.toLowerCase();
+      const childrenWrap = row.nextElementSibling;
+      const childOpts = [...childrenWrap.querySelectorAll('.ms-option')];
+      const childMatches = childOpts.filter(o => o.querySelector('.ms-option-label').textContent.toLowerCase().includes(q));
+      if (!q) {
+        row.style.display = ''; childrenWrap.style.display = '';
+        childOpts.forEach(o => o.style.display = '');
+      } else if (parentText.includes(q)) {
+        row.style.display = ''; childrenWrap.style.display = '';
+        childOpts.forEach(o => o.style.display = '');
+        row.querySelector('.hier-chev').style.transform = '';
+      } else if (childMatches.length) {
+        row.style.display = ''; childrenWrap.style.display = '';
+        row.querySelector('.hier-chev').style.transform = '';
+        childOpts.forEach(o => { o.style.display = o.querySelector('.ms-option-label').textContent.toLowerCase().includes(q) ? '' : 'none'; });
+      } else {
+        row.style.display = 'none'; childrenWrap.style.display = 'none';
+      }
+    });
+    // Section headers
     document.querySelectorAll('#category-options .ms-nested-group-header').forEach(h => {
-      const sibs = [];
+      let anyVisible = false;
       let s = h.nextElementSibling;
-      while (s && !s.classList.contains('ms-nested-group-header')) { sibs.push(s); s = s.nextElementSibling; }
-      h.style.display = sibs.some(el => el.style.display !== 'none') ? '' : 'none';
+      while (s && !s.classList.contains('ms-nested-group-header')) {
+        if (s.style.display !== 'none') anyVisible = true;
+        s = s.nextElementSibling;
+      }
+      h.style.display = anyVisible || !q ? '' : 'none';
     });
   });
 
@@ -2142,6 +2271,7 @@
 
     // Uncheck all filter checkboxes
     document.querySelectorAll('input[data-filter]').forEach(cb => { cb.checked = false; });
+    document.querySelectorAll('.cat-parent-cb').forEach(cb => { cb.checked = false; cb.indeterminate = false; });
 
     // Clear all sel sets
     Object.keys(sel).forEach(k => sel[k].clear());
@@ -2330,7 +2460,39 @@
     const catSearch = document.getElementById('category-search');
     if (catSearch) catSearch.value = '';
     document.querySelectorAll('#category-options .ms-option').forEach(o => o.style.display = '');
-    document.querySelectorAll('#category-options .ms-nested-group-header').forEach(h => h.style.display = '');
+    document.querySelectorAll('#category-options .ms-nested-group-header, #category-options .hier-group-row, #category-options .ms-group-children').forEach(el => el.style.display = '');
+    document.querySelectorAll('#category-options .cat-parent-cb').forEach(cb => { cb.checked = false; cb.indeterminate = false; });
+  });
+
+  // Category expand/collapse toggles
+  document.querySelectorAll('#category-options .cat-toggle').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const childrenEl = btn.closest('.hier-group-row').nextElementSibling;
+      const chev = btn.querySelector('.hier-chev');
+      const isOpen = childrenEl.style.display !== 'none';
+      childrenEl.style.display = isOpen ? 'none' : '';
+      chev.style.transform = isOpen ? 'rotate(-90deg)' : '';
+    });
+  });
+
+  // Category parent-child checkbox sync
+  document.querySelectorAll('#category-options .cat-parent-cb').forEach(parentCb => {
+    const childrenWrap = parentCb.closest('.hier-group-row').nextElementSibling;
+    const childCbs = [...childrenWrap.querySelectorAll('.cat-child-cb')];
+    function syncParent() {
+      const n = childCbs.filter(c => c.checked).length;
+      parentCb.checked = n === childCbs.length && n > 0;
+      parentCb.indeterminate = n > 0 && n < childCbs.length;
+    }
+    parentCb.addEventListener('change', function() {
+      childCbs.forEach(c => {
+        c.checked = this.checked;
+        if (this.checked) sel.category.add(c.dataset.val); else sel.category.delete(c.dataset.val);
+      });
+      updateChipCount('category');
+    });
+    childCbs.forEach(cb => cb.addEventListener('change', () => syncParent()));
   });
 
   // ── Add Filter search ──────────────────────────────────
