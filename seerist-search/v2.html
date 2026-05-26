@@ -697,6 +697,16 @@
     .ct-sub-group .ms-option-label { font-size: 12px; color: #64748b; }
     .ct-sub-group .ms-option-count { font-size: 11px; color: #94a3b8; }
 
+    /* Hierarchical picker rows */
+    .hier-group-row { display: flex; align-items: stretch; }
+    .hier-toggle {
+      background: none; border: none; cursor: pointer;
+      padding: 0 4px 0 10px; display: flex; align-items: center; flex-shrink: 0;
+    }
+    .hier-toggle .hier-chev { font-size: 9px; color: #94a3b8; transition: transform .2s; }
+    .hier-group-row .ms-option { flex: 1; padding-left: 4px; }
+    .ms-group-children { padding-left: 16px; border-left: 2px solid #f1f5f9; margin-left: 17px; }
+
     /* Search right buttons */
     .search-right {
       display: flex; align-items: center; gap: 5px;
@@ -973,8 +983,9 @@
             <span class="date-chip" data-val="Last Hour">Last Hour</span>
             <span class="date-chip" data-val="Last 24 hours">Last 24 hours</span>
             <span class="date-chip" data-val="Last 7 days">Last 7 days</span>
-            <span class="date-chip" data-val="Next 7 days">Next 7 days</span>
             <span class="date-chip" data-val="Last 30 days">Last 30 days</span>
+            <span class="date-chip" data-val="Last 60 days">Last 60 days</span>
+            <span class="date-chip" data-val="Next 7 days">Next 7 days</span>
             <span class="date-chip" data-val="Next 30 days">Next 30 days</span>
           </div>
           <div class="date-apply-to">
@@ -1200,8 +1211,8 @@
 
       <!-- Add filter -->
       <div class="add-filter-btn" id="addFilterBtn">
-        <i class="fa-solid fa-plus" style="font-size:11px;"></i>
-        Add filter
+        <i class="fa-solid fa-sliders" style="font-size:11px;"></i>
+        Advanced Filters
         <span class="af-badge" id="af-badge" style="display:none;"></span>
         <div class="dropdown" id="dd-addFilter" style="min-width:260px; max-height:460px; overflow-y:auto;">
           <div class="af-search-wrap">
@@ -1409,7 +1420,10 @@
     sentiment:          { label: 'Sentiment',                    options: ['Negative','Neutral','Positive'] },
     socialAuthenticity: { label: 'Social Authenticity',          options: ['Authentic','Inauthentic','(Not set)'] },
     socialNumbers:      { label: 'Social Numbers',               options: ['High >100k','Medium 10–100k','Low <10k'] },
-    sourcePlatform:     { label: 'Source Platform',              options: ['4chan','Bluesky','Discord','Facebook','Gettr','Instagram','LinkedIn','Mastodon','Parler','Reddit','Rumble','Telegram','TikTok','Truth Social','Tumblr','VK','WeChat','WhatsApp','X (Twitter)','YouTube'] },
+    sourcePlatform:     { label: 'Source Platform', nested: true, groups: [
+      { label: 'News', options: ['Al Jazeera','AP Wire','BBC Online','Bloomberg','CNN Online','Reuters','The Guardian'] },
+      { label: 'Social', options: ['4chan','Bluesky','Discord','Facebook','Gettr','Instagram','LinkedIn','Mastodon','Parler','Reddit','Rumble','Telegram','TikTok','Truth Social','Tumblr','VK','WeChat','WhatsApp','X (Twitter)','YouTube'] },
+    ]},
     sourceType:         { label: 'Source Type',                  options: ['Academic / Think Tank','Activist / Extremist','Forum','Humanitarian','Journalistic','Labor Union','Official / Government','Other','Political','State-Controlled Media'] },
     // Risk Rating Changes / Evacuation Changes
     riskDirection:      { label: 'Direction',                    options: ['Increased','Decreased'] },
@@ -1755,11 +1769,14 @@
                 <span class="ms-option-label">${g.label}</span>
                 <span class="ms-option-result">${fakeCount(key + g.label)}</span>
                </label>`
-            : `<label class="ms-option ms-group-parent" style="display:flex;align-items:center;">
-                <input type="checkbox" class="parent-cb" data-gi="${gi}" />
-                <span class="ms-option-label">${g.label}</span>
-                <span class="ms-option-result">${fakeCount(key + g.label)}</span>
-               </label>
+            : `<div class="hier-group-row">
+                <button class="hier-toggle" data-gi="${gi}" type="button"><i class="fa-solid fa-chevron-down hier-chev"></i></button>
+                <label class="ms-option ms-group-parent" style="flex:1;display:flex;align-items:center;">
+                  <input type="checkbox" class="parent-cb" data-gi="${gi}" />
+                  <span class="ms-option-label">${g.label}</span>
+                  <span class="ms-option-result">${fakeCount(key + g.label)}</span>
+                </label>
+               </div>
                <div class="ms-group-children" data-gi="${gi}">
                  ${renderChildOpts(g.options, gi)}
                </div>`
@@ -1841,6 +1858,18 @@
         });
         childCbs.forEach(cb => cb.addEventListener('change', () => { syncParent(); updateDynChipLabel(); }));
       });
+      // Expand/collapse toggles
+      chip.querySelectorAll('.hier-toggle').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const gi = btn.dataset.gi;
+          const children = chip.querySelector(`.ms-group-children[data-gi="${gi}"]`);
+          const chev = btn.querySelector('.hier-chev');
+          const isOpen = children.style.display !== 'none';
+          children.style.display = isOpen ? 'none' : '';
+          chev.style.transform = isOpen ? 'rotate(-90deg)' : '';
+        });
+      });
     } else {
       chip.querySelectorAll('.ms-option input').forEach(cb => cb.addEventListener('change', () => updateDynChipLabel()));
     }
@@ -1858,7 +1887,8 @@
       if (def.nested && def.groups) {
         def.groups.forEach((g, gi) => {
           const wrap = chip.querySelector(`.ms-group-children[data-gi="${gi}"]`);
-          const parentRow = chip.querySelector(`.parent-cb[data-gi="${gi}"]`)?.closest('.ms-option');
+          const parentRow = chip.querySelector(`.hier-toggle[data-gi="${gi}"]`)?.closest('.hier-group-row')
+                         ?? chip.querySelector(`.parent-cb[data-gi="${gi}"]`)?.closest('.ms-option');
           let anyVisible = false;
           wrap.querySelectorAll('.ms-option').forEach(o => {
             const match = !q || o.querySelector('.ms-option-label').textContent.toLowerCase().includes(q);
@@ -1867,6 +1897,10 @@
           });
           if (parentRow) parentRow.style.display = anyVisible || !q ? '' : 'none';
           wrap.style.display = anyVisible || !q ? '' : 'none';
+          if (anyVisible && q) {
+            const chev = chip.querySelector(`.hier-toggle[data-gi="${gi}"] .hier-chev`);
+            if (chev) chev.style.transform = '';
+          }
         });
       } else {
         chip.querySelectorAll('.ms-option').forEach(o => {
