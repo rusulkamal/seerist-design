@@ -497,6 +497,40 @@ const EVENTS = [
   {id:'e12',status:'verified',  sev:'high',   cat:'Crime',                icon:'fa-shield-halved', title:'Armed robbery — diplomatic district',       place:'Amman, Jordan',         time:'2h ago',         sub:'Crime',                related:['a2'],      lnglat:[35.93,31.95]},
   {id:'e13',status:'breaking',  sev:'high',   cat:'Unrest',               icon:'fa-bullhorn',      title:'Clashes erupt near parliament',             place:'Tel Aviv, Israel',      time:'12 min ago',     sub:'Unrest',               related:['a2'],      lnglat:[34.78,32.08]},
   {id:'e14',status:'verified',  sev:'medium', cat:'Terrorism',            icon:'fa-person-rifle',  title:'Vehicle ramming — border crossing',         place:'Damascus, Syria',       time:'4h ago',         sub:'Attack',               related:['a2'],      lnglat:[36.29,33.51]},
+  /* ── Europe ── */
+  {id:'e30',status:'breaking',  sev:'high',   cat:'Terrorism',            icon:'fa-person-rifle',  title:'Stabbing attack in metro station',          place:'Paris, France',         time:'6 min ago',      sub:'Attack',               related:[],          lnglat:[2.35,48.85]},
+  {id:'e31',status:'verified',  sev:'medium', cat:'Unrest',               icon:'fa-bullhorn',      title:'Far-right protests turn violent',           place:'Berlin, Germany',       time:'3h ago',         sub:'Protest',              related:[],          lnglat:[13.40,52.52]},
+  {id:'e32',status:'unverified',sev:'medium', cat:'Terrorism',            icon:'fa-person-rifle',  title:'Suspicious device found at station',        place:'Madrid, Spain',         time:'55 min ago',     sub:'IED threat',           related:[],          lnglat:[-3.70,40.41]},
+  {id:'e33',status:'verified',  sev:'high',   cat:'Conflict and military',icon:'fa-jet-fighter',   title:'Drone strike intercept — eastern border',   place:'Warsaw, Poland',        time:'1h ago',         sub:'Air defence',          related:['a3'],      lnglat:[21.01,52.23]},
+  {id:'e34',status:'future',    sev:'medium', cat:'Political risk',       icon:'fa-landmark',      title:'Snap elections called — security alert',    place:'Rome, Italy',           time:'Fri 09:00',      sub:'Election',             related:[],          lnglat:[12.50,41.90]},
+  {id:'e35',status:'verified',  sev:'medium', cat:'Unrest',               icon:'fa-bullhorn',      title:'General strike — transport disrupted',      place:'Athens, Greece',        time:'4h ago',         sub:'Strike',               related:[],          lnglat:[23.73,37.98]},
+  {id:'e36',status:'breaking',  sev:'high',   cat:'Conflict and military',icon:'fa-jet-fighter',   title:'Missile barrage targets energy grid',       place:'Kharkiv, Ukraine',      time:'9 min ago',      sub:'Strike',               related:['a3'],      lnglat:[36.25,49.99]},
+  {id:'e37',status:'verified',  sev:'medium', cat:'Crime',                icon:'fa-shield-halved', title:'Organized crime crackdown — 40 arrested',  place:'Naples, Italy',         time:'5h ago',         sub:'Law enforcement',      related:[],          lnglat:[14.27,40.85]},
+  /* ── Middle East / Central Asia ── */
+  {id:'e38',status:'breaking',  sev:'high',   cat:'Conflict and military',icon:'fa-jet-fighter',   title:'Airstrikes hit port infrastructure',        place:'Sanaa, Yemen',          time:'18 min ago',     sub:'Airstrike',            related:['a5'],      lnglat:[44.20,15.35]},
+  {id:'e39',status:'verified',  sev:'high',   cat:'Terrorism',            icon:'fa-person-rifle',  title:'Suicide bombing near government complex',   place:'Kabul, Afghanistan',    time:'2h ago',         sub:'Bombing',              related:[],          lnglat:[69.17,34.52]},
+  {id:'e40',status:'unverified',sev:'high',   cat:'Conflict and military',icon:'fa-jet-fighter',   title:'Cross-border shelling — civilians fled',    place:'Kandahar, Afghanistan', time:'3h ago',         sub:'Shelling',             related:[],          lnglat:[65.71,31.61]},
+  {id:'e41',status:'verified',  sev:'medium', cat:'Unrest',               icon:'fa-bullhorn',      title:'Anti-government protests — thousands march',place:'Tehran, Iran',          time:'6h ago',         sub:'Protest',              related:[],          lnglat:[51.39,35.69]},
+  {id:'e42',status:'future',    sev:'medium', cat:'Official actions',     icon:'fa-gavel',         title:'OPEC+ emergency meeting — production cuts', place:'Riyadh, Saudi Arabia',  time:'Tomorrow 14:00', sub:'Policy',               related:[],          lnglat:[46.68,24.69]},
+  {id:'e43',status:'unverified',sev:'medium', cat:'Terrorism',            icon:'fa-person-rifle',  title:'Bombing near bazaar — casualties reported', place:'Quetta, Pakistan',      time:'1h ago',         sub:'Bombing',              related:[],          lnglat:[66.99,30.18]},
+  {id:'e44',status:'verified',  sev:'high',   cat:'Crime',                icon:'fa-shield-halved', title:'Kidnapping of aid workers confirmed',       place:'Peshawar, Pakistan',    time:'4h ago',         sub:'Kidnapping',           related:[],          lnglat:[71.57,34.01]},
+  /* ── South & Southeast Asia ── */
+  {id:'e45',status:'verified',  sev:'medium', cat:'Disaster',             icon:'fa-hurricane',     title:'Cyclone landfall — coastal evacuation',     place:'Dhaka, Bangladesh',     time:'2h ago',         sub:'Cyclone',              related:[],          lnglat:[90.41,23.81]},
+  {id:'e46',status:'breaking',  sev:'high',   cat:'Unrest',               icon:'fa-bullhorn',      title:'Clashes between protesters and police',     place:'Dhaka, Bangladesh',     time:'28 min ago',     sub:'Unrest',               related:[],          lnglat:[90.40,23.72]},
+  {id:'e47',status:'verified',  sev:'medium', cat:'Political risk',       icon:'fa-landmark',      title:'Opposition leader arrested — protests erupt',place:'Yangon, Myanmar',      time:'5h ago',         sub:'Politics',             related:[],          lnglat:[96.16,16.85]},
+  {id:'e48',status:'unverified',sev:'high',   cat:'Conflict and military',icon:'fa-jet-fighter',   title:'Military convoy ambushed on highway',       place:'Mandalay, Myanmar',     time:'3h ago',         sub:'Ambush',               related:[],          lnglat:[96.08,21.97]},
+  {id:'e49',status:'verified',  sev:'medium', cat:'Terrorism',            icon:'fa-person-rifle',  title:'Bomb disposal at shopping district',        place:'Manila, Philippines',   time:'6h ago',         sub:'IED',                  related:[],          lnglat:[120.98,14.60]},
+  /* ── Africa ── */
+  {id:'e50',status:'breaking',  sev:'high',   cat:'Conflict and military',icon:'fa-jet-fighter',   title:'Rebel advance on provincial capital',       place:'Goma, DR Congo',        time:'14 min ago',     sub:'Armed conflict',       related:[],          lnglat:[29.24,-1.68]},
+  {id:'e51',status:'verified',  sev:'high',   cat:'Terrorism',            icon:'fa-person-rifle',  title:'JNIM attack on UN peacekeepers',            place:'Bamako, Mali',          time:'3h ago',         sub:'Attack',               related:[],          lnglat:[-8.00,12.65]},
+  {id:'e52',status:'unverified',sev:'medium', cat:'Unrest',               icon:'fa-bullhorn',      title:'Post-election violence — roads blocked',    place:'Abidjan, Côte d\'Ivoire',time:'4h ago',        sub:'Unrest',               related:[],          lnglat:[-4.03,5.35]},
+  {id:'e53',status:'verified',  sev:'medium', cat:'Political risk',       icon:'fa-landmark',      title:'Coup attempt reported — military on streets',place:'N\'Djamena, Chad',     time:'2h ago',         sub:'Coup',                 related:[],          lnglat:[15.05,12.11]},
+  {id:'e54',status:'verified',  sev:'high',   cat:'Conflict and military',icon:'fa-jet-fighter',   title:'Air raid on rebel-held town',               place:'Khartoum North, Sudan', time:'5h ago',         sub:'Airstrike',            related:[],          lnglat:[32.56,15.63]},
+  {id:'e55',status:'breaking',  sev:'high',   cat:'Terrorism',            icon:'fa-person-rifle',  title:'IED hits military vehicle — 4 dead',        place:'Ouagadougou, Burkina',   time:'32 min ago',     sub:'IED',                  related:[],          lnglat:[-1.52,12.36]},
+  /* ── Americas ── */
+  {id:'e56',status:'verified',  sev:'high',   cat:'Crime',                icon:'fa-shield-halved', title:'Cartel roadblock — highway shutdown',       place:'Culiacán, Mexico',      time:'3h ago',         sub:'Cartel',               related:[],          lnglat:[-107.39,24.80]},
+  {id:'e57',status:'unverified',sev:'medium', cat:'Unrest',               icon:'fa-bullhorn',      title:'Riots after fuel price hike',               place:'Caracas, Venezuela',    time:'5h ago',         sub:'Riot',                 related:[],          lnglat:[-66.90,10.49]},
+  {id:'e58',status:'verified',  sev:'medium', cat:'Crime',                icon:'fa-shield-halved', title:'Gang violence — 12 killed overnight',       place:'Port-au-Prince, Haiti', time:'4h ago',         sub:'Gang violence',        related:[],          lnglat:[-72.34,18.54]},
 ];
 const ASSETS = [
   {label:'Kyiv Crisis Team',     icon:'fa-person-walking',  color:'#dc2626',lnglat:[30.52,50.45]},
@@ -584,7 +618,7 @@ function placeMarker(el){
 const map = new maplibregl.Map({
   container:'map',
   style:'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-  center:[28,22], zoom:3.0, attributionControl:false,
+  center:[22,25], zoom:2.5, attributionControl:false,
 });
 map.addControl(new maplibregl.AttributionControl({compact:true}),'bottom-right');
 map.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-left');
@@ -668,12 +702,13 @@ map.on('zoomend', refresh);
 ══════════════════════════════════════════ */
 function clusterR(){
   const z=map.getZoom();
-  if(z<2)  return 9999;
-  if(z<3)  return 56;
-  if(z<4)  return 42;
-  if(z<5)  return 30;
-  if(z<6)  return 22;
-  if(z<7)  return 16;
+  if(z<1.5) return 9999;
+  if(z<2.5) return 80;
+  if(z<3)   return 60;
+  if(z<4)   return 44;
+  if(z<5)   return 32;
+  if(z<6)   return 22;
+  if(z<7)   return 14;
   return 0;
 }
 
