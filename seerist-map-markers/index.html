@@ -617,14 +617,17 @@ map.on('load', ()=>{
     it.el = el;
   });
 
-  /* ── Asset markers — MapLibre markers (no clustering, no drift issue) ── */
+  /* ── Asset markers — overlay divs (same system as events, zero drift) ── */
   ASSETS.forEach(a=>{
     const el = document.createElement('div');
     el.className='asset-marker';
     el.style.background=a.color;
     el.innerHTML=`<i class="fa-solid ${a.icon}"></i>`;
     el.title=a.label;
-    new maplibregl.Marker({element:el,anchor:'center'}).setLngLat(a.lnglat).addTo(map);
+    markerOverlay.appendChild(el);
+    regMarker(el, a.lnglat, 32, 32);
+    placeMarker(el);
+    el.style.display='flex';
     a.el=el; allAssetEls.push(el);
   });
 
@@ -864,7 +867,7 @@ function toggleMapLayer(type){
     EVENTS.forEach(ev=>{ if(ev.el) ev.el.classList.toggle('hidden',!layerState[type]); });
     ghostMarkerEls.forEach(el=>el.classList.toggle('hidden',!layerState[type]));
   }
-  if(type==='assets') allAssetEls.forEach(el=>el.classList.toggle('hidden',!layerState[type]));
+  if(type==='assets') allAssetEls.forEach(el=>{ el.style.display=layerState[type]?'flex':'none'; });
 }
 function toggleCheck(id){ document.getElementById('check-'+id)?.classList.toggle('on'); }
 function toggleTypeFilter(type,btn){
