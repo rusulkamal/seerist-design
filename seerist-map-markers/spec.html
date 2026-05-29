@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Seerist Map Markers — Design Spec</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:#f8fafc;color:#1e293b;line-height:1.6;}
+
+/* ── Header ── */
+.header{background:#0f1117;padding:0 48px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100;border-bottom:1px solid #1e2030;}
+.header-brand{display:flex;align-items:center;gap:10px;}
+.header-mark{width:24px;height:24px;border-radius:5px;background:linear-gradient(135deg,#10b981,#99cc10);flex-shrink:0;}
+.header-wordmark{font-size:12px;font-weight:700;letter-spacing:.12em;color:#fff;}
+.header-title{font-size:13px;color:#64748b;font-weight:500;}
+.header-pill{background:#1e2030;border:1px solid #2d3148;color:#94a3b8;font-size:11px;font-weight:600;padding:4px 12px;border-radius:999px;}
+
+/* ── Layout ── */
+.layout{display:flex;min-height:calc(100vh - 60px);}
+.sidebar{width:240px;flex-shrink:0;background:#fff;border-right:1px solid #e2e8f0;padding:28px 0;position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;}
+.sb-section{margin-bottom:24px;}
+.sb-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#94a3b8;padding:0 22px 8px;}
+.sb-link{display:flex;align-items:center;gap:9px;padding:7px 22px;font-size:12px;color:#64748b;cursor:pointer;text-decoration:none;transition:background .1s,color .1s;border-left:2px solid transparent;}
+.sb-link:hover{background:#f8fafc;color:#1e293b;}
+.sb-link.active{background:#f0fdf4;color:#065f46;border-left-color:#10b981;font-weight:600;}
+.sb-link i{width:14px;text-align:center;font-size:11px;flex-shrink:0;}
+.content{flex:1;padding:48px 64px;max-width:900px;}
+
+/* ── Hero ── */
+.hero{margin-bottom:48px;}
+.hero-eyebrow{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#10b981;margin-bottom:10px;}
+.hero h1{font-size:32px;font-weight:800;color:#0f1117;line-height:1.2;margin-bottom:12px;}
+.hero-sub{font-size:15px;color:#64748b;max-width:560px;line-height:1.7;}
+.hero-meta{display:flex;gap:20px;margin-top:20px;flex-wrap:wrap;}
+.hero-meta-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#94a3b8;}
+.hero-meta-item i{font-size:10px;}
+.proto-link{display:inline-flex;align-items:center;gap:7px;margin-top:20px;background:#0f1117;color:#fff;text-decoration:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;transition:background .15s;}
+.proto-link:hover{background:#1e293b;}
+.proto-link i{font-size:11px;}
+
+/* ── Section ── */
+.spec-section{margin-bottom:56px;scroll-margin-top:80px;}
+.spec-section h2{font-size:20px;font-weight:700;color:#0f1117;margin-bottom:6px;display:flex;align-items:center;gap:10px;}
+.section-num{width:26px;height:26px;border-radius:6px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#64748b;flex-shrink:0;}
+.section-desc{font-size:14px;color:#64748b;margin-bottom:24px;margin-left:36px;line-height:1.7;}
+
+/* ── Cards ── */
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin-bottom:16px;}
+.card-title{font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.card-title i{color:#94a3b8;font-size:11px;}
+
+/* ── Marker showcase ── */
+.marker-showcase{display:flex;align-items:center;gap:20px;margin-bottom:20px;flex-wrap:wrap;}
+.marker-demo{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.marker-demo-label{font-size:10px;font-weight:600;color:#94a3b8;text-align:center;white-space:nowrap;}
+
+/* Event marker replicas */
+.m-circle{width:34px;height:34px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.14);position:relative;flex-shrink:0;}
+.m-squircle{width:34px;height:34px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.14);position:relative;flex-shrink:0;}
+.m-asset{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.18);flex-shrink:0;}
+.m-cluster{width:40px;height:40px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.14);flex-shrink:0;}
+.m-stack-wrap{width:38px;height:38px;position:relative;flex-shrink:0;}
+.m-stack-g2{position:absolute;width:30px;height:30px;border-radius:50%;background:#fff;border:1.5px solid #dde4ed;top:6px;left:5px;opacity:.5;}
+.m-stack-g1{position:absolute;width:34px;height:34px;border-radius:50%;background:#fff;border:1.5px solid #dde4ed;top:2px;left:2px;opacity:.7;}
+.m-stack-front{position:absolute;top:0;left:0;width:38px;height:38px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#1e293b;box-shadow:0 2px 8px rgba(0,0,0,.18),0 0 0 2px #c8d4e0,0 0 0 4px #fff;}
+.badge-b{position:absolute;top:-5px;right:-5px;width:17px;height:17px;border-radius:50%;background:#dc2626;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;}
+.badge-f{position:absolute;bottom:-4px;right:-4px;width:14px;height:14px;border-radius:50%;background:#fff;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:6.5px;}
+
+/* ── Table ── */
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#94a3b8;padding:0 12px 10px;border-bottom:1px solid #f1f5f9;}
+td{padding:11px 12px;border-bottom:1px solid #f8fafc;vertical-align:middle;color:#475569;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#fafafa;}
+.td-strong{font-weight:600;color:#1e293b;}
+.swatch{display:inline-flex;align-items:center;gap:7px;}
+.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+
+/* ── Rule card ── */
+.rules-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.rule-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px 18px;display:flex;gap:13px;align-items:flex-start;}
+.rule-card-icon{width:32px;height:32px;border-radius:8px;background:#f8fafc;display:flex;align-items:center;justify-content:center;font-size:13px;color:#64748b;flex-shrink:0;}
+.rule-card-body{}
+.rule-card-title{font-size:12px;font-weight:700;color:#1e293b;margin-bottom:3px;}
+.rule-card-desc{font-size:12px;color:#64748b;line-height:1.5;}
+
+/* ── Callout ── */
+.callout{display:flex;gap:12px;padding:14px 16px;border-radius:8px;margin-bottom:20px;font-size:13px;line-height:1.6;}
+.callout.green{background:#f0fdf4;border:1px solid #bbf7d0;}
+.callout.blue{background:#eff6ff;border:1px solid #bfdbfe;}
+.callout.amber{background:#fffbeb;border:1px solid #fde68a;}
+.callout i{font-size:14px;flex-shrink:0;margin-top:2px;}
+.callout.green i{color:#16a34a;}
+.callout.blue i{color:#2563eb;}
+.callout.amber i{color:#d97706;}
+
+/* ── Status examples ── */
+.status-row{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid #f8fafc;}
+.status-row:last-child{border-bottom:none;}
+.status-label{flex:1;font-size:13px;color:#475569;}
+.status-note{font-size:12px;color:#94a3b8;flex:2;}
+
+/* ── Summary table ── */
+.summary-row{display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid #f1f5f9;}
+.summary-row:last-child{border-bottom:none;}
+.summary-shape{width:48px;flex-shrink:0;display:flex;justify-content:center;}
+.summary-label{font-size:13px;font-weight:600;color:#1e293b;width:160px;flex-shrink:0;}
+.summary-desc{font-size:13px;color:#64748b;flex:1;}
+
+/* ── Severity chips ── */
+.chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;}
+.chip.red{background:#fef2f2;color:#dc2626;border:1px solid #fecaca;}
+.chip.orange{background:#fff7ed;color:#ea580c;border:1px solid #fed7aa;}
+.chip.slate{background:#f8fafc;color:#64748b;border:1px solid #e2e8f0;}
+
+/* ── Footer ── */
+.footer{margin-top:64px;padding-top:24px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;flex-wrap:gap;}
+.footer-text{font-size:12px;color:#94a3b8;}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-brand">
+    <div class="header-mark"></div>
+    <span class="header-wordmark">SEERIST</span>
+    <span style="color:#2d3148;margin:0 8px;">|</span>
+    <span class="header-title">Map Markers — Design Specification</span>
+  </div>
+  <span class="header-pill">v2 · May 2026</span>
+</header>
+
+<div class="layout">
+
+<!-- Sidebar nav -->
+<nav class="sidebar">
+  <div class="sb-section">
+    <div class="sb-label">Overview</div>
+    <a class="sb-link active" href="#overview"><i class="fa-solid fa-house"></i>Introduction</a>
+    <a class="sb-link" href="#language"><i class="fa-solid fa-palette"></i>Visual Language</a>
+    <a class="sb-link" href="#summary"><i class="fa-solid fa-table-list"></i>Quick Summary</a>
+  </div>
+  <div class="sb-section">
+    <div class="sb-label">Marker Types</div>
+    <a class="sb-link" href="#events"><i class="fa-solid fa-circle"></i>Events</a>
+    <a class="sb-link" href="#news"><i class="fa-solid fa-newspaper"></i>News & Social</a>
+    <a class="sb-link" href="#analysis"><i class="fa-solid fa-file-lines"></i>Analysis</a>
+    <a class="sb-link" href="#assets"><i class="fa-solid fa-location-dot"></i>Assets</a>
+    <a class="sb-link" href="#clusters"><i class="fa-solid fa-layer-group"></i>Clusters</a>
+    <a class="sb-link" href="#stacks"><i class="fa-solid fa-clone"></i>Same-Location Stack</a>
+  </div>
+  <div class="sb-section">
+    <div class="sb-label">Behaviour</div>
+    <a class="sb-link" href="#filtering"><i class="fa-solid fa-filter"></i>Filtering</a>
+    <a class="sb-link" href="#interactions"><i class="fa-solid fa-hand-pointer"></i>Interactions</a>
+  </div>
+</nav>
+
+<!-- Main content -->
+<main class="content">
+
+  <!-- Hero -->
+  <div class="hero" id="overview">
+    <div class="hero-eyebrow">Design Specification</div>
+    <h1>Map Markers</h1>
+    <p class="hero-sub">Every marker on the Seerist map answers two questions instantly — <strong>what kind of thing is this</strong> and <strong>how much should I trust it</strong> — without the user needing to read anything.</p>
+    <div class="hero-meta">
+      <span class="hero-meta-item"><i class="fa-solid fa-map"></i> Seerist Monitor — Map view</span>
+      <span class="hero-meta-item"><i class="fa-solid fa-code-branch"></i> Prototype v2</span>
+      <span class="hero-meta-item"><i class="fa-solid fa-calendar"></i> May 2026</span>
+    </div>
+    <a class="proto-link" href="index2.html" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open live prototype</a>
+  </div>
+
+  <!-- Visual Language -->
+  <section class="spec-section" id="language">
+    <h2><span class="section-num">01</span> Visual Language</h2>
+    <p class="section-desc">Each visual property of a marker carries exactly one meaning. Nothing is decorative.</p>
+    <div class="rules-grid">
+      <div class="rule-card">
+        <div class="rule-card-icon"><i class="fa-solid fa-shapes"></i></div>
+        <div class="rule-card-body">
+          <div class="rule-card-title">Shape → Source type</div>
+          <div class="rule-card-desc">Circle = Seerist Event. Rounded square = Intel content (analysis or news). Filled circle = Asset.</div>
+        </div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-card-icon"><i class="fa-solid fa-border-all"></i></div>
+        <div class="rule-card-body">
+          <div class="rule-card-title">Border style → Verification</div>
+          <div class="rule-card-desc">Solid = confirmed. Dashed = unverified / not yet confirmed by Seerist.</div>
+        </div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-card-icon"><i class="fa-solid fa-droplet"></i></div>
+        <div class="rule-card-body">
+          <div class="rule-card-title">Colour → Severity or trust</div>
+          <div class="rule-card-desc">Red = high severity. Orange = medium. Stone = low. Green border = Seerist-authored. Slate = third-party.</div>
+        </div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-card-icon"><i class="fa-solid fa-icons"></i></div>
+        <div class="rule-card-body">
+          <div class="rule-card-title">Icon → Category</div>
+          <div class="rule-card-desc">The icon inside the marker shows what type of incident or content it is (terrorism, maritime, unrest, etc.).</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick summary -->
+  <section class="spec-section" id="summary">
+    <h2><span class="section-num">02</span> Quick Summary</h2>
+    <p class="section-desc">The most important rule: <strong>shape = source</strong>. Everything else builds on top of that.</p>
+    <div class="card">
+      <div class="summary-row">
+        <div class="summary-shape"><div class="m-circle" style="border:2px solid #dc2626;color:#dc2626;"><i class="fa-solid fa-person-rifle"></i><div class="badge-b"><i class="fa-solid fa-bolt"></i></div></div></div>
+        <div class="summary-label">Event — Breaking</div>
+        <div class="summary-desc">Happening right now. Always shown individually, never hidden in a cluster. Animated pulse ring.</div>
+      </div>
+      <div class="summary-row">
+        <div class="summary-shape"><div class="m-circle" style="border:2px solid #78716c;color:#78716c;"><i class="fa-solid fa-bullhorn"></i></div></div>
+        <div class="summary-label">Event — Verified</div>
+        <div class="summary-desc">Confirmed incident, produced by Seerist. Solid border.</div>
+      </div>
+      <div class="summary-row">
+        <div class="summary-shape"><div class="m-circle" style="border:2px dashed #ea580c;color:#ea580c;"><i class="fa-solid fa-jet-fighter"></i></div></div>
+        <div class="summary-label">Event — Unverified</div>
+        <div class="summary-desc">Reported but not yet confirmed. Dashed border signals incompleteness.</div>
+      </div>
+      <div class="summary-row">
+        <div class="summary-shape"><div class="m-circle" style="border:2px solid #78716c;color:#78716c;"><i class="fa-solid fa-landmark"></i><div class="badge-f" style="color:#78716c;"><i class="fa-solid fa-calendar-days"></i></div></div></div>
+        <div class="summary-label">Event — Future</div>
+        <div class="summary-desc">Scheduled or anticipated event. Calendar badge on bottom-right.</div>
+      </div>
+      <div class="summary-row">
+        <div class="summary-shape"><div class="m-squircle" style="border:2px solid #94a3b8;color:#64748b;"><i class="fa-solid fa-bullhorn"></i></div></div>
+        <div class="summary-label">News & Social</div>
+        <div class="summary-desc">Third-party media reporting on a topic. Rounded square distinguishes it from Seerist events. Slate border = lower trust.</div>
+      </div>
+      <div class="summary-row">
+        <div class="summary-shape"><div class="m-squircle" style="border:2px solid #10b981;color:#10b981;"><i class="fa-solid fa-file-lines"></i></div></div>
+        <div class="summary-label">Analysis</div>
+        <div class="summary-desc">In-depth written assessment by a Seerist Analyst. Green border = Seerist-authored, high trust.</div>
+      </div>
+      <div class="summary-row">
+        <div class="summary-shape"><div class="m-asset" style="background:#0891b2;"><i class="fa-solid fa-building-columns"></i></div></div>
+        <div class="summary-label">Asset</div>
+        <div class="summary-desc">Your organisation's tracked locations (offices, teams, facilities). Filled circle, never clusters.</div>
+      </div>
+      <div class="summary-row">
+        <div class="summary-shape"><div class="m-cluster" style="border:2px solid #dc2626;color:#dc2626;">12</div></div>
+        <div class="summary-label">Cluster</div>
+        <div class="summary-desc">Multiple events grouped at this zoom level. Colour = highest severity inside. Zoom in to expand.</div>
+      </div>
+      <div class="summary-row">
+        <div class="summary-shape"><div class="m-stack-wrap"><div class="m-stack-g2"></div><div class="m-stack-g1"></div><div class="m-stack-front">3</div></div></div>
+        <div class="summary-label">Same-location Stack</div>
+        <div class="summary-desc">Multiple events at the exact same coordinates. Stacked rings show count. Click to see all.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Events -->
+  <section class="spec-section" id="events">
+    <h2><span class="section-num">03</span> Event Markers</h2>
+    <p class="section-desc">Events are incidents on the ground, curated and verified by Seerist. They are the most authoritative markers on the map.</p>
+
+    <div class="callout green">
+      <i class="fa-solid fa-shield-check"></i>
+      <div><strong>Seerist-produced.</strong> Events are created by Seerist analysts and editorial processes — not ingested directly from third-party feeds. This makes them the highest-trust content type on the map.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-circle-half-stroke"></i> Shape & Size</div>
+      <p style="font-size:13px;color:#475569;line-height:1.7;">Circle, 34 × 34 px. A circle communicates <em>a point in space where something physically happened</em>. White background so severity colour reads clearly against any map style.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-list-ul"></i> Statuses</div>
+      <div class="status-row">
+        <div class="marker-demo" style="width:48px;flex-shrink:0;">
+          <div class="m-circle" style="border:2px solid #dc2626;color:#dc2626;"><i class="fa-solid fa-person-rifle"></i><div class="badge-b"><i class="fa-solid fa-bolt"></i></div></div>
+        </div>
+        <div class="status-label"><strong>Breaking</strong> — Solid border + red ⚡ badge</div>
+        <div class="status-note">Happening right now, just confirmed. Always shown individually — never hidden inside a cluster.</div>
+      </div>
+      <div class="status-row">
+        <div class="marker-demo" style="width:48px;flex-shrink:0;">
+          <div class="m-circle" style="border:2px solid #ea580c;color:#ea580c;"><i class="fa-solid fa-bullhorn"></i></div>
+        </div>
+        <div class="status-label"><strong>Verified</strong> — Solid border</div>
+        <div class="status-note">Confirmed by Seerist. Most common event status.</div>
+      </div>
+      <div class="status-row">
+        <div class="marker-demo" style="width:48px;flex-shrink:0;">
+          <div class="m-circle" style="border:2px dashed #ea580c;color:#ea580c;"><i class="fa-solid fa-jet-fighter"></i></div>
+        </div>
+        <div class="status-label"><strong>Unverified</strong> — Dashed border</div>
+        <div class="status-note">Reported but not yet independently confirmed. Dashed = incomplete information.</div>
+      </div>
+      <div class="status-row">
+        <div class="marker-demo" style="width:48px;flex-shrink:0;">
+          <div class="m-circle" style="border:2px solid #78716c;color:#78716c;"><i class="fa-solid fa-landmark"></i><div class="badge-f" style="color:#78716c;"><i class="fa-solid fa-calendar-days"></i></div></div>
+        </div>
+        <div class="status-label"><strong>Future</strong> — Solid border + 📅 badge</div>
+        <div class="status-note">Scheduled or anticipated. Calendar badge on bottom-right distinguishes it from verified events.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-droplet"></i> Severity Colours</div>
+      <table>
+        <thead><tr><th>Severity</th><th>Colour</th><th>Hex</th></tr></thead>
+        <tbody>
+          <tr><td class="td-strong"><span class="chip red"><span class="dot" style="background:#dc2626;"></span>High</span></td><td>Red — immediate threat to life or operations</td><td style="font-family:monospace;font-size:12px;">#dc2626</td></tr>
+          <tr><td class="td-strong"><span class="chip orange"><span class="dot" style="background:#ea580c;"></span>Medium</span></td><td>Orange — significant risk, monitor closely</td><td style="font-family:monospace;font-size:12px;">#ea580c</td></tr>
+          <tr><td class="td-strong"><span class="chip slate"><span class="dot" style="background:#78716c;"></span>Low / None</span></td><td>Stone — informational, low immediate risk</td><td style="font-family:monospace;font-size:12px;">#78716c</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-wave-square"></i> Breaking Pulse Animation</div>
+      <p style="font-size:13px;color:#475569;line-height:1.7;margin-bottom:12px;">Breaking events emit a slow pulse ring that radiates outward. It signals urgency without demanding attention on every cycle.</p>
+      <table>
+        <tbody>
+          <tr><td class="td-strong" style="width:160px;">Scale</td><td>Expands from 0.9× to 1.8× the marker size</td></tr>
+          <tr><td class="td-strong">Opacity</td><td>Fades from 0.45 → 0 over the cycle</td></tr>
+          <tr><td class="td-strong">Duration</td><td>2.6 seconds per cycle</td></tr>
+          <tr><td class="td-strong">Stagger</td><td>Each breaking marker offsets by 0.28s so they don't all pulse in sync</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-icons"></i> Category Icons</div>
+      <p style="font-size:13px;color:#475569;line-height:1.7;margin-bottom:14px;">The same icon appears on the map marker and in the event list panel — consistent across all surfaces.</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f8fafc;border-radius:7px;font-size:12px;color:#475569;"><i class="fa-solid fa-jet-fighter" style="width:16px;text-align:center;color:#64748b;"></i> Conflict & Military</div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f8fafc;border-radius:7px;font-size:12px;color:#475569;"><i class="fa-solid fa-person-rifle" style="width:16px;text-align:center;color:#64748b;"></i> Terrorism</div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f8fafc;border-radius:7px;font-size:12px;color:#475569;"><i class="fa-solid fa-bullhorn" style="width:16px;text-align:center;color:#64748b;"></i> Unrest & Protests</div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f8fafc;border-radius:7px;font-size:12px;color:#475569;"><i class="fa-solid fa-anchor" style="width:16px;text-align:center;color:#64748b;"></i> Maritime</div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f8fafc;border-radius:7px;font-size:12px;color:#475569;"><i class="fa-solid fa-hurricane" style="width:16px;text-align:center;color:#64748b;"></i> Disaster</div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f8fafc;border-radius:7px;font-size:12px;color:#475569;"><i class="fa-solid fa-shield-halved" style="width:16px;text-align:center;color:#64748b;"></i> Crime</div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f8fafc;border-radius:7px;font-size:12px;color:#475569;"><i class="fa-solid fa-landmark" style="width:16px;text-align:center;color:#64748b;"></i> Political Risk</div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f8fafc;border-radius:7px;font-size:12px;color:#475569;"><i class="fa-solid fa-gavel" style="width:16px;text-align:center;color:#64748b;"></i> Official Actions</div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f8fafc;border-radius:7px;font-size:12px;color:#475569;"><i class="fa-solid fa-heart-pulse" style="width:16px;text-align:center;color:#64748b;"></i> Health</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- News & Social -->
+  <section class="spec-section" id="news">
+    <h2><span class="section-num">04</span> News & Social Markers</h2>
+    <p class="section-desc">Third-party reporting — news articles, wire feeds, and social media posts about a topic in an area. Less authoritative than Seerist Events.</p>
+
+    <div class="callout amber">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <div><strong>Third-party source.</strong> News & Social markers have not been independently verified by Seerist analysts. They provide signal and context but should be treated with appropriate caution.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-square"></i> Shape & Style</div>
+      <div style="display:flex;align-items:center;gap:20px;margin-bottom:14px;">
+        <div class="m-squircle" style="border:2px solid #94a3b8;color:#64748b;"><i class="fa-solid fa-bullhorn"></i></div>
+        <div style="font-size:13px;color:#475569;line-height:1.7;"><strong>Rounded square (squircle)</strong>, 34 × 34 px, white background, slate border (#94a3b8).<br/>The squircle shape is the instant signal: <em>this is not a Seerist ground-truth event.</em></div>
+      </div>
+      <table>
+        <tbody>
+          <tr><td class="td-strong" style="width:140px;">Shape</td><td>Rounded square — border-radius 8px</td></tr>
+          <tr><td class="td-strong">Border colour</td><td>Slate <code style="font-size:11px;background:#f1f5f9;padding:2px 5px;border-radius:3px;">#94a3b8</td></tr>
+          <tr><td class="td-strong">Icon</td><td>Matches the event category (same icons as events — bullhorn, anchor, etc.)</td></tr>
+          <tr><td class="td-strong">Visible from</td><td>Zoom level 2 and above</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-circle-info"></i> How to read it alongside events</div>
+      <p style="font-size:13px;color:#475569;line-height:1.7;">A bullhorn <strong>circle</strong> next to a bullhorn <strong>squircle</strong> means: <em>Seerist has a verified protest event here, and the media is also reporting on protests in this area.</em> Same icon, different shape — source is immediately obvious without reading a label.</p>
+    </div>
+  </section>
+
+  <!-- Analysis -->
+  <section class="spec-section" id="analysis">
+    <h2><span class="section-num">05</span> Analysis Markers</h2>
+    <p class="section-desc">In-depth written assessments produced by Seerist Analysts about a region or topic.</p>
+
+    <div class="callout green">
+      <i class="fa-solid fa-shield-check"></i>
+      <div><strong>Seerist-produced.</strong> Analysis is authored by Seerist's analyst team — not third-party. The green border distinguishes it from News & Social (slate border) and communicates high trust.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-square"></i> Shape & Style</div>
+      <div style="display:flex;align-items:center;gap:20px;margin-bottom:14px;">
+        <div class="m-squircle" style="border:2px solid #10b981;color:#10b981;"><i class="fa-solid fa-file-lines"></i></div>
+        <div style="font-size:13px;color:#475569;line-height:1.7;"><strong>Rounded square (squircle)</strong>, same shape as News & Social — both are intel content rather than ground events.<br/><strong>Green border and icon</strong> = Seerist-authored, high trust.</div>
+      </div>
+      <table>
+        <tbody>
+          <tr><td class="td-strong" style="width:140px;">Shape</td><td>Rounded square — border-radius 8px</td></tr>
+          <tr><td class="td-strong">Border colour</td><td>Green <code style="font-size:11px;background:#f1f5f9;padding:2px 5px;border-radius:3px;">#10b981</code></td></tr>
+          <tr><td class="td-strong">Icon colour</td><td>Matches the green border</td></tr>
+          <tr><td class="td-strong">Icon</td><td>Document / file-lines — represents a written report</td></tr>
+          <tr><td class="td-strong">Visible from</td><td>Zoom level 2 and above</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Assets -->
+  <section class="spec-section" id="assets">
+    <h2><span class="section-num">06</span> Asset Markers</h2>
+    <p class="section-desc">The user's own tracked locations — offices, field teams, embassies, vessels, facilities. Completely separate from events and intel.</p>
+
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-location-dot"></i> Shape & Style</div>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap;">
+        <div class="m-asset" style="background:#dc2626;"><i class="fa-solid fa-person-walking"></i></div>
+        <div class="m-asset" style="background:#0891b2;"><i class="fa-solid fa-building-columns"></i></div>
+        <div class="m-asset" style="background:#1e40af;"><i class="fa-solid fa-anchor"></i></div>
+        <div class="m-asset" style="background:#d97706;"><i class="fa-solid fa-users"></i></div>
+        <div class="m-asset" style="background:#7c3aed;"><i class="fa-solid fa-flag"></i></div>
+        <div style="font-size:13px;color:#475569;line-height:1.7;">Solid coloured fill — immediately distinct from all other marker types. Each asset type has its own colour.</div>
+      </div>
+      <table>
+        <tbody>
+          <tr><td class="td-strong" style="width:160px;">Shape</td><td>Circle, 32 × 32 px</td></tr>
+          <tr><td class="td-strong">Fill</td><td>Solid colour (no white background) — instantly recognisable as an asset</td></tr>
+          <tr><td class="td-strong">Clustering</td><td>Never clustered — always visible at all zoom levels</td></tr>
+          <tr><td class="td-strong">Filtering</td><td>Toggled via the Assets layer in the Layers panel (independent of event filters)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Clusters -->
+  <section class="spec-section" id="clusters">
+    <h2><span class="section-num">07</span> Cluster Markers</h2>
+    <p class="section-desc">When multiple events are geographically close at the current zoom level, they merge into a cluster bubble to prevent the map becoming unreadable.</p>
+
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-circle-nodes"></i> Cluster examples</div>
+      <div style="display:flex;align-items:center;gap:20px;margin-bottom:20px;flex-wrap:wrap;">
+        <div class="marker-demo"><div class="m-cluster" style="border:2px solid #dc2626;color:#dc2626;width:34px;height:34px;font-size:12px;">5</div><div class="marker-demo-label">High severity</div></div>
+        <div class="marker-demo"><div class="m-cluster" style="border:2px solid #ea580c;color:#ea580c;width:40px;height:40px;">12</div><div class="marker-demo-label">Medium severity</div></div>
+        <div class="marker-demo"><div class="m-cluster" style="border:1.5px solid #94a3b8;color:#1c1917;width:46px;height:46px;font-size:14px;">28</div><div class="marker-demo-label">Low / none</div></div>
+      </div>
+      <table>
+        <tbody>
+          <tr><td class="td-strong" style="width:160px;">Colour</td><td>Inherits the <strong>highest severity</strong> of all events inside it. A red cluster = at least one high-severity event inside.</td></tr>
+          <tr><td class="td-strong">Size</td><td>34px (≤7 events) → 40px (8–15 events) → 46px (16+ events)</td></tr>
+          <tr><td class="td-strong">Position</td><td>Placed at the geographic centroid of all member events — not anchored to the first event</td></tr>
+          <tr><td class="td-strong">Breaking events</td><td>Always shown individually — never hidden inside a cluster</td></tr>
+          <tr><td class="td-strong">To expand</td><td>Zoom in — clusters break apart automatically</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-magnifying-glass-plus"></i> Zoom thresholds</div>
+      <table>
+        <thead><tr><th>Zoom level</th><th>Cluster behaviour</th></tr></thead>
+        <tbody>
+          <tr><td class="td-strong">Below 2.5</td><td>Maximum clustering — world view, most events grouped</td></tr>
+          <tr><td class="td-strong">2.5 – 3</td><td>Aggressive — continental view</td></tr>
+          <tr><td class="td-strong">3 – 5</td><td>Moderate — regional view</td></tr>
+          <tr><td class="td-strong">5 – 7</td><td>Loose — country view</td></tr>
+          <tr><td class="td-strong">7+</td><td>No clustering — all individual markers visible</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Stacks -->
+  <section class="spec-section" id="stacks">
+    <h2><span class="section-num">08</span> Same-Location Stack</h2>
+    <p class="section-desc">When two or more non-breaking events share the exact same coordinates, they are shown as a stacked group rather than overlapping circles.</p>
+
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:24px;margin-bottom:20px;">
+        <div class="m-stack-wrap" style="flex-shrink:0;"><div class="m-stack-g2"></div><div class="m-stack-g1"></div><div class="m-stack-front">3</div></div>
+        <div style="font-size:13px;color:#475569;line-height:1.7;">Three stacked rings with the event count on the front. Clicking opens a list in the popover where users can select any individual event from the group.</div>
+      </div>
+      <table>
+        <tbody>
+          <tr><td class="td-strong" style="width:180px;">Breaking events</td><td>Always shown as individual markers — the stack count only reflects non-breaking events</td></tr>
+          <tr><td class="td-strong">Click action</td><td>Opens a stack list view in the popover — user selects an event to see its full detail</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Filtering -->
+  <section class="spec-section" id="filtering">
+    <h2><span class="section-num">09</span> Filtering</h2>
+    <p class="section-desc">Users control which marker types are visible via the Layers panel (top-right of the map).</p>
+    <div class="card">
+      <table>
+        <thead><tr><th>Filter</th><th>Controls</th></tr></thead>
+        <tbody>
+          <tr><td class="td-strong">⚡ Breaking</td><td>Breaking event markers</td></tr>
+          <tr><td class="td-strong">✓ Verified</td><td>Verified event markers</td></tr>
+          <tr><td class="td-strong">ℹ Unverified</td><td>Unverified event markers</td></tr>
+          <tr><td class="td-strong">🕐 Future</td><td>Future event markers</td></tr>
+          <tr><td class="td-strong">📰 News & Social</td><td>News & Social squircle markers</td></tr>
+          <tr><td class="td-strong">📄 Analysis</td><td>Analysis squircle markers</td></tr>
+          <tr><td class="td-strong">Assets layer</td><td>All asset markers (independent toggle)</td></tr>
+          <tr><td class="td-strong">Incidents layer</td><td>All event markers (bulk toggle)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Interactions -->
+  <section class="spec-section" id="interactions">
+    <h2><span class="section-num">10</span> Interactions</h2>
+    <p class="section-desc">What happens when users interact with markers.</p>
+    <div class="card">
+      <table>
+        <thead><tr><th>Action</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td class="td-strong">Click event marker</td><td>Opens detail popover — title, location, time, source, category, and action buttons (Open article, Save, Share)</td></tr>
+          <tr><td class="td-strong">Click stack marker</td><td>Opens stack list view — all events at that location, tap any to see full detail</td></tr>
+          <tr><td class="td-strong">Hover analysis / news marker</td><td>Shows tooltip with the document or article title</td></tr>
+          <tr><td class="td-strong">Click cluster</td><td>Planned: zooms in to expand the cluster into individual markers</td></tr>
+          <tr><td class="td-strong">Click map background</td><td>Closes any open popover and deselects the active marker</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <div class="footer">
+    <span class="footer-text">Seerist Monitor — Map Markers Spec v2 · May 2026</span>
+    <a class="proto-link" href="index2.html" target="_blank" style="margin-top:0;font-size:12px;padding:8px 14px;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open prototype</a>
+  </div>
+
+</main>
+</div>
+
+<script>
+// Highlight active sidebar link on scroll
+const sections = document.querySelectorAll('.spec-section, .hero');
+const links = document.querySelectorAll('.sb-link');
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      links.forEach(l=>l.classList.remove('active'));
+      const id = e.target.id;
+      const active = document.querySelector(`.sb-link[href="#${id}"]`);
+      if(active) active.classList.add('active');
+    }
+  });
+},{rootMargin:'-20% 0px -60% 0px'});
+sections.forEach(s=>observer.observe(s));
+</script>
+</body>
+</html>
