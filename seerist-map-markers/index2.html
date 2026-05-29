@@ -253,12 +253,9 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;}
 .ct-ico{width:14px;height:14px;border-radius:50%;background:#f8fafc;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-size:6px;color:#334155;flex-shrink:0;}
 .ct-lbl{flex:1;color:#475569;font-size:10px;}
 .ct-cnt{font-weight:700;color:#1e293b;font-size:10px;}
-.sameloc-wrap{position:absolute;width:38px;height:38px;cursor:pointer;pointer-events:auto;}
-.sameloc-ghost{position:absolute;border-radius:50%;background:#fff;border:1.5px solid #dde4ed;}
-.sameloc-g2{width:30px;height:30px;top:6px;left:5px;opacity:.5;}
-.sameloc-g1{width:34px;height:34px;top:2px;left:2px;opacity:.7;}
-.sameloc-front{position:absolute;top:0;left:0;width:38px;height:38px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#1e293b;box-shadow:0 2px 8px rgba(0,0,0,.18),0 0 0 2px #c8d4e0,0 0 0 4px #fff;}
-.sameloc-wrap:hover .sameloc-front{box-shadow:0 4px 14px rgba(0,0,0,.26),0 0 0 2px #64748b,0 0 0 4px #fff;}
+.sameloc-wrap{position:absolute;width:34px;height:34px;cursor:pointer;pointer-events:auto;}
+.sameloc-front{position:absolute;inset:0;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#1e293b;border:2px solid #334155;box-shadow:0 0 0 3px #fff,0 0 0 5.5px #94a3b8,0 2px 8px rgba(0,0,0,.14);}
+.sameloc-wrap:hover .sameloc-front{border-color:#1e293b;box-shadow:0 0 0 3px #fff,0 0 0 5.5px #475569,0 4px 12px rgba(0,0,0,.2);}
 .rel-empty{font-size:12px;color:#d6d3d1;font-style:italic;}
 </style>
 </head>
@@ -585,19 +582,14 @@ const locKey    = ev => ev.lnglat[0].toFixed(3)+','+ev.lnglat[1].toFixed(3);
 const locGroups = {};
 EVENTS.forEach(ev=>{ const k=locKey(ev);(locGroups[k]=locGroups[k]||[]).push(ev); });
 
-/* Logical pins for clustering.
-   Breaking events are always shown individually — exclude from PINS entirely.
-   For same-location groups, only count non-breaking events; if only 1 remains
-   after removing breaking, treat it as an individual pin (not a ghost stack). */
+/* Logical pins for clustering — all statuses including breaking. */
 const PINS = [];
 {
   const seen = new Set();
   EVENTS.forEach(ev=>{
-    if(ev.status==='breaking') return;           // handled separately in refresh()
     const lk = locKey(ev);
-    const nonBreaking = locGroups[lk].filter(e=>e.status!=='breaking');
-    if(nonBreaking.length>1){
-      if(!seen.has(lk)){ seen.add(lk); PINS.push({kind:'group',lk,grp:nonBreaking,lnglat:ev.lnglat}); }
+    if(locGroups[lk].length>1){
+      if(!seen.has(lk)){ seen.add(lk); PINS.push({kind:'group',lk,grp:locGroups[lk],lnglat:ev.lnglat}); }
     } else {
       PINS.push({kind:'event',ev,lnglat:ev.lnglat});
     }
@@ -671,21 +663,16 @@ map.on('load', ()=>{
     ev.el = el;
   });
 
-  /* ── Same-location ghost stacks ── */
-  /* fix 1 — breaking events shown individually; stack only for non-breaking events */
+  /* ── Same-location stacks — double-border circle, all statuses ── */
   Object.values(locGroups).filter(g=>g.length>1).forEach(grp=>{
-    const stackEvts = grp.filter(ev=>ev.status!=='breaking');
-    if(stackEvts.length < 2) return;  // only 1 non-breaking left — shown as individual pin
     const wrap  = document.createElement('div'); wrap.className='sameloc-wrap';
-    const g2    = document.createElement('div'); g2.className='sameloc-ghost sameloc-g2';
-    const g1    = document.createElement('div'); g1.className='sameloc-ghost sameloc-g1';
     const front = document.createElement('div'); front.className='sameloc-front';
-    front.textContent = stackEvts.length;   // correct count — excludes breaking
-    wrap.appendChild(g2); wrap.appendChild(g1); wrap.appendChild(front);
+    front.textContent = grp.length;
+    wrap.appendChild(front);
     wrap.style.display='none';
-    wrap.addEventListener('click',e=>{e.stopPropagation();selectGroup(stackEvts);});
+    wrap.addEventListener('click',e=>{e.stopPropagation();selectGroup(grp);});
     markerOverlay.appendChild(wrap);
-    regMarker(wrap, stackEvts[0].lnglat, 38, 38);
+    regMarker(wrap, grp[0].lnglat, 34, 34);
     ghostMarkerEls.set(locKey(grp[0]), wrap);
   });
 
@@ -768,14 +755,7 @@ function refresh(){
     }
   });
 
-  /* 3b · breaking events — always individual, never clustered */
-  if(typeFilters.breaking){
-    EVENTS.forEach(ev=>{
-      if(ev.status==='breaking' && ev.el){ placeMarker(ev.el); ev.el.style.display='flex'; }
-    });
-  }
-
-  /* 4 · cluster non-breaking event pins */
+  /* 4 · cluster all event pins */
   const R = clusterR();
   const pts = PINS.map(p=>map.project(p.lnglat));
   const used= new Array(PINS.length).fill(false);
