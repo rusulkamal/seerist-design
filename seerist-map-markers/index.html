@@ -50,10 +50,10 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;}
 
 /* ══ MINI MARKERS (list) ══ */
 .mini-event{width:20px;height:20px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:7.5px;box-shadow:0 1px 3px rgba(0,0,0,.1);flex-shrink:0;margin-top:1px;border-color:currentColor;}
-.mini-event.st-breaking  {border:2px solid currentColor;}
+.mini-event.st-breaking  {border:2px dashed currentColor;}
 .mini-event.st-verified  {border:2px solid currentColor;}
 .mini-event.st-unverified{border:2px dashed currentColor;}
-.mini-event.st-future    {border:2px solid currentColor;}
+.mini-event.st-future    {border:2px dashed currentColor;}
 .sev-none  {color:#78716c;}
 .sev-medium{color:#ea580c;}
 .sev-high  {color:#dc2626;}
@@ -77,10 +77,10 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;}
 }
 .event-marker:hover{transform:scale(1.12);}
 .event-marker.selected{box-shadow:0 0 0 3px rgba(16,185,129,.3),0 0 0 7px rgba(16,185,129,.08),0 3px 12px rgba(0,0,0,.2);}
-.st-breaking  {border:2px solid currentColor;}
+.st-breaking  {border:2px dashed currentColor;}
 .st-verified  {border:2px solid currentColor;}
 .st-unverified{border:2px dashed currentColor;}
-.st-future    {border:2px solid currentColor;}
+.st-future    {border:2px dashed currentColor;}
 .event-marker.sev-medium{color:#ea580c;}
 .event-marker.sev-high  {color:#dc2626;}
 .event-marker.st-breaking{color:#dc2626;}
@@ -342,10 +342,10 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;}
       <div class="leg-content" id="leg-content">
         <div class="leg-section">
           <div class="leg-s-title">Event Types</div>
-          <div class="leg-row"><div class="leg-ev" style="border:2px solid #78716c;"><div style="position:absolute;top:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#78716c;border:1.5px solid #fff;display:flex;align-items:center;justify-content:center;font-size:4px;color:#fff;"><i class="fa-solid fa-bolt"></i></div></div>Breaking</div>
           <div class="leg-row"><div class="leg-ev" style="border:2px solid #78716c;"></div>Verified</div>
           <div class="leg-row"><div class="leg-ev" style="border:2px dashed #78716c;"></div>Unverified</div>
-          <div class="leg-row"><div class="leg-ev" style="border:2px solid #78716c;"><div style="position:absolute;bottom:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#fff;border:1.5px solid #78716c;display:flex;align-items:center;justify-content:center;font-size:4px;color:#78716c;"><i class="fa-solid fa-calendar-days"></i></div></div>Future</div>
+          <div class="leg-row"><div class="leg-ev" style="border:2px dashed #78716c;"><div style="position:absolute;bottom:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#fff;border:1.5px solid #78716c;display:flex;align-items:center;justify-content:center;font-size:4px;color:#78716c;"><i class="fa-solid fa-clock"></i></div></div>Future</div>
+          <div class="leg-row"><div class="leg-ev" style="border:2px dashed #78716c;"><div style="position:absolute;top:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#dc2626;border:1.5px solid #fff;display:flex;align-items:center;justify-content:center;font-size:4px;color:#fff;"><i class="fa-solid fa-bolt"></i></div></div>Breaking</div>
           <div class="leg-row"><div class="leg-ev" style="border-radius:4px;border:2px solid #94a3b8;"></div>News &amp; Social</div>
           <div class="leg-row"><div class="leg-ev" style="border-radius:4px;border:2px solid #10b981;color:#10b981;display:flex;align-items:center;justify-content:center;font-size:6px;"><i class="fa-solid fa-file-lines"></i></div>Analysis</div>
         </div>
@@ -655,7 +655,7 @@ map.on('load', ()=>{
       /* fix 6 — stagger each breaking marker's pulse so they don't all fire together */
       el.style.setProperty('--pulse-delay', `${(breakingIdx++ * 0.28).toFixed(2)}s`);
     }
-    if(ev.status==='future')  { const b=document.createElement('div');b.className='badge-future';b.innerHTML='<i class="fa-solid fa-calendar-days"></i>';el.appendChild(b); }
+    if(ev.status==='future')  { const b=document.createElement('div');b.className='badge-future';b.innerHTML='<i class="fa-solid fa-clock"></i>';el.appendChild(b); }
     el.style.display='none';
     el.addEventListener('click',e=>{e.stopPropagation();selectEvent(ev);});
     markerOverlay.appendChild(el);

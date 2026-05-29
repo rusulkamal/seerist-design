@@ -184,29 +184,29 @@ tr:hover td{background:#fafafa;}
       <div class="rule-card">
         <div class="rule-card-icon"><i class="fa-solid fa-shapes"></i></div>
         <div class="rule-card-body">
-          <div class="rule-card-title">Shape → Source type</div>
-          <div class="rule-card-desc">Circle = Seerist Event. Rounded square = Intel content (analysis or news). Filled circle = Asset.</div>
+          <div class="rule-card-title">Shape → Content type</div>
+          <div class="rule-card-desc">Circle = Event. Rounded square = Analysis or News & Social. Filled circle = Asset.</div>
         </div>
       </div>
       <div class="rule-card">
         <div class="rule-card-icon"><i class="fa-solid fa-border-all"></i></div>
         <div class="rule-card-body">
-          <div class="rule-card-title">Border style → Verification</div>
-          <div class="rule-card-desc">Solid = confirmed. Dashed = unverified / not yet confirmed by Seerist.</div>
+          <div class="rule-card-title">Border → Event status</div>
+          <div class="rule-card-desc">Solid = Verified. Dashed = Unverified. Dashed + clock badge = Future. Dashed + spark badge = Breaking.</div>
         </div>
       </div>
       <div class="rule-card">
         <div class="rule-card-icon"><i class="fa-solid fa-droplet"></i></div>
         <div class="rule-card-body">
-          <div class="rule-card-title">Colour → Severity or trust</div>
-          <div class="rule-card-desc">Red = high severity. Orange = medium. Stone = low. Green border = Seerist-authored. Slate = third-party.</div>
+          <div class="rule-card-title">Colour → Severity</div>
+          <div class="rule-card-desc">Red = high severity. Orange = medium. Grey = low.</div>
         </div>
       </div>
       <div class="rule-card">
         <div class="rule-card-icon"><i class="fa-solid fa-icons"></i></div>
         <div class="rule-card-body">
           <div class="rule-card-title">Icon → Category</div>
-          <div class="rule-card-desc">The icon inside the marker shows what type of incident or content it is (terrorism, maritime, unrest, etc.).</div>
+          <div class="rule-card-desc">The icon inside the marker shows the type category (terrorism, maritime, unrest, etc.).</div>
         </div>
       </div>
     </div>
@@ -218,24 +218,24 @@ tr:hover td{background:#fafafa;}
     <p class="section-desc">The most important rule: <strong>shape = source</strong>. Everything else builds on top of that.</p>
     <div class="card">
       <div class="summary-row">
-        <div class="summary-shape"><div class="m-circle" style="border:2px solid #dc2626;color:#dc2626;"><i class="fa-solid fa-person-rifle"></i><div class="badge-b"><i class="fa-solid fa-bolt"></i></div></div></div>
-        <div class="summary-label">Event — Breaking</div>
-        <div class="summary-desc">Happening right now. Always shown individually, never hidden in a cluster. Animated pulse ring.</div>
-      </div>
-      <div class="summary-row">
         <div class="summary-shape"><div class="m-circle" style="border:2px solid #78716c;color:#78716c;"><i class="fa-solid fa-bullhorn"></i></div></div>
         <div class="summary-label">Event — Verified</div>
-        <div class="summary-desc">Confirmed incident, produced by Seerist. Solid border.</div>
+        <div class="summary-desc">Confirmed by Seerist. Solid border.</div>
       </div>
       <div class="summary-row">
         <div class="summary-shape"><div class="m-circle" style="border:2px dashed #ea580c;color:#ea580c;"><i class="fa-solid fa-jet-fighter"></i></div></div>
         <div class="summary-label">Event — Unverified</div>
-        <div class="summary-desc">Reported but not yet confirmed. Dashed border signals incompleteness.</div>
+        <div class="summary-desc">Reported but not yet confirmed. Dashed border.</div>
       </div>
       <div class="summary-row">
-        <div class="summary-shape"><div class="m-circle" style="border:2px solid #78716c;color:#78716c;"><i class="fa-solid fa-landmark"></i><div class="badge-f" style="color:#78716c;"><i class="fa-solid fa-calendar-days"></i></div></div></div>
+        <div class="summary-shape"><div class="m-circle" style="border:2px dashed #78716c;color:#78716c;"><i class="fa-solid fa-landmark"></i><div class="badge-f" style="color:#78716c;"><i class="fa-solid fa-clock"></i></div></div></div>
         <div class="summary-label">Event — Future</div>
-        <div class="summary-desc">Scheduled or anticipated event. Calendar badge on bottom-right.</div>
+        <div class="summary-desc">Scheduled or anticipated. Dashed border + clock badge.</div>
+      </div>
+      <div class="summary-row">
+        <div class="summary-shape"><div class="m-circle" style="border:2px dashed #dc2626;color:#dc2626;"><i class="fa-solid fa-person-rifle"></i><div class="badge-b"><i class="fa-solid fa-bolt"></i></div></div></div>
+        <div class="summary-label">Event — Breaking</div>
+        <div class="summary-desc">Happening right now. Dashed border + spark badge + pulse ring.</div>
       </div>
       <div class="summary-row">
         <div class="summary-shape"><div class="m-squircle" style="border:2px solid #94a3b8;color:#64748b;"><i class="fa-solid fa-bullhorn"></i></div></div>
@@ -284,31 +284,31 @@ tr:hover td{background:#fafafa;}
       <div class="card-title"><i class="fa-solid fa-list-ul"></i> Statuses</div>
       <div class="status-row">
         <div class="marker-demo" style="width:48px;flex-shrink:0;">
-          <div class="m-circle" style="border:2px solid #dc2626;color:#dc2626;"><i class="fa-solid fa-person-rifle"></i><div class="badge-b"><i class="fa-solid fa-bolt"></i></div></div>
-        </div>
-        <div class="status-label"><strong>Breaking</strong> — Solid border + red ⚡ badge</div>
-        <div class="status-note">Happening right now, just confirmed. Always shown individually — never hidden inside a cluster.</div>
-      </div>
-      <div class="status-row">
-        <div class="marker-demo" style="width:48px;flex-shrink:0;">
           <div class="m-circle" style="border:2px solid #ea580c;color:#ea580c;"><i class="fa-solid fa-bullhorn"></i></div>
         </div>
         <div class="status-label"><strong>Verified</strong> — Solid border</div>
-        <div class="status-note">Confirmed by Seerist. Most common event status.</div>
+        <div class="status-note">Confirmed by Seerist.</div>
       </div>
       <div class="status-row">
         <div class="marker-demo" style="width:48px;flex-shrink:0;">
           <div class="m-circle" style="border:2px dashed #ea580c;color:#ea580c;"><i class="fa-solid fa-jet-fighter"></i></div>
         </div>
         <div class="status-label"><strong>Unverified</strong> — Dashed border</div>
-        <div class="status-note">Reported but not yet independently confirmed. Dashed = incomplete information.</div>
+        <div class="status-note">Reported but not yet confirmed.</div>
       </div>
       <div class="status-row">
         <div class="marker-demo" style="width:48px;flex-shrink:0;">
-          <div class="m-circle" style="border:2px solid #78716c;color:#78716c;"><i class="fa-solid fa-landmark"></i><div class="badge-f" style="color:#78716c;"><i class="fa-solid fa-calendar-days"></i></div></div>
+          <div class="m-circle" style="border:2px dashed #78716c;color:#78716c;"><i class="fa-solid fa-landmark"></i><div class="badge-f" style="color:#78716c;"><i class="fa-solid fa-clock"></i></div></div>
         </div>
-        <div class="status-label"><strong>Future</strong> — Solid border + 📅 badge</div>
-        <div class="status-note">Scheduled or anticipated. Calendar badge on bottom-right distinguishes it from verified events.</div>
+        <div class="status-label"><strong>Future</strong> — Dashed + 🕐 clock badge</div>
+        <div class="status-note">Scheduled or anticipated event.</div>
+      </div>
+      <div class="status-row">
+        <div class="marker-demo" style="width:48px;flex-shrink:0;">
+          <div class="m-circle" style="border:2px dashed #dc2626;color:#dc2626;"><i class="fa-solid fa-person-rifle"></i><div class="badge-b"><i class="fa-solid fa-bolt"></i></div></div>
+        </div>
+        <div class="status-label"><strong>Breaking</strong> — Dashed + ⚡ spark badge</div>
+        <div class="status-note">Happening right now. Pulse ring radiates outward.</div>
       </div>
     </div>
 
@@ -317,9 +317,9 @@ tr:hover td{background:#fafafa;}
       <table>
         <thead><tr><th>Severity</th><th>Colour</th><th>Hex</th></tr></thead>
         <tbody>
-          <tr><td class="td-strong"><span class="chip red"><span class="dot" style="background:#dc2626;"></span>High</span></td><td>Red — immediate threat to life or operations</td><td style="font-family:monospace;font-size:12px;">#dc2626</td></tr>
-          <tr><td class="td-strong"><span class="chip orange"><span class="dot" style="background:#ea580c;"></span>Medium</span></td><td>Orange — significant risk, monitor closely</td><td style="font-family:monospace;font-size:12px;">#ea580c</td></tr>
-          <tr><td class="td-strong"><span class="chip slate"><span class="dot" style="background:#78716c;"></span>Low / None</span></td><td>Stone — informational, low immediate risk</td><td style="font-family:monospace;font-size:12px;">#78716c</td></tr>
+          <tr><td class="td-strong"><span class="chip red"><span class="dot" style="background:#dc2626;"></span>High</span></td><td>Red</td><td style="font-family:monospace;font-size:12px;">#dc2626</td></tr>
+          <tr><td class="td-strong"><span class="chip orange"><span class="dot" style="background:#ea580c;"></span>Medium</span></td><td>Orange</td><td style="font-family:monospace;font-size:12px;">#ea580c</td></tr>
+          <tr><td class="td-strong"><span class="chip slate"><span class="dot" style="background:#78716c;"></span>Low</span></td><td>Grey</td><td style="font-family:monospace;font-size:12px;">#78716c</td></tr>
         </tbody>
       </table>
     </div>
