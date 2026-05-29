@@ -95,6 +95,7 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;}
   content:'';position:absolute;inset:0;border-radius:50%;
   border:2px solid #dc2626;
   animation:pulse-break 1.8s ease-out infinite;
+  animation-delay:var(--pulse-delay,0s);
   pointer-events:none;
 }
 
@@ -106,12 +107,25 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;}
 .asset-marker:hover{transform:scale(1.1);}
 
 /* ══ INTEL MARKERS (overlay) ══ */
-.intel-marker{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;cursor:pointer;transition:transform .15s,opacity .25s;opacity:.7;pointer-events:auto;}
+.intel-marker{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;cursor:pointer;transition:transform .15s,opacity .25s;opacity:.7;pointer-events:auto;position:relative;}
 .intel-marker:hover{transform:scale(1.15);opacity:1;}
 .intel-marker.lit{opacity:1;box-shadow:0 0 0 2.5px rgba(16,185,129,.45);}
 .intel-marker.hidden{display:none !important;}
 .intel-analysis{background:#d1fae5;color:#065f46;border:1.5px solid #6ee7b7;}
 .intel-news    {background:#e0f2fe;color:#0369a1;border:1.5px solid #7dd3fc;border-radius:5px;}
+/* Intel hover tooltip */
+.intel-tip{
+  position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);
+  background:#1e293b;color:#f8fafc;font-size:10px;line-height:1.4;font-family:'Inter',sans-serif;
+  padding:5px 9px;border-radius:6px;white-space:nowrap;max-width:200px;white-space:normal;
+  text-align:center;pointer-events:none;opacity:0;transition:opacity .15s;z-index:60;
+  box-shadow:0 4px 12px rgba(0,0,0,.2);
+}
+.intel-tip::after{
+  content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:5px solid transparent;border-top-color:#1e293b;
+}
+.intel-marker:hover .intel-tip{opacity:1;}
 
 /* ══ LEGEND ══ */
 .legend{position:absolute;bottom:28px;left:14px;z-index:15;background:rgba(255,255,255,.97);border:1px solid #e2e8f0;border-radius:10px;font-size:11px;color:#475569;box-shadow:0 2px 12px rgba(0,0,0,.1);min-width:224px;overflow:hidden;}
@@ -566,14 +580,22 @@ const locKey    = ev => ev.lnglat[0].toFixed(3)+','+ev.lnglat[1].toFixed(3);
 const locGroups = {};
 EVENTS.forEach(ev=>{ const k=locKey(ev);(locGroups[k]=locGroups[k]||[]).push(ev); });
 
-/* Logical pins for clustering (events + groups only; intel handled separately) */
+/* Logical pins for clustering.
+   Breaking events are always shown individually — exclude from PINS entirely.
+   For same-location groups, only count non-breaking events; if only 1 remains
+   after removing breaking, treat it as an individual pin (not a ghost stack). */
 const PINS = [];
 {
   const seen = new Set();
   EVENTS.forEach(ev=>{
-    const lk=locKey(ev);
-    if(locGroups[lk].length>1){ if(!seen.has(lk)){seen.add(lk);PINS.push({kind:'group',lk,grp:locGroups[lk],lnglat:ev.lnglat});} }
-    else{ PINS.push({kind:'event',ev,lnglat:ev.lnglat}); }
+    if(ev.status==='breaking') return;           // handled separately in refresh()
+    const lk = locKey(ev);
+    const nonBreaking = locGroups[lk].filter(e=>e.status!=='breaking');
+    if(nonBreaking.length>1){
+      if(!seen.has(lk)){ seen.add(lk); PINS.push({kind:'group',lk,grp:nonBreaking,lnglat:ev.lnglat}); }
+    } else {
+      PINS.push({kind:'event',ev,lnglat:ev.lnglat});
+    }
   });
 }
 
@@ -626,11 +648,16 @@ map.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-left')
 map.on('load', ()=>{
 
   /* ── Event markers ── */
+  let breakingIdx = 0;
   EVENTS.forEach(ev=>{
     const el = document.createElement('div');
     el.className = `event-marker st-${ev.status} sev-${ev.sev||'none'}`;
     el.innerHTML = `<i class="fa-solid ${ev.icon}"></i>`;
-    if(ev.status==='breaking'){ const b=document.createElement('div');b.className='badge-breaking';b.innerHTML='<i class="fa-solid fa-bolt"></i>';el.appendChild(b); }
+    if(ev.status==='breaking'){
+      const b=document.createElement('div');b.className='badge-breaking';b.innerHTML='<i class="fa-solid fa-bolt"></i>';el.appendChild(b);
+      /* fix 6 — stagger each breaking marker's pulse so they don't all fire together */
+      el.style.setProperty('--pulse-delay', `${(breakingIdx++ * 0.28).toFixed(2)}s`);
+    }
     if(ev.status==='future')  { const b=document.createElement('div');b.className='badge-future';b.innerHTML='<i class="fa-solid fa-calendar-days"></i>';el.appendChild(b); }
     el.style.display='none';
     el.addEventListener('click',e=>{e.stopPropagation();selectEvent(ev);});
@@ -640,25 +667,32 @@ map.on('load', ()=>{
   });
 
   /* ── Same-location ghost stacks ── */
+  /* fix 1 — breaking events shown individually; stack only for non-breaking events */
   Object.values(locGroups).filter(g=>g.length>1).forEach(grp=>{
+    const stackEvts = grp.filter(ev=>ev.status!=='breaking');
+    if(stackEvts.length < 2) return;  // only 1 non-breaking left — shown as individual pin
     const wrap  = document.createElement('div'); wrap.className='sameloc-wrap';
     const g2    = document.createElement('div'); g2.className='sameloc-ghost sameloc-g2';
     const g1    = document.createElement('div'); g1.className='sameloc-ghost sameloc-g1';
     const front = document.createElement('div'); front.className='sameloc-front';
-    front.textContent = grp.length;
+    front.textContent = stackEvts.length;   // correct count — excludes breaking
     wrap.appendChild(g2); wrap.appendChild(g1); wrap.appendChild(front);
     wrap.style.display='none';
-    wrap.addEventListener('click',e=>{e.stopPropagation();selectGroup(grp);});
+    wrap.addEventListener('click',e=>{e.stopPropagation();selectGroup(stackEvts);});
     markerOverlay.appendChild(wrap);
-    regMarker(wrap, grp[0].lnglat, 38, 38);
+    regMarker(wrap, stackEvts[0].lnglat, 38, 38);
     ghostMarkerEls.set(locKey(grp[0]), wrap);
   });
 
-  /* ── Intel markers (always visible, never cluster) ── */
+  /* ── Intel markers — shown individually at zoom ≥ 4 ── */
   INTEL.forEach(it=>{
     const el = document.createElement('div');
     el.className = `intel-marker intel-${it.type}`;
     el.innerHTML = `<i class="fa-solid ${it.type==='analysis'?'fa-file-lines':'fa-earth-americas'}"></i>`;
+    /* fix 3 — hover tooltip */
+    const tip = document.createElement('div'); tip.className='intel-tip';
+    tip.textContent = it.title;
+    el.appendChild(tip);
     el.style.display='none';
     markerOverlay.appendChild(el);
     regMarker(el, it.lnglat, 22, 22);
@@ -713,6 +747,8 @@ function clusterR(){
 }
 
 function refresh(){
+  const zoom = map.getZoom();
+
   /* 1 · hide all event + group markers */
   EVENTS.forEach(ev=>{ if(ev.el) ev.el.style.display='none'; });
   ghostMarkerEls.forEach(el=>{ el.style.display='none'; });
@@ -720,16 +756,15 @@ function refresh(){
   /* 2 · remove old cluster divs */
   while(clusterEls.length){ const c=clusterEls.pop(); c.el.remove(); }
 
-  /* 3 · show intel markers (always individual, never cluster) */
+  /* 3 · intel markers — fix 4: only show at zoom ≥ 4 to reduce global noise */
   INTEL.forEach(it=>{
     const t=it.type==='analysis'?'analysis':'news';
-    if(it.el && typeFilters[t]){
-      placeMarker(it.el);
-      it.el.style.display='flex';
+    if(it.el && typeFilters[t] && zoom>=4){
+      placeMarker(it.el); it.el.style.display='flex';
     }
   });
 
-  /* 3b · show BREAKING events individually — always visible, never swallowed by a cluster */
+  /* 3b · breaking events — always individual, never clustered */
   if(typeFilters.breaking){
     EVENTS.forEach(ev=>{
       if(ev.status==='breaking' && ev.el){ placeMarker(ev.el); ev.el.style.display='flex'; }
@@ -737,34 +772,43 @@ function refresh(){
   }
 
   /* 4 · cluster non-breaking event pins */
-  const R   = clusterR();
-  /* exclude breaking events from clustering pool (already shown above) */
-  const clusterPins = PINS.filter(p => p.kind==='group' || (p.kind==='event' && p.ev.status!=='breaking'));
-  const pts = clusterPins.map(p=>map.project(p.lnglat));
-  const used= new Array(clusterPins.length).fill(false);
+  const R = clusterR();
+  const pts = PINS.map(p=>map.project(p.lnglat));
+  const used= new Array(PINS.length).fill(false);
 
-  for(let i=0;i<clusterPins.length;i++){
+  for(let i=0;i<PINS.length;i++){
     if(used[i]) continue;
     used[i]=true;
     const members=[i];
-    for(let j=i+1;j<clusterPins.length;j++){
+    for(let j=i+1;j<PINS.length;j++){
       if(used[j]) continue;
       if(Math.hypot(pts[j].x-pts[i].x, pts[j].y-pts[i].y)<R){ members.push(j); used[j]=true; }
     }
     if(members.length===1){
-      showPin(clusterPins[i]);
+      showPin(PINS[i]);
     } else {
       let count=0;
-      members.forEach(k=>{ count += clusterPins[k].kind==='group' ? clusterPins[k].grp.length : 1; });
-      /* anchor at first pin's real lnglat — no computed centroid, no drift */
-      const anchor=clusterPins[members[0]];
+      let maxSev='none';
+      /* fix 5 — weighted centroid; fix 2 — track highest severity */
+      let sumLng=0, sumLat=0;
+      members.forEach(k=>{
+        const pin=PINS[k];
+        const evts=pin.kind==='group'?pin.grp:[pin.ev];
+        count += evts.length;
+        sumLng += pin.lnglat[0]; sumLat += pin.lnglat[1];
+        evts.forEach(ev=>{
+          if(ev.sev==='high') maxSev='high';
+          else if(ev.sev==='medium' && maxSev!=='high') maxSev='medium';
+        });
+      });
+      const centroid = [sumLng/members.length, sumLat/members.length];
       const sz=count>15?46:count>7?40:34;
-      const el=makeClusterEl(anchor.lnglat, count, sz);
+      const el=makeClusterEl(centroid, count, sz, maxSev);
       clusterLayer.appendChild(el);
-      const pt=map.project(anchor.lnglat);
+      const pt=map.project(centroid);
       el.style.left=(pt.x-sz/2)+'px';
       el.style.top =(pt.y-sz/2)+'px';
-      clusterEls.push({el, lnglat:anchor.lnglat, sz});
+      clusterEls.push({el, lnglat:centroid, sz});
     }
   }
 }
@@ -781,16 +825,23 @@ function showPin(p){
   }
 }
 
-function makeClusterEl(lnglat, count, sz){
+/* fix 2 — colour cluster by highest severity inside */
+const SEV_STYLE = {
+  high:   { border:'2px solid #dc2626', color:'#dc2626', glow:'rgba(220,38,38,.12)' },
+  medium: { border:'2px solid #ea580c', color:'#ea580c', glow:'rgba(234,88,12,.1)'  },
+  none:   { border:'2px solid #475569', color:'#1c1917', glow:'transparent'          },
+};
+function makeClusterEl(lnglat, count, sz, sev='none'){
+  const s = SEV_STYLE[sev] || SEV_STYLE.none;
   const el=document.createElement('div');
   Object.assign(el.style,{
     position:'absolute', width:sz+'px', height:sz+'px', borderRadius:'50%',
-    background:'#fff', border:'2px solid #334155',
-    boxShadow:'0 2px 10px rgba(0,0,0,.28)',
+    background:'#fff', border:s.border,
+    boxShadow:`0 2px 10px rgba(0,0,0,.28), 0 0 0 4px ${s.glow}`,
     display:'flex', alignItems:'center', justifyContent:'center',
     fontFamily:"'Inter',sans-serif", fontSize:(sz>40?14:12)+'px', fontWeight:'700',
-    color:'#1c1917', cursor:'pointer', userSelect:'none',
-    pointerEvents:'auto', overflow:'visible',
+    color:s.color, cursor:'pointer', userSelect:'none',
+    pointerEvents:'auto', overflow:'visible', transition:'transform .15s',
   });
   const span=document.createElement('span');
   span.textContent=count>99?'99+':String(count);
@@ -798,7 +849,7 @@ function makeClusterEl(lnglat, count, sz){
   const tip=document.createElement('div'); tip.className='cluster-tip';
   tip.innerHTML=`<div class="ct-title">${count} in area</div>`;
   el.appendChild(tip);
-  el.addEventListener('mouseenter',()=>{ el.style.transform='scale(1.06)'; tip.style.opacity='1'; });
+  el.addEventListener('mouseenter',()=>{ el.style.transform='scale(1.08)'; tip.style.opacity='1'; });
   el.addEventListener('mouseleave',()=>{ el.style.transform='';            tip.style.opacity='0'; });
   el.addEventListener('click',e=>{ e.stopPropagation(); map.easeTo({center:lnglat,zoom:map.getZoom()+2.5}); });
   return el;
