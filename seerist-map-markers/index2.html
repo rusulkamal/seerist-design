@@ -106,11 +106,16 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;}
 .asset-marker{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.22),0 0 0 2.5px #fff;cursor:pointer;position:relative;transition:transform .15s;}
 .asset-marker:hover{transform:scale(1.1);}
 
-/* ══ NEWS & SOCIAL MARKERS (overlay — squircle, distinct from circular events) ══ */
-.intel-marker{width:34px;height:34px;border-radius:8px;background:#fff;border:2px solid #94a3b8;color:#64748b;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;transition:transform .15s,box-shadow .2s;pointer-events:auto;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.14);}
+/* ══ INTEL MARKERS — squircle shape; colour = source trust ══
+   Analysis  (Seerist)      → green border  — authoritative intel
+   News/Social (third-party) → slate border  — less reliable signal  */
+.intel-marker{width:34px;height:34px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;transition:transform .15s,box-shadow .2s;pointer-events:auto;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.14);}
 .intel-marker:hover{transform:scale(1.12);box-shadow:0 4px 14px rgba(0,0,0,.2);}
-.intel-marker.lit{box-shadow:0 0 0 3px rgba(148,163,184,.4),0 2px 8px rgba(0,0,0,.14);}
 .intel-marker.hidden{display:none !important;}
+.intel-analysis{border:2px solid #10b981;color:#065f46;}
+.intel-analysis.lit{box-shadow:0 0 0 3px rgba(16,185,129,.3),0 2px 8px rgba(0,0,0,.14);}
+.intel-news{border:2px solid #94a3b8;color:#64748b;}
+.intel-news.lit{box-shadow:0 0 0 3px rgba(148,163,184,.4),0 2px 8px rgba(0,0,0,.14);}
 /* Intel hover tooltip */
 .intel-tip{
   position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);
@@ -146,6 +151,8 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;}
 .asset-leg-dot{width:16px;height:16px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:6px;color:#fff;}
 .asset-leg-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10.5px;}
 
+/* rp-tb-a restored for Analysis filter button */
+.rp-tb-a{background:#d1fae5;color:#065f46;border-color:#6ee7b7;}
 /* ══ LAYERS PANEL ══ */
 .sb-right{position:absolute;top:0;right:0;bottom:0;width:256px;background:#fff;border-left:1px solid #e2e8f0;display:flex;flex-direction:column;overflow:hidden;z-index:25;transform:translateX(100%);transition:transform .25s cubic-bezier(.2,0,0,1);box-shadow:-4px 0 20px rgba(0,0,0,.1);}
 .sb-right.open{transform:translateX(0);}
@@ -341,6 +348,7 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;}
           <div class="leg-row"><div class="leg-ev" style="border:2px solid #78716c;"></div>Verified</div>
           <div class="leg-row"><div class="leg-ev" style="border:2px dashed #78716c;"></div>Unverified</div>
           <div class="leg-row"><div class="leg-ev" style="border:2px solid #78716c;"><div style="position:absolute;bottom:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#fff;border:1.5px solid #78716c;display:flex;align-items:center;justify-content:center;font-size:4px;color:#78716c;"><i class="fa-solid fa-calendar-days"></i></div></div>Future</div>
+          <div class="leg-row"><div class="leg-ev" style="border-radius:4px;border:2px solid #10b981;color:#065f46;display:flex;align-items:center;justify-content:center;font-size:6px;"><i class="fa-solid fa-file-lines"></i></div>Analysis</div>
           <div class="leg-row"><div class="leg-ev" style="border-radius:4px;border:2px solid #94a3b8;color:#64748b;display:flex;align-items:center;justify-content:center;font-size:6px;"><i class="fa-solid fa-newspaper"></i></div>News &amp; Social</div>
         </div>
         <hr class="leg-divider"/>
@@ -439,6 +447,7 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;}
             <div class="rp-type-btn rp-tb-v" title="Verified"        onclick="toggleTypeFilter('verified',this)"><i class="fa-solid fa-check"></i></div>
             <div class="rp-type-btn rp-tb-u" title="Unverified"      onclick="toggleTypeFilter('unverified',this)"><i class="fa-solid fa-circle-info"></i></div>
             <div class="rp-type-btn rp-tb-f" title="Future"          onclick="toggleTypeFilter('future',this)"><i class="fa-solid fa-clock"></i></div>
+            <div class="rp-type-btn rp-tb-a" title="Analysis"        onclick="toggleTypeFilter('analysis',this)"><i class="fa-solid fa-file-lines"></i></div>
             <div class="rp-type-btn rp-tb-o" title="News &amp; Social" onclick="toggleTypeFilter('news',this)"><i class="fa-solid fa-newspaper"></i></div>
           </div>
         </div>
@@ -603,7 +612,7 @@ const layerState  = {assets:true,events:true};
 const allAssetEls = [];
 const ghostMarkerEls = new Map();   // lk → sameloc-wrap el
 const clusterEls     = [];          // {el, lnglat, sz} — plain divs, NOT maplibre markers
-const typeFilters    = {breaking:true,verified:true,unverified:true,future:true,news:true};
+const typeFilters    = {breaking:true,verified:true,unverified:true,future:true,analysis:true,news:true};
 
 /* ══════════════════════════════════════════
    OVERLAY POSITIONING
@@ -679,12 +688,11 @@ map.on('load', ()=>{
     ghostMarkerEls.set(locKey(grp[0]), wrap);
   });
 
-  /* ── News & Social markers — squircle, shown at zoom ≥ 4 ── */
+  /* ── Intel markers — squircle; analysis=green (Seerist), news=slate (third-party) ── */
   INTEL.forEach(it=>{
-    if(it.type === 'analysis') return;   // analysis removed; news & social only
     const el = document.createElement('div');
-    el.className = 'intel-marker';
-    el.innerHTML = `<i class="fa-solid fa-newspaper"></i>`;
+    el.className = `intel-marker intel-${it.type}`;
+    el.innerHTML = `<i class="fa-solid ${it.type==='analysis'?'fa-file-lines':'fa-newspaper'}"></i>`;
     const tip = document.createElement('div'); tip.className='intel-tip';
     tip.textContent = it.title;
     el.appendChild(tip);
@@ -751,9 +759,10 @@ function refresh(){
   /* 2 · remove old cluster divs */
   while(clusterEls.length){ const c=clusterEls.pop(); c.el.remove(); }
 
-  /* 3 · news & social markers — only show at zoom ≥ 4 to reduce global noise */
+  /* 3 · intel markers — show at zoom ≥ 2 */
   INTEL.forEach(it=>{
-    if(it.el && typeFilters.news && zoom>=4){
+    const t = it.type==='analysis' ? 'analysis' : 'news';
+    if(it.el && typeFilters[t] && zoom>=2){
       placeMarker(it.el); it.el.style.display='flex';
     }
   });
