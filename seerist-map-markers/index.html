@@ -566,13 +566,13 @@ const INTEL = [
   {id:'a1', type:'analysis',title:'Iraq: threat environment — week 18',          source:'Seerist Analyst',lnglat:[44.70,33.20]},
   {id:'a2', type:'analysis',title:'Levant: escalation indicators',               source:'Seerist Analyst',lnglat:[35.80,34.00]},
   {id:'a3', type:'analysis',title:'Ukraine frontline stability — week 18',       source:'Seerist Analyst',lnglat:[34.50,51.10]},
-  {id:'a4', type:'news',    title:'NATO emergency session on Ukraine aid',       source:'Reuters',        lnglat:[28.60,50.60]},
+  {id:'a4', type:'news',    icon:'fa-jet-fighter',  title:'NATO emergency session on Ukraine aid',       source:'Reuters',        lnglat:[28.60,50.60]},
   {id:'a5', type:'analysis',title:'Red Sea shipping risk — May 2026',            source:'Seerist Analyst',lnglat:[43.40,14.40]},
-  {id:'a6', type:'news',    title:'Houthi threat to commercial vessels',         source:'AP',             lnglat:[42.40,15.10]},
+  {id:'a6', type:'news',    icon:'fa-anchor',       title:'Houthi threat to commercial vessels',         source:'AP',             lnglat:[42.40,15.10]},
   {id:'a7', type:'analysis',title:'North Africa stability overview — May',       source:'Seerist Analyst',lnglat:[19.80,31.80]},
-  {id:'a8', type:'news',    title:'Protests spread across Turkish cities',       source:'BBC',            lnglat:[29.20,41.40]},
+  {id:'a8', type:'news',    icon:'fa-bullhorn',     title:'Protests spread across Turkish cities',       source:'BBC',            lnglat:[29.20,41.40]},
   {id:'a9', type:'analysis',title:'Sub-Saharan Africa risk brief — Q2',          source:'Seerist Analyst',lnglat:[36.60,-1.55]},
-  {id:'a10',type:'news',    title:'Egypt: opposition groups plan demonstrations',source:'Al Jazeera',     lnglat:[31.00,29.80]},
+  {id:'a10',type:'news',    icon:'fa-bullhorn',     title:'Egypt: opposition groups plan demonstrations',source:'Al Jazeera',     lnglat:[31.00,29.80]},
 ];
 const INTEL_MAP    = Object.fromEntries(INTEL.map(i=>[i.id,i]));
 const STATUS_LABEL = {breaking:'Breaking',verified:'Verified',unverified:'Unverified',future:'Future Event'};
@@ -692,7 +692,7 @@ map.on('load', ()=>{
   INTEL.forEach(it=>{
     const el = document.createElement('div');
     el.className = `intel-marker intel-${it.type}`;
-    el.innerHTML = `<i class="fa-solid ${it.type==='analysis'?'fa-file-lines':'fa-newspaper'}"></i>`;
+    el.innerHTML = `<i class="fa-solid ${it.type==='analysis'?'fa-file-lines':(it.icon||'fa-newspaper')}"></i>`;
     const tip = document.createElement('div'); tip.className='intel-tip';
     tip.textContent = it.title;
     el.appendChild(tip);
