@@ -10,24 +10,24 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.7;font-size:14px;}
 
-/* ── Header ── */
-.doc-header{background:#0f1117;padding:40px 0 36px;border-bottom:1px solid #1e2030;}
-.doc-header-inner{max-width:760px;margin:0 auto;padding:0 40px;}
-.doc-eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
-.doc-mark{width:22px;height:22px;border-radius:5px;background:linear-gradient(135deg,#10b981,#99cc10);flex-shrink:0;}
-.doc-wordmark{font-size:11px;font-weight:700;letter-spacing:.12em;color:#fff;}
-.doc-divider{color:#2d3148;}
-.doc-tag{font-size:11px;color:#64748b;font-weight:500;}
-.doc-header h1{font-size:28px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:10px;}
-.doc-header p{font-size:14px;color:#64748b;max-width:520px;line-height:1.7;}
-.doc-meta{display:flex;gap:20px;margin-top:16px;flex-wrap:wrap;}
-.doc-meta span{font-size:11px;color:#475569;display:flex;align-items:center;gap:5px;}
-.doc-meta i{font-size:10px;}
-.proto-btn{display:inline-flex;align-items:center;gap:7px;margin-top:20px;background:#10b981;color:#fff;text-decoration:none;padding:9px 16px;border-radius:7px;font-size:12px;font-weight:600;transition:background .15s;}
-.proto-btn:hover{background:#059669;}
+/* ── Top nav (shared) ── */
+.top-nav{height:44px;background:#0f1117;border-bottom:1px solid #1e2030;display:flex;align-items:center;padding:0 16px;position:sticky;top:0;z-index:100;}
+.top-nav-brand{display:flex;align-items:center;gap:8px;padding-right:20px;border-right:1px solid #1e2030;margin-right:4px;}
+.top-nav-mark{width:20px;height:20px;border-radius:4px;background:linear-gradient(135deg,#10b981,#99cc10);flex-shrink:0;}
+.top-nav-wordmark{font-size:11px;font-weight:700;letter-spacing:.12em;color:#fff;}
+.top-nav-tab{display:flex;align-items:center;gap:6px;padding:0 14px;height:44px;font-size:12px;font-weight:500;color:#64748b;cursor:pointer;text-decoration:none;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;}
+.top-nav-tab:hover{color:#94a3b8;}
+.top-nav-tab.active{color:#fff;border-bottom-color:#10b981;}
+.top-nav-tab i{font-size:11px;}
+
+/* ── Page title bar ── */
+.page-title-bar{background:#fff;border-bottom:1px solid #e2e8f0;padding:20px 0;}
+.page-title-inner{max-width:760px;margin:0 auto;padding:0 40px;}
+.page-title-inner h1{font-size:22px;font-weight:800;color:#0f1117;margin-bottom:4px;}
+.page-title-inner p{font-size:13px;color:#94a3b8;}
 
 /* ── Layout ── */
-.doc-body{max-width:760px;margin:0 auto;padding:48px 40px 80px;}
+.doc-body{max-width:760px;margin:0 auto;padding:40px 40px 80px;}
 
 /* ── Table of Contents ── */
 .toc{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:24px 28px;margin-bottom:48px;}
@@ -113,25 +113,21 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
 </head>
 <body>
 
-<!-- Header -->
-<header class="doc-header">
-  <div class="doc-header-inner">
-    <div class="doc-eyebrow">
-      <div class="doc-mark"></div>
-      <span class="doc-wordmark">SEERIST</span>
-      <span class="doc-divider">|</span>
-      <span class="doc-tag">Design Specification</span>
-    </div>
-    <h1>Map Markers</h1>
-    <p>Every marker on the map answers two questions instantly — <strong style="color:#e2e8f0;">what kind of thing is this</strong> and <strong style="color:#e2e8f0;">how much should I trust it</strong> — without the user needing to read anything.</p>
-    <div class="doc-meta">
-      <span><i class="fa-solid fa-map"></i> Map view</span>
-      <span><i class="fa-solid fa-code-branch"></i> Prototype v2</span>
-      <span><i class="fa-solid fa-calendar"></i> May 2026</span>
-    </div>
-    <a class="proto-btn" href="index2.html" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open prototype</a>
+<nav class="top-nav">
+  <div class="top-nav-brand">
+    <div class="top-nav-mark"></div>
+    <span class="top-nav-wordmark">SEERIST</span>
   </div>
-</header>
+  <a class="top-nav-tab" href="index2.html"><i class="fa-solid fa-map"></i>Prototype</a>
+  <a class="top-nav-tab active" href="spec.html"><i class="fa-solid fa-book-open"></i>Spec</a>
+</nav>
+
+<div class="page-title-bar">
+  <div class="page-title-inner">
+    <h1>Map Markers</h1>
+    <p>Design specification · v2 · May 2026</p>
+  </div>
+</div>
 
 <div class="doc-body">
 
@@ -438,9 +434,7 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
     </table>
   </section>
 
-  <div class="doc-footer">
-    Map Markers Spec v2 · May 2026 · <a href="index2.html" target="_blank" style="color:#10b981;text-decoration:none;">Open prototype →</a>
-  </div>
+  <div class="doc-footer">Map Markers Spec v2 · May 2026</div>
 
 </div>
 

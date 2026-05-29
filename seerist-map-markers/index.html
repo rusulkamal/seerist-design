@@ -10,8 +10,18 @@
 <script src="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;}
-.shell{display:flex;width:100%;height:100vh;}
+body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+.shell{display:flex;width:100%;flex:1;min-height:0;}
+
+/* ══ TOP NAV ══ */
+.top-nav{height:44px;background:#0f1117;border-bottom:1px solid #1e2030;display:flex;align-items:center;padding:0 16px;gap:0;flex-shrink:0;z-index:50;}
+.top-nav-brand{display:flex;align-items:center;gap:8px;padding-right:20px;border-right:1px solid #1e2030;margin-right:4px;}
+.top-nav-mark{width:20px;height:20px;border-radius:4px;background:linear-gradient(135deg,#10b981,#99cc10);flex-shrink:0;}
+.top-nav-wordmark{font-size:11px;font-weight:700;letter-spacing:.12em;color:#fff;}
+.top-nav-tab{display:flex;align-items:center;gap:6px;padding:0 14px;height:44px;font-size:12px;font-weight:500;color:#64748b;cursor:pointer;text-decoration:none;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;}
+.top-nav-tab:hover{color:#94a3b8;}
+.top-nav-tab.active{color:#fff;border-bottom-color:#10b981;}
+.top-nav-tab i{font-size:11px;}
 
 /* ══ PLATFORM NAV ══ */
 .nav{width:172px;flex-shrink:0;background:#0f1117;border-right:1px solid #1e2030;display:flex;flex-direction:column;overflow:hidden;z-index:30;}
@@ -260,6 +270,16 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;}
 </style>
 </head>
 <body>
+
+<nav class="top-nav">
+  <div class="top-nav-brand">
+    <div class="top-nav-mark"></div>
+    <span class="top-nav-wordmark">SEERIST</span>
+  </div>
+  <a class="top-nav-tab active" href="index2.html"><i class="fa-solid fa-map"></i>Prototype</a>
+  <a class="top-nav-tab" href="spec.html"><i class="fa-solid fa-book-open"></i>Spec</a>
+</nav>
+
 <div class="shell">
 
 <!-- ══ PLATFORM NAV ══ -->
@@ -331,7 +351,6 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;}
     <div class="layers-btn" id="layersBtn" onclick="toggleLayersPanel()">
       <i class="fa-solid fa-layer-group"></i> Layers
     </div>
-    <a href="spec.html" target="_blank" style="position:absolute;top:14px;left:14px;z-index:15;background:#fff;border:1px solid #e2e8f0;border-radius:7px;padding:7px 13px;display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#334155;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.1);text-decoration:none;transition:background .15s;"><i class="fa-solid fa-book-open" style="font-size:11px;"></i> Marker Spec</a>
 
     <!-- LEGEND -->
     <div class="legend" id="legend">
