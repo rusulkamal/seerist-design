@@ -760,12 +760,12 @@ map.on('zoomend', refresh);
 function clusterR(){
   const z=map.getZoom();
   if(z<1.5) return 9999;
-  if(z<2.5) return 80;
-  if(z<3)   return 60;
-  if(z<4)   return 44;
-  if(z<5)   return 32;
-  if(z<6)   return 22;
-  if(z<7)   return 14;
+  if(z<2.5) return 160;
+  if(z<3)   return 120;
+  if(z<4)   return 80;
+  if(z<5)   return 52;
+  if(z<6)   return 32;
+  if(z<7)   return 18;
   return 0;
 }
 
