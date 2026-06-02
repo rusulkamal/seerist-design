@@ -111,6 +111,7 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;fl
 
 .badge-breaking{position:absolute;top:-5px;right:-5px;width:17px;height:17px;border-radius:50%;background:#dc2626;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;pointer-events:none;box-shadow:0 1px 4px rgba(220,38,38,.4);}
 .badge-future  {position:absolute;bottom:-4px;right:-4px;width:14px;height:14px;border-radius:50%;background:#fff;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:6.5px;color:currentColor;pointer-events:none;}
+.badge-multi   {position:absolute;bottom:-4px;left:-4px;width:14px;height:14px;border-radius:50%;background:#7c3aed;border:1.5px solid #fff;display:flex;align-items:center;justify-content:center;font-size:6px;color:#fff;pointer-events:none;box-shadow:0 1px 3px rgba(124,58,237,.35);}
 
 /* ══ ASSET MARKERS (maplibre — no clustering) ══ */
 .asset-marker{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.22),0 0 0 2.5px #fff;cursor:pointer;position:relative;transition:transform .15s;}
@@ -318,19 +319,21 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;fl
   <div class="lp-head">
     <div class="lp-back" onclick="closePanel()"><i class="fa-solid fa-xmark"></i></div>
     <span class="lp-title" id="lp-title">Latest</span>
-    <span class="lp-count" id="lp-count">11</span>
+    <span class="lp-count" id="lp-count">13</span>
   </div>
   <div class="lp-body" id="lp-body">
     <div class="ev-divider">Breaking · 3</div>
     <div class="ev-row" data-eid="e1"><div style="flex-shrink:0;padding-top:1px;"><div class="mini-event st-breaking sev-high"><i class="fa-solid fa-person-rifle"></i></div></div><div class="ev-row-body"><div class="ev-title">IED detonated near checkpoint</div><div class="ev-meta">Terrorism · Baghdad, Iraq</div><div class="ev-time">8 min ago</div></div></div>
     <div class="ev-row" data-eid="e2"><div style="flex-shrink:0;padding-top:1px;"><div class="mini-event st-breaking sev-high"><i class="fa-solid fa-jet-fighter"></i></div></div><div class="ev-row-body"><div class="ev-title">Artillery fire on residential district</div><div class="ev-meta">Conflict & military · Sumy Oblast</div><div class="ev-time">19 min ago</div></div></div>
     <div class="ev-row" data-eid="e3"><div style="flex-shrink:0;padding-top:1px;"><div class="mini-event st-breaking sev-medium"><i class="fa-solid fa-anchor"></i></div></div><div class="ev-row-body"><div class="ev-title">Tanker boarded — crew unaccounted</div><div class="ev-meta">Maritime · Red Sea</div><div class="ev-time">34 min ago</div></div></div>
-    <div class="ev-divider">Verified · 4</div>
+    <div class="ev-divider">Verified · 5</div>
+    <div class="ev-row" data-eid="e60"><div style="flex-shrink:0;padding-top:1px;position:relative;display:inline-flex;"><div class="mini-event st-verified sev-high"><i class="fa-solid fa-shield-halved"></i></div><div style="position:absolute;bottom:-2px;left:-2px;width:11px;height:11px;border-radius:50%;background:#7c3aed;border:1.5px solid #fff;display:flex;align-items:center;justify-content:center;font-size:5px;color:#fff;"><i class="fa-solid fa-tags"></i></div></div><div class="ev-row-body"><div class="ev-title">Gang-linked terror cell disrupted</div><div class="ev-meta">Crime · Terrorism · Tripoli, Libya</div><div class="ev-time">1h ago</div></div></div>
     <div class="ev-row" data-eid="e4"><div style="flex-shrink:0;padding-top:1px;"><div class="mini-event st-verified sev-medium"><i class="fa-solid fa-hurricane"></i></div></div><div class="ev-row-body"><div class="ev-title">Flash flood — emergency declared</div><div class="ev-meta">Disaster · Benghazi, Libya</div><div class="ev-time">3h ago</div></div></div>
     <div class="ev-row" data-eid="e5"><div style="flex-shrink:0;padding-top:1px;"><div class="mini-event st-verified sev-none"><i class="fa-solid fa-bullhorn"></i></div></div><div class="ev-row-body"><div class="ev-title">Demonstration — Taksim Square</div><div class="ev-meta">Unrest · Istanbul, Türkiye</div><div class="ev-time">2h ago</div></div></div>
     <div class="ev-row" data-eid="e6"><div style="flex-shrink:0;padding-top:1px;"><div class="mini-event st-verified sev-high"><i class="fa-solid fa-shield-halved"></i></div></div><div class="ev-row-body"><div class="ev-title">Kidnap for ransom — expat targeted</div><div class="ev-meta">Crime · Lagos, Nigeria</div><div class="ev-time">5h ago</div></div></div>
     <div class="ev-row" data-eid="e7"><div style="flex-shrink:0;padding-top:1px;"><div class="mini-event st-verified sev-medium"><i class="fa-solid fa-gavel"></i></div></div><div class="ev-row-body"><div class="ev-title">Travel advisory — Level 3</div><div class="ev-meta">Official actions · Khartoum</div><div class="ev-time">6h ago</div></div></div>
-    <div class="ev-divider">Unverified · 2</div>
+    <div class="ev-divider">Unverified · 3</div>
+    <div class="ev-row" data-eid="e61"><div style="flex-shrink:0;padding-top:1px;"><div class="mini-event st-unverified sev-medium"><i class="fa-solid fa-circle-question"></i></div></div><div class="ev-row-body"><div class="ev-title">Unclassified incident reported</div><div class="ev-meta">Uncategorized · Algiers, Algeria</div><div class="ev-time">2h ago</div></div></div>
     <div class="ev-row" data-eid="e8"><div style="flex-shrink:0;padding-top:1px;"><div class="mini-event st-unverified sev-medium"><i class="fa-solid fa-person-rifle"></i></div></div><div class="ev-row-body"><div class="ev-title">Explosion reported — unconfirmed</div><div class="ev-meta">Terrorism · Beirut, Lebanon</div><div class="ev-time">41 min ago</div></div></div>
     <div class="ev-row" data-eid="e9"><div style="flex-shrink:0;padding-top:1px;"><div class="mini-event st-unverified sev-none"><i class="fa-solid fa-jet-fighter"></i></div></div><div class="ev-row-body"><div class="ev-title">Troop movement — unconfirmed</div><div class="ev-meta">Conflict & military · Armenia–Azer.</div><div class="ev-time">1h ago</div></div></div>
     <div class="ev-divider">Future · 2</div>
@@ -403,6 +406,8 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;fl
               <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"><i class="fa-solid fa-ticket"></i></div><span class="asset-leg-label">Sporting</span></div>
               <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"><i class="fa-solid fa-gift"></i></div><span class="asset-leg-label">Holiday</span></div>
               <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"><i class="fa-solid fa-calendar-days"></i></div><span class="asset-leg-label">Anniversary</span></div>
+              <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;position:relative;"><i class="fa-solid fa-shield-halved"></i><div style="position:absolute;bottom:-2px;left:-2px;width:9px;height:9px;border-radius:50%;background:#7c3aed;border:1px solid #fff;display:flex;align-items:center;justify-content:center;font-size:4px;color:#fff;"><i class="fa-solid fa-tags"></i></div></div><span class="asset-leg-label">Multi-cat</span></div>
+              <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#94a3b8;border:1px solid #e2e8f0;"><i class="fa-solid fa-circle-question"></i></div><span class="asset-leg-label">No category</span></div>
             </div>
           </div>
         </div>
@@ -566,6 +571,9 @@ const EVENTS = [
   {id:'e56',status:'verified',  sev:'high',   cat:'Crime',                icon:'fa-shield-halved', title:'Cartel roadblock — highway shutdown',       place:'Culiacán, Mexico',      time:'3h ago',         sub:'Cartel',               related:[],          lnglat:[-107.39,24.80]},
   {id:'e57',status:'unverified',sev:'medium', cat:'Unrest',               icon:'fa-bullhorn',      title:'Riots after fuel price hike',               place:'Caracas, Venezuela',    time:'5h ago',         sub:'Riot',                 related:[],          lnglat:[-66.90,10.49]},
   {id:'e58',status:'verified',  sev:'medium', cat:'Crime',                icon:'fa-shield-halved', title:'Gang violence — 12 killed overnight',       place:'Port-au-Prince, Haiti', time:'4h ago',         sub:'Gang violence',        related:[],          lnglat:[-72.34,18.54]},
+  /* ── Multi-category & no-category showcase ── */
+  {id:'e60',status:'verified',  sev:'high',   cats:['Crime','Terrorism'],  icon:'fa-shield-halved', title:'Gang-linked terror cell disrupted',         place:'Tripoli, Libya',        time:'1h ago',         sub:'Multi-threat',         related:[],          lnglat:[13.20,32.90]},
+  {id:'e61',status:'unverified',sev:'medium', cats:[],                     icon:'fa-circle-question',title:'Unclassified incident reported',           place:'Algiers, Algeria',      time:'2h ago',         sub:'',                     related:[],          lnglat:[3.10,36.80]},
 ];
 const ASSETS = [
   {label:'Kyiv Crisis Team',     icon:'fa-person-walking',  color:'#dc2626',lnglat:[30.52,50.45]},
@@ -668,13 +676,18 @@ map.on('load', ()=>{
   EVENTS.forEach(ev=>{
     const el = document.createElement('div');
     el.className = `event-marker st-${ev.status} sev-${ev.sev||'none'}`;
-    el.innerHTML = `<i class="fa-solid ${ev.icon}"></i>`;
+    const evCats = ev.cats !== undefined ? ev.cats : (ev.cat ? [ev.cat] : []);
+    const isNoCat = evCats.length === 0;
+    const isMultiCat = evCats.length > 1;
+    const displayIcon = isNoCat ? 'fa-circle-question' : ev.icon;
+    el.innerHTML = `<i class="fa-solid ${displayIcon}"></i>`;
     if(ev.status==='breaking'){
       const b=document.createElement('div');b.className='badge-breaking';b.innerHTML='<i class="fa-solid fa-bolt"></i>';el.appendChild(b);
       /* fix 6 — stagger each breaking marker's pulse so they don't all fire together */
       el.style.setProperty('--pulse-delay', `${(breakingIdx++ * 0.28).toFixed(2)}s`);
     }
     if(ev.status==='future')  { const b=document.createElement('div');b.className='badge-future';b.innerHTML='<i class="fa-solid fa-clock"></i>';el.appendChild(b); }
+    if(isMultiCat)            { const b=document.createElement('div');b.className='badge-multi';b.innerHTML='<i class="fa-solid fa-tags"></i>';el.appendChild(b); }
     el.style.display='none';
     el.addEventListener('click',e=>{e.stopPropagation();selectEvent(ev);});
     markerOverlay.appendChild(el);
@@ -915,7 +928,9 @@ function showDetailView(ev){
   document.getElementById('detailDate').textContent =ev.time;
   document.getElementById('detailLoc').textContent  =ev.place;
   document.getElementById('detailTitle').textContent=ev.title;
-  document.getElementById('detailSub').textContent  =ev.cat+(ev.sub?' · '+ev.sub:'');
+  const detCats = ev.cats !== undefined ? ev.cats : (ev.cat ? [ev.cat] : []);
+  const catLabel = detCats.length === 0 ? 'Uncategorized' : detCats.join(' · ');
+  document.getElementById('detailSub').textContent  = catLabel+(ev.sub?' · '+ev.sub:'');
 }
 
 function selectEvent(ev){
