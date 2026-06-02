@@ -146,7 +146,6 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
         <li><a href="#clusters"><span class="toc-num">07</span> Clusters</a></li>
         <li><a href="#stacks"><span class="toc-num">08</span> Same-Location Stack</a></li>
         <li><a href="#interactions"><span class="toc-num">09</span> Interactions</a></li>
-        <li><a href="#category-states"><span class="toc-num">10</span> Category States</a></li>
       </ul>
     </div>
   </nav>
@@ -460,48 +459,6 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
         <tr><td class="td-key">Click cluster</td><td>Zooms in to expand the cluster into individual markers</td></tr>
         <tr><td class="td-key">Hover analysis / news</td><td>Shows a tooltip with the document or article title</td></tr>
         <tr><td class="td-key">Click map background</td><td>Closes the open popover and deselects the active marker</td></tr>
-      </tbody>
-    </table>
-  </section>
-
-  <!-- 10 Category States -->
-  <section class="section" id="category-states">
-    <div class="section-header">
-      <span class="section-num">10</span>
-      <h2>Category States</h2>
-    </div>
-    <p class="section-intro">Two special states handle content that doesn't fit the standard single-category model: events tagged across multiple categories, and events with no category assigned yet.</p>
-
-    <div class="status-rows" style="margin-bottom:24px;">
-      <div class="srow">
-        <div class="srow-marker">
-          <div class="m-circle" style="border:2px solid #dc2626;color:#dc2626;">
-            <i class="fa-solid fa-handcuffs"></i>
-            <div class="badge-m"><i class="fa-solid fa-tags"></i></div>
-          </div>
-        </div>
-        <div class="srow-label"><strong>Multi-category</strong></div>
-        <div class="srow-note">Event tagged with two or more categories. Primary category icon is shown; a purple <i class="fa-solid fa-tags" style="font-size:10px;color:#7c3aed;"></i> badge appears at the bottom-left. The detail popover lists all categories.</div>
-      </div>
-      <div class="srow">
-        <div class="srow-marker">
-          <div class="m-circle" style="border:2px dashed #94a3b8;color:#94a3b8;">
-            <i class="fa-solid fa-circle-question"></i>
-          </div>
-        </div>
-        <div class="srow-label"><strong>No category</strong></div>
-        <div class="srow-note">Event with no category assigned. The category icon is replaced with a question mark. The detail popover shows "Uncategorized" in place of a category label.</div>
-      </div>
-    </div>
-
-    <table class="doc-table">
-      <thead><tr><th style="width:160px;">Property</th><th>Multi-category</th><th>No category</th></tr></thead>
-      <tbody>
-        <tr><td class="td-key">Main icon</td><td>First / primary category icon</td><td><code style="font-size:11px;background:#f1f5f9;padding:1px 5px;border-radius:3px;">fa-circle-question</code> (grey)</td></tr>
-        <tr><td class="td-key">Badge</td><td>Purple <code style="font-size:11px;background:#f1f5f9;padding:1px 5px;border-radius:3px;">fa-tags</code> — bottom-left</td><td>None</td></tr>
-        <tr><td class="td-key">Badge colour</td><td><code style="font-size:11px;background:#f1f5f9;padding:1px 5px;border-radius:3px;">#7c3aed</code></td><td>—</td></tr>
-        <tr><td class="td-key">Popover label</td><td>All categories joined with " · "</td><td>"Uncategorized"</td></tr>
-        <tr><td class="td-key">Data model</td><td><code style="font-size:11px;background:#f1f5f9;padding:1px 5px;border-radius:3px;">cats: ['Crime', 'Terrorism']</code></td><td><code style="font-size:11px;background:#f1f5f9;padding:1px 5px;border-radius:3px;">cats: []</code></td></tr>
       </tbody>
     </table>
   </section>
