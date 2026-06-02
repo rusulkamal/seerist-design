@@ -387,15 +387,62 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
     </div>
     <p class="section-intro">The organisation's own tracked locations — offices, field teams, embassies, vessels, facilities. Completely separate from events and intel.</p>
 
-    <table class="doc-table">
+    <table class="doc-table" style="margin-bottom:24px;">
       <tbody>
         <tr><td class="td-key" style="width:140px;">Shape</td><td>Circle with solid colour fill — instantly distinct from all other markers (no white background)</td></tr>
         <tr><td class="td-key">Size</td><td>32 × 32 px</td></tr>
-        <tr><td class="td-key">Colour</td><td>Each asset type has its own colour set by the organisation</td></tr>
+        <tr><td class="td-key">Icon colour</td><td>Always white — sits on top of the fill colour</td></tr>
+        <tr><td class="td-key">Fill colour</td><td>Each asset type gets its own colour, assigned by the organisation. No severity meaning — purely for identification.</td></tr>
         <tr><td class="td-key">Clustering</td><td>Never clustered — always visible at all zoom levels</td></tr>
         <tr><td class="td-key">Layer toggle</td><td>Toggled independently via the Assets layer in the Layers panel</td></tr>
       </tbody>
     </table>
+
+    <p style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:8px;">Colour coding</p>
+    <p style="font-size:13px;color:#64748b;margin-bottom:16px;line-height:1.7;">Each asset type is assigned a distinct colour so users can identify it at a glance without reading a label. Colours carry no severity or risk meaning — they are purely for visual differentiation between asset types.</p>
+
+    <div class="marker-rows" style="margin-bottom:0;">
+      <div class="mrow">
+        <div class="mrow-shape"><div class="m-asset" style="background:#dc2626;"><i class="fa-solid fa-person-walking"></i></div></div>
+        <div class="mrow-label">Crisis Team</div>
+        <div class="mrow-desc" style="display:flex;align-items:center;gap:8px;"><span style="width:14px;height:14px;border-radius:3px;background:#dc2626;display:inline-block;flex-shrink:0;"></span><code style="font-size:11px;background:#f1f5f9;padding:1px 6px;border-radius:3px;">#dc2626</code></div>
+      </div>
+      <div class="mrow">
+        <div class="mrow-shape"><div class="m-asset" style="background:#0891b2;"><i class="fa-solid fa-building-columns"></i></div></div>
+        <div class="mrow-label">Office</div>
+        <div class="mrow-desc" style="display:flex;align-items:center;gap:8px;"><span style="width:14px;height:14px;border-radius:3px;background:#0891b2;display:inline-block;flex-shrink:0;"></span><code style="font-size:11px;background:#f1f5f9;padding:1px 6px;border-radius:3px;">#0891b2</code></div>
+      </div>
+      <div class="mrow">
+        <div class="mrow-shape"><div class="m-asset" style="background:#7c3aed;"><i class="fa-solid fa-flag"></i></div></div>
+        <div class="mrow-label">Embassy</div>
+        <div class="mrow-desc" style="display:flex;align-items:center;gap:8px;"><span style="width:14px;height:14px;border-radius:3px;background:#7c3aed;display:inline-block;flex-shrink:0;"></span><code style="font-size:11px;background:#f1f5f9;padding:1px 6px;border-radius:3px;">#7c3aed</code></div>
+      </div>
+      <div class="mrow">
+        <div class="mrow-shape"><div class="m-asset" style="background:#d97706;"><i class="fa-solid fa-users"></i></div></div>
+        <div class="mrow-label">Field Team</div>
+        <div class="mrow-desc" style="display:flex;align-items:center;gap:8px;"><span style="width:14px;height:14px;border-radius:3px;background:#d97706;display:inline-block;flex-shrink:0;"></span><code style="font-size:11px;background:#f1f5f9;padding:1px 6px;border-radius:3px;">#d97706</code></div>
+      </div>
+      <div class="mrow">
+        <div class="mrow-shape"><div class="m-asset" style="background:#1e40af;"><i class="fa-solid fa-anchor"></i></div></div>
+        <div class="mrow-label">Logistics Hub</div>
+        <div class="mrow-desc" style="display:flex;align-items:center;gap:8px;"><span style="width:14px;height:14px;border-radius:3px;background:#1e40af;display:inline-block;flex-shrink:0;"></span><code style="font-size:11px;background:#f1f5f9;padding:1px 6px;border-radius:3px;">#1e40af</code></div>
+      </div>
+      <div class="mrow">
+        <div class="mrow-shape"><div class="m-asset" style="background:#6366f1;"><i class="fa-solid fa-server"></i></div></div>
+        <div class="mrow-label">Data Center</div>
+        <div class="mrow-desc" style="display:flex;align-items:center;gap:8px;"><span style="width:14px;height:14px;border-radius:3px;background:#6366f1;display:inline-block;flex-shrink:0;"></span><code style="font-size:11px;background:#f1f5f9;padding:1px 6px;border-radius:3px;">#6366f1</code></div>
+      </div>
+      <div class="mrow">
+        <div class="mrow-shape"><div class="m-asset" style="background:#0f766e;"><i class="fa-solid fa-industry"></i></div></div>
+        <div class="mrow-label">Facility</div>
+        <div class="mrow-desc" style="display:flex;align-items:center;gap:8px;"><span style="width:14px;height:14px;border-radius:3px;background:#0f766e;display:inline-block;flex-shrink:0;"></span><code style="font-size:11px;background:#f1f5f9;padding:1px 6px;border-radius:3px;">#0f766e</code></div>
+      </div>
+      <div class="mrow">
+        <div class="mrow-shape"><div class="m-asset" style="background:#334155;"><i class="fa-solid fa-building"></i></div></div>
+        <div class="mrow-label">Headquarters</div>
+        <div class="mrow-desc" style="display:flex;align-items:center;gap:8px;"><span style="width:14px;height:14px;border-radius:3px;background:#334155;display:inline-block;flex-shrink:0;"></span><code style="font-size:11px;background:#f1f5f9;padding:1px 6px;border-radius:3px;">#334155</code></div>
+      </div>
+    </div>
   </section>
 
   <!-- 07 Clusters -->
