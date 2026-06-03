@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Map Markers — Build Approach</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.7;font-size:14px;}
+
+.top-nav{height:44px;background:#0f1117;border-bottom:1px solid #1e2030;display:flex;align-items:center;padding:0 16px;position:sticky;top:0;z-index:100;}
+.top-nav-brand{display:flex;align-items:center;gap:8px;padding-right:20px;border-right:1px solid #1e2030;margin-right:4px;}
+.top-nav-mark{width:20px;height:20px;border-radius:4px;background:linear-gradient(135deg,#10b981,#99cc10);flex-shrink:0;}
+.top-nav-wordmark{font-size:11px;font-weight:700;letter-spacing:.12em;color:#fff;}
+.top-nav-tab{display:flex;align-items:center;gap:6px;padding:0 14px;height:44px;font-size:12px;font-weight:500;color:#64748b;cursor:pointer;text-decoration:none;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;}
+.top-nav-tab:hover{color:#94a3b8;}
+.top-nav-tab.active{color:#fff;border-bottom-color:#10b981;}
+.top-nav-tab i{font-size:11px;}
+
+.page-title-bar{background:#fff;border-bottom:1px solid #e2e8f0;padding:20px 0;}
+.page-title-inner{max-width:860px;margin:0 auto;padding:0 40px;}
+.page-title-inner h1{font-size:22px;font-weight:800;color:#0f1117;margin-bottom:4px;}
+.page-title-inner p{font-size:13px;color:#94a3b8;}
+
+.doc-body{max-width:860px;margin:0 auto;padding:40px 40px 80px;}
+
+/* Stepper */
+.stepper{display:flex;align-items:center;margin-bottom:52px;padding:20px 24px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;}
+.step{display:flex;align-items:center;gap:9px;flex:1;min-width:0;}
+.step-dot{width:28px;height:28px;border-radius:50%;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#94a3b8;flex-shrink:0;}
+.step-info{min-width:0;}
+.step-num-lbl{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#94a3b8;}
+.step-name{font-size:12px;font-weight:600;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.step-connector{flex:none;width:24px;height:1px;background:#e2e8f0;margin:0 4px;}
+
+/* Phase section */
+.phase{margin-bottom:0;scroll-margin-top:24px;}
+.phase-header{display:flex;align-items:center;gap:12px;margin-bottom:10px;padding-bottom:16px;border-bottom:2px solid #f1f5f9;}
+.phase-pill{font-size:10px;font-weight:700;color:#fff;background:#0f1117;padding:3px 10px;border-radius:20px;letter-spacing:.05em;flex-shrink:0;}
+.phase h2{font-size:18px;font-weight:700;color:#0f1117;}
+.phase-sub{font-size:13px;color:#64748b;margin-bottom:22px;line-height:1.75;max-width:680px;}
+
+/* Marker preview */
+.marker-strip{display:flex;align-items:flex-end;gap:24px;padding:24px 28px;background:#e8edf2;border-radius:12px;margin-bottom:22px;flex-wrap:wrap;}
+.strip-item{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.strip-caption{font-size:10px;color:#64748b;font-weight:500;white-space:nowrap;text-align:center;}
+
+/* Marker shapes */
+.m-circle{width:34px;height:34px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;position:relative;}
+.m-squircle{width:34px;height:34px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;position:relative;}
+.m-asset{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.14);flex-shrink:0;position:relative;}
+.badge-b{position:absolute;top:-5px;right:-5px;width:16px;height:16px;border-radius:50%;background:#dc2626;border:2px solid #e8edf2;display:flex;align-items:center;justify-content:center;font-size:7px;color:#fff;}
+.badge-f{position:absolute;bottom:-4px;right:-4px;width:14px;height:14px;border-radius:50%;background:#fff;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:6px;}
+
+/* Build / Test cards */
+.bt-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.bt-card{border-radius:10px;padding:16px 18px;}
+.bt-card.build{background:#f0fdf4;border:1px solid #bbf7d0;}
+.bt-card.test{background:#eff6ff;border:1px solid #bfdbfe;}
+.bt-head{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.bt-card.build .bt-head{color:#166534;}
+.bt-card.test .bt-head{color:#1d4ed8;}
+.bt-list{list-style:none;display:flex;flex-direction:column;gap:5px;}
+.bt-list li{font-size:12.5px;color:#475569;display:flex;gap:7px;line-height:1.5;}
+.bt-list li::before{content:'·';color:#94a3b8;flex-shrink:0;margin-top:1px;}
+
+/* Phase divider */
+.phase-sep{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
+
+.doc-footer{border-top:1px solid #f1f5f9;padding:24px 0;text-align:center;font-size:12px;color:#94a3b8;margin-top:40px;}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="top-nav-brand">
+    <div class="top-nav-mark"></div>
+    <span class="top-nav-wordmark">SEERIST</span>
+  </div>
+  <a class="top-nav-tab" href="index2.html"><i class="fa-solid fa-map"></i>Prototype</a>
+  <a class="top-nav-tab" href="spec.html"><i class="fa-solid fa-book-open"></i>Spec</a>
+  <a class="top-nav-tab active" href="build.html"><i class="fa-solid fa-layer-group"></i>Approach</a>
+</nav>
+
+<div class="page-title-bar">
+  <div class="page-title-inner">
+    <h1>Build Approach</h1>
+    <p>A phased plan — implement and validate one visual layer at a time before adding the next.</p>
+  </div>
+</div>
+
+<div class="doc-body">
+
+  <!-- Stepper -->
+  <div class="stepper">
+    <div class="step">
+      <div class="step-dot">1</div>
+      <div class="step-info">
+        <div class="step-num-lbl">Phase 1</div>
+        <div class="step-name">Content Type</div>
+      </div>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step">
+      <div class="step-dot">2</div>
+      <div class="step-info">
+        <div class="step-num-lbl">Phase 2</div>
+        <div class="step-name">Event Status</div>
+      </div>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step">
+      <div class="step-dot">3</div>
+      <div class="step-info">
+        <div class="step-num-lbl">Phase 3</div>
+        <div class="step-name">Category</div>
+      </div>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step">
+      <div class="step-dot">4</div>
+      <div class="step-info">
+        <div class="step-num-lbl">Phase 4</div>
+        <div class="step-name">Severity</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 1 -->
+  <section class="phase" id="phase-1">
+    <div class="phase-header">
+      <span class="phase-pill">Phase 1</span>
+      <h2>Content Type</h2>
+    </div>
+    <p class="phase-sub">Shape is the only differentiator. No icons, no colour, no border variation yet. The goal is to confirm the four shapes are visually distinct at map scale before any other layer is added.</p>
+
+    <div class="marker-strip">
+      <div class="strip-item">
+        <div class="m-circle" style="border:2px solid #94a3b8;"></div>
+        <span class="strip-caption">Event</span>
+      </div>
+      <div class="strip-item">
+        <div class="m-squircle" style="border:2px dotted #94a3b8;"></div>
+        <span class="strip-caption">News & Social</span>
+      </div>
+      <div class="strip-item">
+        <div class="m-squircle" style="border:2px solid #94a3b8;background:#ecfdf5;"></div>
+        <span class="strip-caption">Analysis</span>
+      </div>
+      <div class="strip-item">
+        <div class="m-asset" style="background:#94a3b8;"></div>
+        <span class="strip-caption">Asset</span>
+      </div>
+    </div>
+
+    <div class="bt-grid">
+      <div class="bt-card build">
+        <div class="bt-head"><i class="fa-solid fa-hammer" style="font-size:9px;"></i>Build</div>
+        <ul class="bt-list">
+          <li>Render all marker shapes on the map in a single neutral slate colour</li>
+          <li>Circle (34 px) for events</li>
+          <li>Rounded square with dotted border for News & Social</li>
+          <li>Rounded square with soft green fill for Analysis</li>
+          <li>Filled circle for Assets</li>
+          <li>Cluster bubble for grouped events</li>
+        </ul>
+      </div>
+      <div class="bt-card test">
+        <div class="bt-head"><i class="fa-solid fa-flask" style="font-size:9px;"></i>Test</div>
+        <ul class="bt-list">
+          <li>Can users tell the four types apart at typical zoom levels?</li>
+          <li>Does the rounded square read clearly vs circle at small sizes?</li>
+          <li>Is the dotted border visible enough to separate News & Social from Analysis?</li>
+          <li>Does the filled asset circle feel distinct from an event circle?</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <hr class="phase-sep"/>
+
+  <!-- Phase 2 -->
+  <section class="phase" id="phase-2">
+    <div class="phase-header">
+      <span class="phase-pill">Phase 2</span>
+      <h2>Event Status</h2>
+    </div>
+    <p class="phase-sub">Add border patterns to events to signal lifecycle stage. Still no icons or colour variation. The goal is to confirm all four border states read clearly before icons add visual noise.</p>
+
+    <div class="marker-strip">
+      <div class="strip-item">
+        <div class="m-circle" style="border:2px solid #78716c;color:#78716c;"></div>
+        <span class="strip-caption">Verified</span>
+      </div>
+      <div class="strip-item">
+        <div class="m-circle" style="border:2px dashed #78716c;color:#78716c;"></div>
+        <span class="strip-caption">Unverified</span>
+      </div>
+      <div class="strip-item">
+        <div class="m-circle" style="border:2px dashed #78716c;color:#78716c;">
+          <div class="badge-f" style="border-color:#78716c;color:#78716c;background:#e8edf2;"><i class="fa-solid fa-clock"></i></div>
+        </div>
+        <span class="strip-caption">Future</span>
+      </div>
+      <div class="strip-item">
+        <div class="m-circle" style="border:2px dashed #78716c;color:#78716c;">
+          <div class="badge-b" style="background:#78716c;border-color:#e8edf2;"><i class="fa-solid fa-bolt"></i></div>
+        </div>
+        <span class="strip-caption">Breaking</span>
+      </div>
+    </div>
+
+    <div class="bt-grid">
+      <div class="bt-card build">
+        <div class="bt-head"><i class="fa-solid fa-hammer" style="font-size:9px;"></i>Build</div>
+        <ul class="bt-list">
+          <li>Solid border → Verified</li>
+          <li>Dashed border → Unverified</li>
+          <li>Dashed border + clock badge (bottom-right) → Future</li>
+          <li>Dashed border + bolt badge (top-right) + pulse ring → Breaking</li>
+          <li>Stagger pulse animation across markers (0.28 s offset per marker)</li>
+        </ul>
+      </div>
+      <div class="bt-card test">
+        <div class="bt-head"><i class="fa-solid fa-flask" style="font-size:9px;"></i>Test</div>
+        <ul class="bt-list">
+          <li>Is solid vs dashed border distinguishable at zoom 3–5?</li>
+          <li>Do clock and bolt badges read at 34 px marker size?</li>
+          <li>Does the pulse ring signal urgency without being distracting?</li>
+          <li>Can users name all four statuses without seeing the legend?</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <hr class="phase-sep"/>
+
+  <!-- Phase 3 -->
+  <section class="phase" id="phase-3">
+    <div class="phase-header">
+      <span class="phase-pill">Phase 3</span>
+      <h2>Category</h2>
+    </div>
+    <p class="phase-sub">Add category icons inside event markers. Status borders are already in place — icons layer on top without replacing that signal. The goal is to confirm icons aid quick scanning without crowding the shape.</p>
+
+    <div class="marker-strip">
+      <div class="strip-item">
+        <div class="m-circle" style="border:2px solid #78716c;color:#78716c;"><i class="fa-solid fa-bullhorn"></i></div>
+        <span class="strip-caption">Unrest</span>
+      </div>
+      <div class="strip-item">
+        <div class="m-circle" style="border:2px dashed #78716c;color:#78716c;"><i class="fa-solid fa-person-rifle"></i></div>
+        <span class="strip-caption">Terrorism</span>
+      </div>
+      <div class="strip-item">
+        <div class="m-circle" style="border:2px solid #78716c;color:#78716c;"><i class="fa-solid fa-anchor"></i></div>
+        <span class="strip-caption">Maritime</span>
+      </div>
+      <div class="strip-item">
+        <div class="m-circle" style="border:2px dashed #78716c;color:#78716c;"><i class="fa-solid fa-jet-fighter"></i>
+          <div class="badge-b" style="background:#78716c;border-color:#e8edf2;"><i class="fa-solid fa-bolt"></i></div>
+        </div>
+        <span class="strip-caption">Conflict · Breaking</span>
+      </div>
+      <div class="strip-item">
+        <div class="m-circle" style="border:2px dashed #78716c;color:#78716c;"><i class="fa-solid fa-hurricane"></i>
+          <div class="badge-f" style="border-color:#78716c;color:#78716c;background:#e8edf2;"><i class="fa-solid fa-clock"></i></div>
+        </div>
+        <span class="strip-caption">Disaster · Future</span>
+      </div>
+      <div class="strip-item">
+        <div class="m-circle" style="border:2px solid #78716c;color:#78716c;"><i class="fa-solid fa-tags"></i></div>
+        <span class="strip-caption">Multi-cat</span>
+      </div>
+      <div class="strip-item">
+        <div class="m-circle" style="border:2px solid #78716c;color:#94a3b8;"><i class="fa-solid fa-question"></i></div>
+        <span class="strip-caption">Unset</span>
+      </div>
+    </div>
+
+    <div class="bt-grid">
+      <div class="bt-card build">
+        <div class="bt-head"><i class="fa-solid fa-hammer" style="font-size:9px;"></i>Build</div>
+        <ul class="bt-list">
+          <li>Map each event category to a Font Awesome icon (see Spec for full list)</li>
+          <li>Multi-category events → fa-tags icon</li>
+          <li>No-category events → fa-question in muted slate</li>
+          <li>Icon size: 13 px inside a 34 px marker; colour inherits from marker</li>
+        </ul>
+      </div>
+      <div class="bt-card test">
+        <div class="bt-head"><i class="fa-solid fa-flask" style="font-size:9px;"></i>Test</div>
+        <ul class="bt-list">
+          <li>Do icons aid scanning or add noise at map scale?</li>
+          <li>Are icons legible at zoom 3–4 where markers are smallest?</li>
+          <li>Can users identify categories without reading the legend?</li>
+          <li>Does the icon compete visually with the status badge?</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <hr class="phase-sep"/>
+
+  <!-- Phase 4 -->
+  <section class="phase" id="phase-4">
+    <div class="phase-header">
+      <span class="phase-pill">Phase 4</span>
+      <h2>Severity</h2>
+    </div>
+    <p class="phase-sub">Add colour to reflect event severity. Colour is the final layer — it amplifies urgency but is never the only differentiator, so the system remains usable for colour-blind users.</p>
+
+    <div class="marker-strip">
+      <div class="strip-item">
+        <div class="m-circle" style="border:2px solid #b91c1c;color:#dc2626;"><i class="fa-solid fa-person-rifle"></i></div>
+        <span class="strip-caption">High</span>
+      </div>
+      <div class="strip-item">
+        <div class="m-circle" style="border:2px solid #c2410c;color:#ea580c;"><i class="fa-solid fa-bullhorn"></i></div>
+        <span class="strip-caption">Medium</span>
+      </div>
+      <div class="strip-item">
+        <div class="m-circle" style="border:2px solid #78716c;color:#78716c;"><i class="fa-solid fa-gavel"></i></div>
+        <span class="strip-caption">Low</span>
+      </div>
+      <div class="strip-item">
+        <div class="m-circle" style="border:2px dashed #b91c1c;color:#dc2626;"><i class="fa-solid fa-jet-fighter"></i>
+          <div class="badge-b"><i class="fa-solid fa-bolt"></i></div>
+        </div>
+        <span class="strip-caption">Breaking · High</span>
+      </div>
+      <div class="strip-item">
+        <div class="m-circle" style="border:2px dashed #c2410c;color:#ea580c;"><i class="fa-solid fa-anchor"></i>
+          <div class="badge-f" style="border-color:#ea580c;color:#ea580c;background:#e8edf2;"><i class="fa-solid fa-clock"></i></div>
+        </div>
+        <span class="strip-caption">Future · Medium</span>
+      </div>
+    </div>
+
+    <div class="bt-grid">
+      <div class="bt-card build">
+        <div class="bt-head"><i class="fa-solid fa-hammer" style="font-size:9px;"></i>Build</div>
+        <ul class="bt-list">
+          <li>High → red <code style="font-size:11px;background:rgba(0,0,0,.06);padding:1px 4px;border-radius:3px;">#dc2626</code> border and icon</li>
+          <li>Medium → orange <code style="font-size:11px;background:rgba(0,0,0,.06);padding:1px 4px;border-radius:3px;">#ea580c</code></li>
+          <li>Low → grey <code style="font-size:11px;background:rgba(0,0,0,.06);padding:1px 4px;border-radius:3px;">#78716c</code> (no change from Phase 3)</li>
+          <li>Breaking always renders in red regardless of assigned severity</li>
+          <li>Colour applies to both border and interior icon</li>
+        </ul>
+      </div>
+      <div class="bt-card test">
+        <div class="bt-head"><i class="fa-solid fa-flask" style="font-size:9px;"></i>Test</div>
+        <ul class="bt-list">
+          <li>Does red / orange / grey provide enough contrast at map scale?</li>
+          <li>Is the system still usable without colour (colour-blind users)?</li>
+          <li>Does combining high severity + breaking feel redundant or helpful?</li>
+          <li>Can users prioritise high-severity events by scanning without reading labels?</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="doc-footer">Map Markers — Build Approach · June 2026</div>
+
+</div>
+
+<script>
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    e.preventDefault();
+    document.querySelector(a.getAttribute('href'))?.scrollIntoView({behavior:'smooth'});
+  });
+});
+</script>
+</body>
+</html>
