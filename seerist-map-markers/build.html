@@ -24,7 +24,7 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
 .page-title-inner h1{font-size:22px;font-weight:800;color:#0f1117;margin-bottom:4px;}
 .page-title-inner p{font-size:13px;color:#94a3b8;}
 
-.doc-body{max-width:860px;margin:0 auto;padding:40px 40px 80px;}
+.doc-body{max-width:1020px;margin:0 auto;padding:40px 40px 80px;}
 
 /* Stepper */
 .stepper{display:flex;align-items:center;margin-bottom:52px;padding:20px 24px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;}
@@ -54,14 +54,16 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
 .badge-b{position:absolute;top:-5px;right:-5px;width:16px;height:16px;border-radius:50%;background:#dc2626;border:2px solid #e8edf2;display:flex;align-items:center;justify-content:center;font-size:7px;color:#fff;}
 .badge-f{position:absolute;bottom:-4px;right:-4px;width:14px;height:14px;border-radius:50%;background:#fff;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:6px;}
 
-/* Build / Test cards */
-.bt-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+/* Build / Feasibility / Product cards */
+.bt-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
 .bt-card{border-radius:10px;padding:16px 18px;}
 .bt-card.build{background:#f0fdf4;border:1px solid #bbf7d0;}
 .bt-card.test{background:#eff6ff;border:1px solid #bfdbfe;}
+.bt-card.product{background:#fffbeb;border:1px solid #fde68a;}
 .bt-head{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
 .bt-card.build .bt-head{color:#166534;}
 .bt-card.test .bt-head{color:#1d4ed8;}
+.bt-card.product .bt-head{color:#92400e;}
 .bt-list{list-style:none;display:flex;flex-direction:column;gap:5px;}
 .bt-list li{font-size:12.5px;color:#475569;display:flex;gap:7px;line-height:1.5;}
 .bt-list li::before{content:'·';color:#94a3b8;flex-shrink:0;margin-top:1px;}
@@ -176,6 +178,14 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
           <li>Does the CSS dotted border render consistently across Chrome, Safari, and Firefox?</li>
         </ul>
       </div>
+      <div class="bt-card product">
+        <div class="bt-head"><i class="fa-solid fa-lightbulb" style="font-size:9px;"></i>Product</div>
+        <ul class="bt-list">
+          <li>Do all four content types ship together, or can events land first?</li>
+          <li>Are assets managed separately from editorial content — different team, different release cadence?</li>
+          <li>What's the process if a fifth content type needs to be added later?</li>
+        </ul>
+      </div>
     </div>
   </section>
 
@@ -230,6 +240,14 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
           <li>Do absolutely-positioned badges stay anchored to markers during zoom and pan?</li>
           <li>Can the pulse ring CSS animation run on 20+ simultaneous markers without CPU/GPU impact?</li>
           <li>Do staggered pulse delays (0.28 s offsets) hold up correctly in practice?</li>
+        </ul>
+      </div>
+      <div class="bt-card product">
+        <div class="bt-head"><i class="fa-solid fa-lightbulb" style="font-size:9px;"></i>Product</div>
+        <ul class="bt-list">
+          <li>Is Breaking set manually by an analyst or auto-promoted by a system rule?</li>
+          <li>How long does an event stay Breaking before it reverts to Verified?</li>
+          <li>Does Future need a countdown or time-to-event on the marker, or just in the detail panel?</li>
         </ul>
       </div>
     </div>
@@ -299,6 +317,14 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
           <li>Does <code style="font-size:11px;background:rgba(0,0,0,.06);padding:1px 4px;border-radius:3px;">currentColor</code> inheritance work correctly for icon colour in all browsers?</li>
         </ul>
       </div>
+      <div class="bt-card product">
+        <div class="bt-head"><i class="fa-solid fa-lightbulb" style="font-size:9px;"></i>Product</div>
+        <ul class="bt-list">
+          <li>Who owns the category taxonomy — editorial, product, or a shared governance process?</li>
+          <li>What's the process for adding a new category? Does it require a new icon?</li>
+          <li>Is Multi-category a permanent state or temporary until an analyst picks a primary?</li>
+        </ul>
+      </div>
     </div>
   </section>
 
@@ -357,6 +383,14 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
           <li>Do the three severity colours pass WCAG contrast against the white marker background?</li>
           <li>Are red and orange distinguishable from each other at small marker sizes and low screen brightness?</li>
           <li>Does the system degrade meaningfully if colour is stripped (forced grayscale / accessibility mode)?</li>
+        </ul>
+      </div>
+      <div class="bt-card product">
+        <div class="bt-head"><i class="fa-solid fa-lightbulb" style="font-size:9px;"></i>Product</div>
+        <ul class="bt-list">
+          <li>Who sets severity — analysts manually, an automated scoring model, or both?</li>
+          <li>Can severity be updated after publish? If so, does the marker update live on the map?</li>
+          <li>Should Low severity events be shown by default or hidden to reduce map noise?</li>
         </ul>
       </div>
     </div>
