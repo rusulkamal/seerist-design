@@ -87,7 +87,7 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
 <div class="page-title-bar">
   <div class="page-title-inner">
     <h1>Build Approach</h1>
-    <p>A phased plan — implement and validate one visual layer at a time before adding the next.</p>
+    <p>A phased plan for engineering to explore what's technically feasible, one layer at a time.</p>
   </div>
 </div>
 
@@ -134,7 +134,7 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
       <span class="phase-pill">Phase 1</span>
       <h2>Content Type</h2>
     </div>
-    <p class="phase-sub">Shape is the only differentiator. No icons, no colour, no border variation yet. The goal is to confirm the four shapes are visually distinct at map scale before any other layer is added.</p>
+    <p class="phase-sub">Shape only — no icons, colour, or border variation. Establish the rendering baseline: can all four marker types be placed on MapLibre as overlay divs with correct sizing, positioning, and overlap behaviour at every zoom level?</p>
 
     <div class="marker-strip">
       <div class="strip-item">
@@ -168,12 +168,12 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
         </ul>
       </div>
       <div class="bt-card test">
-        <div class="bt-head"><i class="fa-solid fa-flask" style="font-size:9px;"></i>Test</div>
+        <div class="bt-head"><i class="fa-solid fa-flask" style="font-size:9px;"></i>Feasibility</div>
         <ul class="bt-list">
-          <li>Can users tell the four types apart at typical zoom levels?</li>
-          <li>Does the rounded square read clearly vs circle at small sizes?</li>
-          <li>Is the dotted border visible enough to separate News & Social from Analysis?</li>
-          <li>Does the filled asset circle feel distinct from an event circle?</li>
+          <li>Do overlay divs stay correctly anchored to map coordinates during pan and zoom?</li>
+          <li>Do shapes render crisp at 34 px on retina / high-DPI displays?</li>
+          <li>At what marker count does frame rate start to drop?</li>
+          <li>Does the CSS dotted border render consistently across Chrome, Safari, and Firefox?</li>
         </ul>
       </div>
     </div>
@@ -187,7 +187,7 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
       <span class="phase-pill">Phase 2</span>
       <h2>Event Status</h2>
     </div>
-    <p class="phase-sub">Add border patterns to events to signal lifecycle stage. Still no icons or colour variation. The goal is to confirm all four border states read clearly before icons add visual noise.</p>
+    <p class="phase-sub">Add border patterns and badges to events. Verify that CSS dashed borders on circular elements behave consistently across browsers, and that absolutely-positioned badges stay anchored during map movement.</p>
 
     <div class="marker-strip">
       <div class="strip-item">
@@ -224,12 +224,12 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
         </ul>
       </div>
       <div class="bt-card test">
-        <div class="bt-head"><i class="fa-solid fa-flask" style="font-size:9px;"></i>Test</div>
+        <div class="bt-head"><i class="fa-solid fa-flask" style="font-size:9px;"></i>Feasibility</div>
         <ul class="bt-list">
-          <li>Is solid vs dashed border distinguishable at zoom 3–5?</li>
-          <li>Do clock and bolt badges read at 34 px marker size?</li>
-          <li>Does the pulse ring signal urgency without being distracting?</li>
-          <li>Can users name all four statuses without seeing the legend?</li>
+          <li>Does CSS dashed border on a circular element render consistently across browsers?</li>
+          <li>Do absolutely-positioned badges stay anchored to markers during zoom and pan?</li>
+          <li>Can the pulse ring CSS animation run on 20+ simultaneous markers without CPU/GPU impact?</li>
+          <li>Do staggered pulse delays (0.28 s offsets) hold up correctly in practice?</li>
         </ul>
       </div>
     </div>
@@ -243,7 +243,7 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
       <span class="phase-pill">Phase 3</span>
       <h2>Category</h2>
     </div>
-    <p class="phase-sub">Add category icons inside event markers. Status borders are already in place — icons layer on top without replacing that signal. The goal is to confirm icons aid quick scanning without crowding the shape.</p>
+    <p class="phase-sub">Add Font Awesome icons inside markers. Confirm icon loading, CDN fallback behaviour, and rendering cost before colour is applied. Status borders from Phase 2 remain in place.</p>
 
     <div class="marker-strip">
       <div class="strip-item">
@@ -291,12 +291,12 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
         </ul>
       </div>
       <div class="bt-card test">
-        <div class="bt-head"><i class="fa-solid fa-flask" style="font-size:9px;"></i>Test</div>
+        <div class="bt-head"><i class="fa-solid fa-flask" style="font-size:9px;"></i>Feasibility</div>
         <ul class="bt-list">
-          <li>Do icons aid scanning or add noise at map scale?</li>
-          <li>Are icons legible at zoom 3–4 where markers are smallest?</li>
-          <li>Can users identify categories without reading the legend?</li>
-          <li>Does the icon compete visually with the status badge?</li>
+          <li>Does Font Awesome load reliably from CDN? What's the fallback if it times out?</li>
+          <li>Are 13 px icons legible inside 34 px markers at zoom 3–4?</li>
+          <li>Does icon rendering add measurable cost when 200+ markers are visible?</li>
+          <li>Does <code style="font-size:11px;background:rgba(0,0,0,.06);padding:1px 4px;border-radius:3px;">currentColor</code> inheritance work correctly for icon colour in all browsers?</li>
         </ul>
       </div>
     </div>
@@ -310,7 +310,7 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
       <span class="phase-pill">Phase 4</span>
       <h2>Severity</h2>
     </div>
-    <p class="phase-sub">Add colour to reflect event severity. Colour is the final layer — it amplifies urgency but is never the only differentiator, so the system remains usable for colour-blind users.</p>
+    <p class="phase-sub">Add colour as the final layer. Verify that colour values propagate correctly through the <code style="font-size:12px;background:#f1f5f9;padding:1px 5px;border-radius:3px;">currentColor</code> pattern and that the system degrades gracefully when colour is unavailable.</p>
 
     <div class="marker-strip">
       <div class="strip-item">
@@ -351,12 +351,12 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
         </ul>
       </div>
       <div class="bt-card test">
-        <div class="bt-head"><i class="fa-solid fa-flask" style="font-size:9px;"></i>Test</div>
+        <div class="bt-head"><i class="fa-solid fa-flask" style="font-size:9px;"></i>Feasibility</div>
         <ul class="bt-list">
-          <li>Does red / orange / grey provide enough contrast at map scale?</li>
-          <li>Is the system still usable without colour (colour-blind users)?</li>
-          <li>Does combining high severity + breaking feel redundant or helpful?</li>
-          <li>Can users prioritise high-severity events by scanning without reading labels?</li>
+          <li>Does <code style="font-size:11px;background:rgba(0,0,0,.06);padding:1px 4px;border-radius:3px;">currentColor</code> propagate correctly to both border and icon across all browsers?</li>
+          <li>Do the three severity colours pass WCAG contrast against the white marker background?</li>
+          <li>Are red and orange distinguishable from each other at small marker sizes and low screen brightness?</li>
+          <li>Does the system degrade meaningfully if colour is stripped (forced grayscale / accessibility mode)?</li>
         </ul>
       </div>
     </div>
