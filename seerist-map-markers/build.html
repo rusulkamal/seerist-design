@@ -68,6 +68,31 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
 .bt-list li{font-size:12.5px;color:#475569;display:flex;gap:7px;line-height:1.5;}
 .bt-list li::before{content:'·';color:#94a3b8;flex-shrink:0;margin-top:1px;}
 
+/* Design option note */
+.design-note{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:12.5px;color:#78350f;margin-bottom:20px;line-height:1.5;}
+.design-note i{font-size:11px;color:#d97706;margin-top:2px;flex-shrink:0;}
+
+/* Content type list */
+.type-list{border:1px solid #f1f5f9;border-radius:10px;overflow:hidden;margin-bottom:22px;}
+.type-row{display:flex;align-items:center;gap:16px;padding:14px 18px;border-bottom:1px solid #f8fafc;}
+.type-row:last-child{border-bottom:none;}
+.type-name{font-size:13px;font-weight:700;color:#1e293b;}
+.type-desc{font-size:11.5px;color:#94a3b8;margin-top:1px;}
+
+/* Legend preview */
+.legend-preview-wrap{margin-bottom:22px;}
+.legend-preview-label{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin-bottom:8px;}
+.legend-preview{display:inline-flex;flex-direction:column;background:rgba(255,255,255,.97);border:1px solid #e2e8f0;border-radius:10px;font-size:11px;color:#475569;box-shadow:0 2px 12px rgba(0,0,0,.08);min-width:180px;overflow:hidden;}
+.lp-title-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid #f1f5f9;}
+.lp-title{font-size:11px;font-weight:600;color:#334155;}
+.lp-body{padding:8px 12px 10px;}
+.lp-s-title{font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin-bottom:6px;}
+.lp-row{display:flex;align-items:center;gap:7px;margin-bottom:4px;font-size:11px;color:#475569;}
+.lp-row:last-child{margin-bottom:0;}
+.lp-ev{width:13px;height:13px;border-radius:50%;background:#fff;flex-shrink:0;position:relative;}
+.lp-sq{width:13px;height:13px;border-radius:3px;background:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:5px;}
+.lp-dot{width:13px;height:13px;border-radius:50%;flex-shrink:0;}
+
 /* Phase divider */
 .phase-sep{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
 
@@ -136,24 +161,58 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
       <span class="phase-pill">Phase 1</span>
       <h2>Content Type</h2>
     </div>
-    <p class="phase-sub">Shape only — no icons, colour, or border variation. Establish the rendering baseline: can all four marker types be placed on MapLibre as overlay divs with correct sizing, positioning, and overlap behaviour at every zoom level?</p>
+    <p class="phase-sub">Shape only to differentiate between content types — no colour or border variation yet. Establish the rendering baseline: can all four marker types be placed on MapLibre as overlay divs with correct sizing, positioning, and overlap behaviour at every zoom level?</p>
 
-    <div class="marker-strip">
-      <div class="strip-item">
+    <div class="design-note">
+      <i class="fa-solid fa-circle-info"></i>
+      <div><strong>Alternative:</strong> Match the colours already used on content cards instead of a flat neutral — this would align map markers with the rest of the UI from day one rather than introducing colour in a later phase.</div>
+    </div>
+
+    <div class="type-list">
+      <div class="type-row">
         <div class="m-circle" style="border:2px solid #94a3b8;"></div>
-        <span class="strip-caption">Event</span>
+        <div>
+          <div class="type-name">Event</div>
+          <div class="type-desc">Circle, 34 px</div>
+        </div>
       </div>
-      <div class="strip-item">
+      <div class="type-row">
         <div class="m-squircle" style="border:2px dotted #94a3b8;"></div>
-        <span class="strip-caption">News & Social</span>
+        <div>
+          <div class="type-name">News & Social</div>
+          <div class="type-desc">Rounded square, dotted border</div>
+        </div>
       </div>
-      <div class="strip-item">
+      <div class="type-row">
         <div class="m-squircle" style="border:2px solid #94a3b8;background:#ecfdf5;"></div>
-        <span class="strip-caption">Analysis</span>
+        <div>
+          <div class="type-name">Analysis</div>
+          <div class="type-desc">Rounded square, soft green fill</div>
+        </div>
       </div>
-      <div class="strip-item">
+      <div class="type-row">
         <div class="m-asset" style="background:#94a3b8;"></div>
-        <span class="strip-caption">Asset</span>
+        <div>
+          <div class="type-name">Asset</div>
+          <div class="type-desc">Filled circle</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="legend-preview-wrap">
+      <div class="legend-preview-label">Legend at this phase</div>
+      <div class="legend-preview">
+        <div class="lp-title-row">
+          <span class="lp-title">Legend</span>
+          <i class="fa-solid fa-chevron-down" style="font-size:8px;color:#a8a29e;"></i>
+        </div>
+        <div class="lp-body">
+          <div class="lp-s-title">Content</div>
+          <div class="lp-row"><div class="lp-ev" style="border:2px solid #94a3b8;"></div>Event</div>
+          <div class="lp-row"><div class="lp-sq" style="border:2px dotted #94a3b8;"></div>News & Social</div>
+          <div class="lp-row"><div class="lp-sq" style="border:2px solid #94a3b8;background:#ecfdf5;"></div>Analysis</div>
+          <div class="lp-row"><div class="lp-dot" style="background:#94a3b8;"></div>Asset</div>
+        </div>
       </div>
     </div>
 
