@@ -218,9 +218,9 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
         <div class="mrow-desc">Happening right now. Dashed border + spark badge + pulse ring.</div>
       </div>
       <div class="mrow">
-        <div class="mrow-shape"><div class="m-squircle" style="border:2px solid #94a3b8;color:#64748b;"><i class="fa-solid fa-bullhorn"></i></div></div>
+        <div class="mrow-shape"><div class="m-squircle" style="border:2px dotted #94a3b8;color:#64748b;"><i class="fa-solid fa-bullhorn"></i></div></div>
         <div class="mrow-label">News & Social</div>
-        <div class="mrow-desc">Third-party reporting. Rounded square, white background, slate border.</div>
+        <div class="mrow-desc">Third-party reporting. Rounded square, white background, dotted slate border.</div>
       </div>
       <div class="mrow">
         <div class="mrow-shape"><div class="m-squircle" style="border:2px solid #10b981;color:#10b981;background:#ecfdf5;"><i class="fa-solid fa-file-lines"></i></div></div>
@@ -323,20 +323,13 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
 
     <p style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin:20px 0 10px;">Special states</p>
     <div class="icon-grid">
-      <div class="icon-item" style="position:relative;">
-        <span style="position:relative;display:inline-flex;flex-shrink:0;margin-right:2px;">
-          <i class="fa-solid fa-handcuffs" style="width:14px;text-align:center;color:#64748b;"></i>
-          <span style="position:absolute;bottom:-5px;left:-5px;width:12px;height:12px;border-radius:50%;background:#64748b;border:1.5px solid #fff;display:flex;align-items:center;justify-content:center;font-size:5px;color:#fff;"><i class="fa-solid fa-tags"></i></span>
-        </span>
+      <div class="icon-item">
+        <i class="fa-solid fa-tags" style="width:14px;text-align:center;color:#64748b;"></i>
         Multi-category
       </div>
       <div class="icon-item">
-        <i class="fa-solid fa-minus" style="width:14px;text-align:center;color:#94a3b8;"></i>
-        No category — option A
-      </div>
-      <div class="icon-item">
         <i class="fa-solid fa-question" style="width:14px;text-align:center;color:#94a3b8;"></i>
-        No category — option B
+        Unset
       </div>
     </div>
   </section>
@@ -353,7 +346,7 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
       <tbody>
         <tr><td class="td-key" style="width:120px;">Shape</td><td>Rounded square — same shape family as Analysis, distinguished by white (unfilled) background vs Analysis's soft green tint</td></tr>
         <tr><td class="td-key">Size</td><td>34 × 34 px — same as events, equal visual weight on the map</td></tr>
-        <tr><td class="td-key">Border</td><td>Slate <code style="font-size:11px;background:#f1f5f9;padding:1px 5px;border-radius:3px;">#94a3b8</code> — third-party, lower trust</td></tr>
+        <tr><td class="td-key">Border</td><td>Dotted slate <code style="font-size:11px;background:#f1f5f9;padding:1px 5px;border-radius:3px;">#94a3b8</code> — dotted to signal third-party, lower trust vs solid Seerist content</td></tr>
         <tr><td class="td-key">Icon</td><td>Matches the event category (bullhorn, anchor, etc.) so users can compare directly</td></tr>
         <tr><td class="td-key">Visible from</td><td>Zoom level 2 and above</td></tr>
       </tbody>
@@ -469,18 +462,23 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
         <tr><td class="td-key" style="width:140px;">Appearance</td><td>Circle with a count number. Neutral slate border and dark text — no severity colouring.</td></tr>
         <tr><td class="td-key">Size</td><td>34 px (≤7 events) · 40 px (8–15) · 46 px (16+)</td></tr>
         <tr><td class="td-key">Position</td><td>Placed at the geographic centroid of all member events</td></tr>
+        <tr><td class="td-key">Algorithm</td><td>Geographic grid — events snap to a degree-based cell determined by zoom level. Consistent regardless of pan position.</td></tr>
         <tr><td class="td-key">To expand</td><td>Zoom in — clusters break apart automatically at higher zoom levels</td></tr>
       </tbody>
     </table>
 
     <p style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:12px;">Zoom thresholds</p>
     <table class="doc-table">
-      <thead><tr><th>Zoom level</th><th>Behaviour</th></tr></thead>
+      <thead><tr><th>Zoom level</th><th>Cell size</th><th>Behaviour</th></tr></thead>
       <tbody>
-        <tr><td class="td-key">Below 2.5</td><td>Maximum clustering — world view</td></tr>
-        <tr><td class="td-key">2.5 – 5</td><td>Moderate — regional view</td></tr>
-        <tr><td class="td-key">5 – 7</td><td>Loose — country view</td></tr>
-        <tr><td class="td-key">7+</td><td>No clustering — all individual markers visible</td></tr>
+        <tr><td class="td-key">Below 1.5</td><td>999°</td><td>Everything in one cluster — world view</td></tr>
+        <tr><td class="td-key">1.5 – 2.5</td><td>22°</td><td>Continental clustering</td></tr>
+        <tr><td class="td-key">2.5 – 3</td><td>14°</td><td>Regional clustering</td></tr>
+        <tr><td class="td-key">3 – 4</td><td>7°</td><td>Sub-regional clustering</td></tr>
+        <tr><td class="td-key">4 – 5</td><td>3.5°</td><td>Country-level clustering</td></tr>
+        <tr><td class="td-key">5 – 6</td><td>1.8°</td><td>City-region clustering</td></tr>
+        <tr><td class="td-key">6 – 7</td><td>0.9°</td><td>Loose — city view</td></tr>
+        <tr><td class="td-key">7+</td><td>—</td><td>No clustering — all individual markers visible</td></tr>
       </tbody>
     </table>
   </section>

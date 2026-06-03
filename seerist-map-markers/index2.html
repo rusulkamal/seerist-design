@@ -360,13 +360,14 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;fl
       </div>
       <div class="leg-content" id="leg-content">
         <div class="leg-section">
-          <div class="leg-s-title">Event Types</div>
-          <div class="leg-row"><div class="leg-ev" style="border:2px solid #78716c;"></div>Verified</div>
-          <div class="leg-row"><div class="leg-ev" style="border:2px dashed #78716c;"></div>Unverified</div>
-          <div class="leg-row"><div class="leg-ev" style="border:2px dashed #78716c;"><div style="position:absolute;bottom:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#fff;border:1.5px solid #78716c;display:flex;align-items:center;justify-content:center;font-size:4px;color:#78716c;"><i class="fa-solid fa-clock"></i></div></div>Future</div>
-          <div class="leg-row"><div class="leg-ev" style="border:2px dashed #78716c;"><div style="position:absolute;top:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#dc2626;border:1.5px solid #fff;display:flex;align-items:center;justify-content:center;font-size:4px;color:#fff;"><i class="fa-solid fa-bolt"></i></div></div>Breaking</div>
-          <div class="leg-row"><div class="leg-ev" style="border-radius:4px;border:2px solid #94a3b8;"></div>News &amp; Social</div>
+          <div class="leg-s-title">Content</div>
+          <div class="leg-row"><div class="leg-ev" style="border-radius:4px;border:2px dotted #94a3b8;"></div>News &amp; Social</div>
           <div class="leg-row"><div class="leg-ev" style="border-radius:4px;border:2px solid #10b981;color:#10b981;display:flex;align-items:center;justify-content:center;font-size:6px;"><i class="fa-solid fa-file-lines"></i></div>Analysis</div>
+          <div style="font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#cbd5e1;margin-bottom:5px;margin-top:8px;">Event</div>
+          <div class="leg-row" style="padding-left:8px;"><div class="leg-ev" style="border:2px solid #78716c;"></div>Verified</div>
+          <div class="leg-row" style="padding-left:8px;"><div class="leg-ev" style="border:2px dashed #78716c;"></div>Unverified</div>
+          <div class="leg-row" style="padding-left:8px;"><div class="leg-ev" style="border:2px dashed #78716c;"><div style="position:absolute;bottom:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#fff;border:1.5px solid #78716c;display:flex;align-items:center;justify-content:center;font-size:4px;color:#78716c;"><i class="fa-solid fa-clock"></i></div></div>Future</div>
+          <div class="leg-row" style="padding-left:8px;"><div class="leg-ev" style="border:2px dashed #78716c;"><div style="position:absolute;top:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#dc2626;border:1.5px solid #fff;display:flex;align-items:center;justify-content:center;font-size:4px;color:#fff;"><i class="fa-solid fa-bolt"></i></div></div>Breaking</div>
         </div>
         <hr class="leg-divider"/>
         <div class="leg-section">
@@ -387,7 +388,7 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;fl
             <span class="leg-s-title" style="margin-bottom:0;">Categories</span>
             <i class="fa-solid fa-chevron-down" id="cat-leg-chevron" style="font-size:8px;color:#94a3b8;margin-left:auto;transition:transform .15s;"></i>
           </div>
-          <div id="cat-leg-list" style="display:none;">
+          <div id="cat-leg-list" style="">
             <div class="assets-grid" style="margin-top:7px;">
               <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"><i class="fa-solid fa-shield-halved"></i></div><span class="asset-leg-label">Crime</span></div>
               <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"><i class="fa-solid fa-jet-fighter"></i></div><span class="asset-leg-label">Conflict</span></div>
@@ -403,6 +404,8 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;fl
               <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"><i class="fa-solid fa-ticket"></i></div><span class="asset-leg-label">Sporting</span></div>
               <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"><i class="fa-solid fa-gift"></i></div><span class="asset-leg-label">Holiday</span></div>
               <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"><i class="fa-solid fa-calendar-days"></i></div><span class="asset-leg-label">Anniversary</span></div>
+              <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"><i class="fa-solid fa-tags"></i></div><span class="asset-leg-label">Multi-cat</span></div>
+              <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#94a3b8;border:1px solid #e2e8f0;"><i class="fa-solid fa-question"></i></div><span class="asset-leg-label">Unset</span></div>
             </div>
           </div>
         </div>
@@ -744,15 +747,16 @@ map.on('zoomend', refresh);
 /* ══════════════════════════════════════════
    CLUSTERING
 ══════════════════════════════════════════ */
-function clusterR(){
+/* Geographic cell size in degrees per zoom tier — pan-invariant clustering */
+function cellDeg(){
   const z=map.getZoom();
-  if(z<1.5) return 9999;
-  if(z<2.5) return 80;
-  if(z<3)   return 60;
-  if(z<4)   return 44;
-  if(z<5)   return 32;
-  if(z<6)   return 22;
-  if(z<7)   return 14;
+  if(z<1.5) return 999;
+  if(z<2.5) return 22;
+  if(z<3)   return 14;
+  if(z<4)   return 7;
+  if(z<5)   return 3.5;
+  if(z<6)   return 1.8;
+  if(z<7)   return 0.9;
   return 0;
 }
 
@@ -774,46 +778,37 @@ function refresh(){
     }
   });
 
-  /* 4 · cluster all event pins */
-  const R = clusterR();
-  const pts = PINS.map(p=>map.project(p.lnglat));
-  const used= new Array(PINS.length).fill(false);
+  /* 4 · cluster by geographic grid — stable regardless of pan position */
+  const cell = cellDeg();
+  if(cell===0){ PINS.forEach(p=>showPin(p)); return; }
 
-  for(let i=0;i<PINS.length;i++){
-    if(used[i]) continue;
-    used[i]=true;
-    const members=[i];
-    for(let j=i+1;j<PINS.length;j++){
-      if(used[j]) continue;
-      if(Math.hypot(pts[j].x-pts[i].x, pts[j].y-pts[i].y)<R){ members.push(j); used[j]=true; }
-    }
-    if(members.length===1){
-      showPin(PINS[i]);
-    } else {
-      let count=0;
-      let maxSev='none';
-      /* fix 5 — weighted centroid; fix 2 — track highest severity */
-      let sumLng=0, sumLat=0;
-      members.forEach(k=>{
-        const pin=PINS[k];
-        const evts=pin.kind==='group'?pin.grp:[pin.ev];
-        count += evts.length;
-        sumLng += pin.lnglat[0]; sumLat += pin.lnglat[1];
-        evts.forEach(ev=>{
-          if(ev.sev==='high') maxSev='high';
-          else if(ev.sev==='medium' && maxSev!=='high') maxSev='medium';
-        });
+  const cells={};
+  PINS.forEach(p=>{
+    const key=`${Math.floor(p.lnglat[0]/cell)},${Math.floor(p.lnglat[1]/cell)}`;
+    (cells[key]=cells[key]||[]).push(p);
+  });
+
+  Object.values(cells).forEach(members=>{
+    if(members.length===1){ showPin(members[0]); return; }
+    let count=0, maxSev='none', sumLng=0, sumLat=0;
+    members.forEach(p=>{
+      const evts=p.kind==='group'?p.grp:[p.ev];
+      count+=evts.length;
+      sumLng+=p.lnglat[0]; sumLat+=p.lnglat[1];
+      evts.forEach(ev=>{
+        if(ev.sev==='high') maxSev='high';
+        else if(ev.sev==='medium'&&maxSev!=='high') maxSev='medium';
       });
-      const centroid = [sumLng/members.length, sumLat/members.length];
-      const sz=count>15?46:count>7?40:34;
-      const el=makeClusterEl(centroid, count, sz);
-      clusterLayer.appendChild(el);
-      const pt=map.project(centroid);
-      el.style.left=(pt.x-sz/2)+'px';
-      el.style.top =(pt.y-sz/2)+'px';
-      clusterEls.push({el, lnglat:centroid, sz});
-    }
-  }
+    });
+    const centroid=[sumLng/members.length, sumLat/members.length];
+    const sz=count>15?46:count>7?40:34;
+    const el=makeClusterEl(centroid,count,sz);
+    clusterLayer.appendChild(el);
+    const pt=map.project(centroid);
+    el.style.left=(pt.x-sz/2)+'px';
+    el.style.top =(pt.y-sz/2)+'px';
+    clusterEls.push({el,lnglat:centroid,sz});
+  });
 }
 
 function showPin(p){
