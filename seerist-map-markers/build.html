@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>Map Markers — Build Approach</title>
+<title>Map Markers Build Approach</title>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
@@ -119,8 +119,6 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
 
   <!-- Rationale -->
   <div style="margin-bottom:40px;">
-    <h2 style="font-size:16px;font-weight:700;color:#0f1117;margin-bottom:10px;">Why a phased approach?</h2>
-    <p style="font-size:13px;color:#64748b;line-height:1.8;margin-bottom:16px;">We're breaking the marker system into layers so engineering can build and validate each one before the next is added. Each phase produces real data — performance limits, rendering behaviour, zoom legibility — that tells us whether the next layer is worth the complexity. Any phase can be the shipping point if the EOS timeline tightens.</p>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
       <div style="padding:14px 16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
         <div style="font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#94a3b8;margin-bottom:6px;">One layer at a time</div>
@@ -178,11 +176,11 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
       <span class="phase-pill">Phase 1</span>
       <h2>Content Type</h2>
     </div>
-    <p class="phase-sub">Shape only to differentiate between content types — no colour or border variation yet. Establish the rendering baseline: can all four marker types be placed on MapLibre as overlay divs with correct sizing, positioning, and overlap behaviour at every zoom level?</p>
+    <p class="phase-sub">Shape only to differentiate between content types no colour or border variation yet. Establish the rendering baseline: can all four marker types be placed on MapLibre as overlay divs with correct sizing, positioning, and overlap behaviour at every zoom level?</p>
 
     <div class="design-note">
       <i class="fa-solid fa-circle-info"></i>
-      <div><strong>Alternative:</strong> Match the colours already used on content cards instead of a flat neutral — this would align map markers with the rest of the UI from day one rather than introducing colour in a later phase.</div>
+      <div><strong>Alternative:</strong> Match the colours already used on content cards instead of a flat neutral this would align map markers with the rest of the UI from day one rather than introducing colour in a later phase.</div>
     </div>
 
     <div class="type-list">
@@ -305,7 +303,7 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
 
     <div class="design-note">
       <i class="fa-solid fa-circle-info"></i>
-      <div><strong>Sample only</strong> — a subset of categories is shown below. See the <a href="spec.html" style="color:#92400e;font-weight:600;">Spec</a> for the full list of category icons.</div>
+      <div><strong>Sample only</strong> a subset of categories is shown below. See the <a href="spec.html" style="color:#92400e;font-weight:600;">Spec</a> for the full list of category icons.</div>
     </div>
 
     <div class="type-list">
@@ -362,7 +360,7 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
       <span class="phase-pill">Phase 4</span>
       <h2>Severity</h2>
     </div>
-    <p class="phase-sub">Add colour as the final layer — most events tend to be low severity, which is why colour comes last.</p>
+    <p class="phase-sub">Add colour as the final layer most events tend to be low severity, which is why colour comes last.</p>
 
     <div class="type-list">
       <div class="type-row">
@@ -403,7 +401,7 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
       </div>
   </section>
 
-  <div class="doc-footer">Map Markers — Build Approach · June 2026</div>
+  <div class="doc-footer">Map Markers Build Approach · June 2026</div>
 
 </div>
 
