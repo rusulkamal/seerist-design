@@ -73,7 +73,7 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
 .design-note i{font-size:11px;color:#d97706;margin-top:2px;flex-shrink:0;}
 
 /* Content type list */
-.type-list{border:1px solid #f1f5f9;border-radius:10px;overflow:hidden;margin-bottom:22px;}
+.type-list{border:1px solid #f1f5f9;border-radius:10px;overflow:visible;margin-bottom:22px;}
 .type-row{display:flex;align-items:center;gap:16px;padding:14px 18px;border-bottom:1px solid #f8fafc;}
 .type-row:last-child{border-bottom:none;}
 .type-name{font-size:13px;font-weight:700;color:#1e293b;}
@@ -256,28 +256,28 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
       <span class="phase-pill">Phase 2</span>
       <h2>Event Status</h2>
     </div>
-    <p class="phase-sub">Add border patterns and badges to events. Verify that CSS dashed borders on circular elements behave consistently across browsers, and that absolutely-positioned badges stay anchored during map movement.</p>
+    <p class="phase-sub">Add border patterns and badges to events.</p>
 
-    <div class="marker-strip">
-      <div class="strip-item">
+    <div class="type-list">
+      <div class="type-row">
         <div class="m-circle" style="border:2px solid #78716c;color:#78716c;"></div>
-        <span class="strip-caption">Verified</span>
+        <div><div class="type-name">Verified</div><div class="type-desc">Solid border</div></div>
       </div>
-      <div class="strip-item">
+      <div class="type-row">
         <div class="m-circle" style="border:2px dashed #78716c;color:#78716c;"></div>
-        <span class="strip-caption">Unverified</span>
+        <div><div class="type-name">Unverified</div><div class="type-desc">Dashed border</div></div>
       </div>
-      <div class="strip-item">
+      <div class="type-row">
         <div class="m-circle" style="border:2px dashed #78716c;color:#78716c;">
-          <div class="badge-f" style="border-color:#78716c;color:#78716c;background:#e8edf2;"><i class="fa-solid fa-clock"></i></div>
+          <div class="badge-f" style="border-color:#78716c;color:#78716c;background:#fff;"><i class="fa-solid fa-clock"></i></div>
         </div>
-        <span class="strip-caption">Future</span>
+        <div><div class="type-name">Future</div><div class="type-desc">Dashed border + clock badge (bottom-right)</div></div>
       </div>
-      <div class="strip-item">
+      <div class="type-row">
         <div class="m-circle" style="border:2px dashed #78716c;color:#78716c;">
-          <div class="badge-b" style="background:#78716c;border-color:#e8edf2;"><i class="fa-solid fa-bolt"></i></div>
+          <div class="badge-b" style="background:#78716c;border-color:#fff;"><i class="fa-solid fa-bolt"></i></div>
         </div>
-        <span class="strip-caption">Breaking</span>
+        <div><div class="type-name">Breaking</div><div class="type-desc">Dashed border + bolt badge (top-right) + pulse ring</div></div>
       </div>
     </div>
 
@@ -320,40 +320,45 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
       <span class="phase-pill">Phase 3</span>
       <h2>Category</h2>
     </div>
-    <p class="phase-sub">Add Font Awesome icons inside markers. Confirm icon loading, CDN fallback behaviour, and rendering cost before colour is applied. Status borders from Phase 2 remain in place.</p>
+    <p class="phase-sub">Add Font Awesome icons inside markers.</p>
 
-    <div class="marker-strip">
-      <div class="strip-item">
+    <div class="design-note">
+      <i class="fa-solid fa-circle-info"></i>
+      <div><strong>Consider:</strong> Aligning these icons with the ones used on content cards would create a more seamless experience — users recognise the same icon across the map and the feed without needing to re-learn.</div>
+    </div>
+
+    <div class="type-list">
+      <div class="type-row">
         <div class="m-circle" style="border:2px solid #78716c;color:#78716c;"><i class="fa-solid fa-bullhorn"></i></div>
-        <span class="strip-caption">Unrest</span>
+        <div><div class="type-name">Unrest</div></div>
       </div>
-      <div class="strip-item">
+      <div class="type-row">
         <div class="m-circle" style="border:2px dashed #78716c;color:#78716c;"><i class="fa-solid fa-person-rifle"></i></div>
-        <span class="strip-caption">Terrorism</span>
+        <div><div class="type-name">Terrorism</div></div>
       </div>
-      <div class="strip-item">
+      <div class="type-row">
         <div class="m-circle" style="border:2px solid #78716c;color:#78716c;"><i class="fa-solid fa-anchor"></i></div>
-        <span class="strip-caption">Maritime</span>
+        <div><div class="type-name">Maritime</div></div>
       </div>
-      <div class="strip-item">
+      <div class="type-row">
         <div class="m-circle" style="border:2px dashed #78716c;color:#78716c;"><i class="fa-solid fa-jet-fighter"></i>
-          <div class="badge-b" style="background:#78716c;border-color:#e8edf2;"><i class="fa-solid fa-bolt"></i></div>
+          <div class="badge-b" style="background:#78716c;border-color:#fff;"><i class="fa-solid fa-bolt"></i></div>
         </div>
-        <span class="strip-caption">Conflict · Breaking</span>
+        <div><div class="type-name">Conflict · Breaking</div></div>
       </div>
-      <div class="strip-item">
+      <div class="type-row">
         <div class="m-circle" style="border:2px dashed #78716c;color:#78716c;"><i class="fa-solid fa-hurricane"></i>
-          <div class="badge-f" style="border-color:#78716c;color:#78716c;background:#e8edf2;"><i class="fa-solid fa-clock"></i></div>
+          <div class="badge-f" style="border-color:#78716c;color:#78716c;background:#fff;"><i class="fa-solid fa-clock"></i></div>
         </div>
-        <span class="strip-caption">Disaster · Future</span>
+        <div><div class="type-name">Disaster · Future</div></div>
       </div>
-      <div class="strip-item">
+      <div class="type-row">
         <div class="m-circle" style="border:2px solid #78716c;color:#78716c;"><i class="fa-solid fa-tags"></i></div>
-        <span class="strip-caption">Multi-cat</span>
+        <div><div class="type-name">Multi-cat</div></div>
       </div>
-      <div class="strip-item">
+      <div class="type-row">
         <div class="m-circle" style="border:2px solid #78716c;color:#94a3b8;"><i class="fa-solid fa-question"></i></div>
-        <span class="strip-caption">Unset</span>
+        <div><div class="type-name">Unset</div></div>
       </div>
     </div>
 
@@ -364,7 +369,6 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
           <li>Map each event category to a Font Awesome icon (see Spec for full list)</li>
           <li>Multi-category events → fa-tags icon</li>
           <li>No-category events → fa-question in muted slate</li>
-          <li>Icon size: 13 px inside a 34 px marker; colour inherits from marker</li>
         </ul>
       </div>
       <div class="bt-card test">
@@ -395,32 +399,32 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
       <span class="phase-pill">Phase 4</span>
       <h2>Severity</h2>
     </div>
-    <p class="phase-sub">Add colour as the final layer. Verify that colour values propagate correctly through the <code style="font-size:12px;background:#f1f5f9;padding:1px 5px;border-radius:3px;">currentColor</code> pattern and that the system degrades gracefully when colour is unavailable.</p>
+    <p class="phase-sub">Add colour as the final layer — most events tend to be low severity, which is why colour comes last.</p>
 
-    <div class="marker-strip">
-      <div class="strip-item">
+    <div class="type-list">
+      <div class="type-row">
         <div class="m-circle" style="border:2px solid #b91c1c;color:#dc2626;"><i class="fa-solid fa-person-rifle"></i></div>
-        <span class="strip-caption">High</span>
+        <div><div class="type-name">High</div></div>
       </div>
-      <div class="strip-item">
+      <div class="type-row">
         <div class="m-circle" style="border:2px solid #c2410c;color:#ea580c;"><i class="fa-solid fa-bullhorn"></i></div>
-        <span class="strip-caption">Medium</span>
+        <div><div class="type-name">Medium</div></div>
       </div>
-      <div class="strip-item">
+      <div class="type-row">
         <div class="m-circle" style="border:2px solid #78716c;color:#78716c;"><i class="fa-solid fa-gavel"></i></div>
-        <span class="strip-caption">Low</span>
+        <div><div class="type-name">Low</div></div>
       </div>
-      <div class="strip-item">
+      <div class="type-row">
         <div class="m-circle" style="border:2px dashed #b91c1c;color:#dc2626;"><i class="fa-solid fa-jet-fighter"></i>
           <div class="badge-b"><i class="fa-solid fa-bolt"></i></div>
         </div>
-        <span class="strip-caption">Breaking · High</span>
+        <div><div class="type-name">Breaking · High</div></div>
       </div>
-      <div class="strip-item">
+      <div class="type-row">
         <div class="m-circle" style="border:2px dashed #c2410c;color:#ea580c;"><i class="fa-solid fa-anchor"></i>
-          <div class="badge-f" style="border-color:#ea580c;color:#ea580c;background:#e8edf2;"><i class="fa-solid fa-clock"></i></div>
+          <div class="badge-f" style="border-color:#ea580c;color:#ea580c;background:#fff;"><i class="fa-solid fa-clock"></i></div>
         </div>
-        <span class="strip-caption">Future · Medium</span>
+        <div><div class="type-name">Future · Medium</div></div>
       </div>
     </div>
 
@@ -431,7 +435,6 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
           <li>High → red <code style="font-size:11px;background:rgba(0,0,0,.06);padding:1px 4px;border-radius:3px;">#dc2626</code> border and icon</li>
           <li>Medium → orange <code style="font-size:11px;background:rgba(0,0,0,.06);padding:1px 4px;border-radius:3px;">#ea580c</code></li>
           <li>Low → grey <code style="font-size:11px;background:rgba(0,0,0,.06);padding:1px 4px;border-radius:3px;">#78716c</code> (no change from Phase 3)</li>
-          <li>Breaking inherits its severity colour — the pulse ring and bolt badge always show regardless</li>
           <li>Colour applies to both border and interior icon</li>
         </ul>
       </div>
