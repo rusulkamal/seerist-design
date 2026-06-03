@@ -93,7 +93,7 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;fl
 .st-future    {border:2px dashed currentColor;}
 .event-marker.sev-medium{color:#ea580c;}
 .event-marker.sev-high  {color:#dc2626;}
-.event-marker.st-breaking{color:#dc2626;}
+/* Breaking inherits severity colour — no colour override here */
 
 /* ── Breaking pulse ring ── */
 @keyframes pulse-break{
@@ -103,7 +103,7 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;fl
 }
 .event-marker.st-breaking::before{
   content:'';position:absolute;inset:0;border-radius:50%;
-  border:1.5px solid #dc2626;
+  border:1.5px solid currentColor;
   animation:pulse-break 2.6s ease-out infinite;
   animation-delay:var(--pulse-delay,0s);
   pointer-events:none;
