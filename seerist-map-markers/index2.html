@@ -596,9 +596,6 @@ const INTEL = [
   {id:'a10',type:'news',    icon:'fa-people-group',     title:'Egypt: opposition groups plan demonstrations',source:'Al Jazeera',     lnglat:[31.00,29.80]},
 ];
 const INTEL_MAP    = Object.fromEntries(INTEL.map(i=>[i.id,i]));
-
-/* Combined pool — events + intel cluster together */
-const ALL_PINS = [...PINS, ...INTEL.map(it=>({kind:'intel',it,lnglat:it.lnglat}))];
 const STATUS_LABEL = {breaking:'Breaking',verified:'Verified',unverified:'Unverified',future:'Future Event'};
 
 /* ══════════════════════════════════════════
@@ -621,6 +618,9 @@ const PINS = [];
     }
   });
 }
+
+/* Combined pool — events + intel cluster together (defined after PINS is populated) */
+const ALL_PINS = [...PINS, ...INTEL.map(it=>({kind:'intel',it,lnglat:it.lnglat}))];
 
 /* ══════════════════════════════════════════
    STATE
