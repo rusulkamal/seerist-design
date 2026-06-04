@@ -596,6 +596,9 @@ const INTEL = [
   {id:'a10',type:'news',    icon:'fa-people-group',     title:'Egypt: opposition groups plan demonstrations',source:'Al Jazeera',     lnglat:[31.00,29.80]},
 ];
 const INTEL_MAP    = Object.fromEntries(INTEL.map(i=>[i.id,i]));
+
+/* Combined pool — events + intel cluster together */
+const ALL_PINS = [...PINS, ...INTEL.map(it=>({kind:'intel',it,lnglat:it.lnglat}))];
 const STATUS_LABEL = {breaking:'Breaking',verified:'Verified',unverified:'Unverified',future:'Future Event'};
 
 /* ══════════════════════════════════════════
@@ -752,39 +755,32 @@ map.on('zoomend', refresh);
 function cellDeg(){
   const z=map.getZoom();
   if(z<1.5) return 999;
-  if(z<2.5) return 22;
-  if(z<3)   return 14;
-  if(z<4)   return 7;
-  if(z<5)   return 3.5;
-  if(z<6)   return 1.8;
-  if(z<7)   return 0.9;
+  if(z<2.5) return 35;
+  if(z<3)   return 22;
+  if(z<4)   return 12;
+  if(z<5)   return 6;
+  if(z<6)   return 2.5;
+  if(z<7)   return 1.2;
   return 0;
 }
 
 function refresh(){
   const zoom = map.getZoom();
 
-  /* 1 · hide all event + group markers */
+  /* 1 · hide everything */
   EVENTS.forEach(ev=>{ if(ev.el) ev.el.style.display='none'; });
   ghostMarkerEls.forEach(el=>{ el.style.display='none'; });
+  INTEL.forEach(it=>{ if(it.el) it.el.style.display='none'; });
 
   /* 2 · remove old cluster divs */
   while(clusterEls.length){ const c=clusterEls.pop(); c.el.remove(); }
 
-  /* 3 · intel markers — show at zoom ≥ 2 */
-  INTEL.forEach(it=>{
-    const t = it.type==='analysis' ? 'analysis' : 'news';
-    if(it.el && typeFilters[t] && zoom>=2){
-      placeMarker(it.el); it.el.style.display='flex';
-    }
-  });
-
-  /* 4 · cluster by geographic grid — stable regardless of pan position */
+  /* 3 · cluster everything — events + intel — by geographic grid */
   const cell = cellDeg();
-  if(cell===0){ PINS.forEach(p=>showPin(p)); return; }
+  if(cell===0){ ALL_PINS.forEach(p=>showPin(p)); return; }
 
   const cells={};
-  PINS.forEach(p=>{
+  ALL_PINS.forEach(p=>{
     const key=`${Math.floor(p.lnglat[0]/cell)},${Math.floor(p.lnglat[1]/cell)}`;
     (cells[key]=cells[key]||[]).push(p);
   });
@@ -793,13 +789,18 @@ function refresh(){
     if(members.length===1){ showPin(members[0]); return; }
     let count=0, maxSev='none', sumLng=0, sumLat=0;
     members.forEach(p=>{
-      const evts=p.kind==='group'?p.grp:[p.ev];
-      count+=evts.length;
-      sumLng+=p.lnglat[0]; sumLat+=p.lnglat[1];
-      evts.forEach(ev=>{
-        if(ev.sev==='high') maxSev='high';
-        else if(ev.sev==='medium'&&maxSev!=='high') maxSev='medium';
-      });
+      if(p.kind==='intel'){
+        count+=1;
+        sumLng+=p.lnglat[0]; sumLat+=p.lnglat[1];
+      } else {
+        const evts=p.kind==='group'?p.grp:[p.ev];
+        count+=evts.length;
+        sumLng+=p.lnglat[0]; sumLat+=p.lnglat[1];
+        evts.forEach(ev=>{
+          if(ev.sev==='high') maxSev='high';
+          else if(ev.sev==='medium'&&maxSev!=='high') maxSev='medium';
+        });
+      }
     });
     const centroid=[sumLng/members.length, sumLat/members.length];
     const sz=count>15?46:count>7?40:34;
@@ -821,6 +822,11 @@ function showPin(p){
     const el=ghostMarkerEls.get(p.lk); if(!el) return;
     placeMarker(el);
     el.style.display='block';
+  } else if(p.kind==='intel'){
+    const t=p.it.type==='analysis'?'analysis':'news';
+    if(!p.it.el||!typeFilters[t]) return;
+    placeMarker(p.it.el);
+    p.it.el.style.display='flex';
   }
 }
 
