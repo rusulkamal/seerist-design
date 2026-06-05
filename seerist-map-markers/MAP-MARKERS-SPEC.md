@@ -49,9 +49,9 @@ There are four event statuses. The border style is how users read them:
 | **Breaking** | Solid 2px | ⚡ Red badge (top-right) | Happening right now, just confirmed |
 | **Verified** | Solid 2px | — | Confirmed by Seerist |
 | **Unverified** | Dashed 2px | — | Reported but not yet confirmed |
-| **Future** | Solid 2px | 📅 Calendar badge (bottom-right) | Scheduled or anticipated event |
+| **Future** | Solid 2px | — | Scheduled or anticipated event |
 
-> **Why dashes for unverified?** Dashes visually imply incompleteness. Users intuitively read a dashed outline as "not fully confirmed" without needing a tooltip.
+> **Why dashes only for unverified?** Dashes signal incompleteness / uncertainty. Breaking and Future are both confirmed states — they happened or will happen — so they use solid borders. Only Unverified is genuinely uncertain.
 
 ### Severity Colours
 
@@ -65,11 +65,20 @@ Severity is communicated through the border and icon colour. The background is a
 
 ### Breaking Pulse
 
-Breaking events have an animated pulse ring that radiates outward from the marker. This makes them immediately visible on a busy map. The pulse is subtle — it signals urgency without being distracting.
+Breaking events emit a **double pulse ring** — two overlapping rings staggered 0.5s apart — that radiates far from the marker. This makes them immediately visible on a dense map and distinguishable from high-severity non-breaking events.
 
-- Animation: expands from 0.9× to 1.8× the marker size, fading out
-- Duration: 2.6 seconds per cycle
-- Each breaking marker pulses at a slightly different offset so they don't all fire in sync
+- Two rings: outer reaches 2.6× the marker size, inner 2.2×
+- Starts at 70% opacity, fades to 0
+- Duration: 2 seconds per cycle (faster than before — more urgent)
+- Each breaking marker offsets by 0.28s so they don't all pulse in sync
+
+### High Severity Pulse
+
+Non-breaking events with **High** severity also emit a single, slower pulse ring to signal they require attention even without being live/breaking.
+
+- Single ring, reaches 2.1× the marker size
+- Duration: 3 seconds per cycle (slower and calmer than breaking)
+- Distinguishable from breaking by: single ring vs double, slower rhythm, no bolt badge
 
 ### Icons
 
@@ -117,16 +126,19 @@ Shown from zoom level 2 and above.
 Analysis markers represent **Seerist Analyst reports** — in-depth written assessments about a region or topic. These are produced by Seerist, making them high-trust content, but they are documents rather than events.
 
 ### Shape
-**Rounded square (squircle).** Like News & Social, the squircle shape communicates "this is content about an area" rather than "this is something that happened at this point."
+**Flat-top hexagon.** The hexagon shape is categorically different from circles (events) and squircles (News & Social) — zero shape ambiguity. The flat-top orientation (straight edge across the top and bottom, points on the sides) renders cleanly at 34px and holds its form at small sizes.
+
+The hexagon is rendered via CSS `clip-path` pseudo-elements: an outer coloured layer and a slightly inset white inner layer, giving the appearance of a coloured border on a white background without using a CSS border (which clip-path would clip).
 
 ### Style
 - White background
-- Green border (`#10b981`) — green distinguishes Seerist-authored content from third-party news
-- Green icon colour (matches border)
-- Icon: document / file-lines
+- Blue border (`#1D4ED8`) — blue distinguishes Seerist-authored analysis from third-party news/social (slate)
+- Blue icon colour (matches border)
+- Icon: document / file-lines (`fa-file-lines`)
+- Shadow: `filter: drop-shadow()` traces the hexagon outline
 
 ### How it differs from News & Social
-Both are squircles, but the **green border = Seerist** vs **slate border = third-party**. Users learn this colour rule quickly because it is consistent across the whole system.
+Different **shape** (hexagon vs squircle) and different **colour** (blue vs slate). Both signals independently communicate "this is not an event" while the shape difference makes them immediately distinguishable from each other.
 
 ### Visibility
 Shown from zoom level 2 and above.
@@ -209,7 +221,7 @@ The single most important rule in the marker system:
 | Shape | Source |
 |---|---|
 | ⬤ Circle | Seerist Event — something happened here |
-| ▣ Green squircle | Seerist Analysis — we wrote about this area |
+| ⬡ Blue hexagon | Seerist Analysis — we wrote about this area |
 | ▣ Slate squircle | News & Social — third-party reporting on this area |
 | ⬤ Filled circle | Asset — your organisation has something here |
 | ⬤ Numbered circle | Cluster — multiple events in this area, zoom to expand |

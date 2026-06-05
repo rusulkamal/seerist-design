@@ -163,14 +163,14 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
         <div class="rule-ico"><i class="fa-solid fa-shapes"></i></div>
         <div>
           <div class="rule-title">Shape → Content type</div>
-          <div class="rule-desc">Circle = Event. Rounded square unfilled = News & Social. Rounded square tinted = Analysis. Filled circle = Asset.</div>
+          <div class="rule-desc">Circle = Event. Flat-top hexagon = Analysis (Seerist). Rounded square = News &amp; Social (third-party). Filled circle = Asset.</div>
         </div>
       </div>
       <div class="rule">
         <div class="rule-ico"><i class="fa-solid fa-border-all"></i></div>
         <div>
           <div class="rule-title">Border → Event status</div>
-          <div class="rule-desc">Solid = Verified. Dashed = Unverified. Dashed + clock = Future. Dashed + spark = Breaking.</div>
+          <div class="rule-desc">Solid = Verified, Breaking, Future. Dashed = Unverified only. Breaking is further distinguished by a bolt badge and double pulse ring.</div>
         </div>
       </div>
       <div class="rule">
@@ -209,14 +209,14 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
         <div class="mrow-desc">Reported, not yet confirmed. Dashed border.</div>
       </div>
       <div class="mrow">
-        <div class="mrow-shape"><div class="m-circle" style="border:2px dashed #78716c;color:#78716c;"><i class="fa-solid fa-landmark"></i><div class="badge-f" style="color:#78716c;"><i class="fa-solid fa-clock"></i></div></div></div>
+        <div class="mrow-shape"><div class="m-circle" style="border:2px solid #78716c;color:#78716c;"><i class="fa-solid fa-landmark"></i></div></div>
         <div class="mrow-label">Event — Future</div>
-        <div class="mrow-desc">Scheduled or anticipated. Dashed border + clock badge.</div>
+        <div class="mrow-desc">Scheduled or anticipated. Solid border. No badge — future is a confirmed state, not uncertain.</div>
       </div>
       <div class="mrow">
-        <div class="mrow-shape"><div class="m-circle" style="border:2px dashed #dc2626;color:#dc2626;"><i class="fa-solid fa-bomb"></i><div class="badge-b"><i class="fa-solid fa-bolt"></i></div></div></div>
+        <div class="mrow-shape"><div class="m-circle" style="border:2px solid #dc2626;color:#dc2626;"><i class="fa-solid fa-bomb"></i><div class="badge-b"><i class="fa-solid fa-bolt"></i></div></div></div>
         <div class="mrow-label">Event — Breaking</div>
-        <div class="mrow-desc">Happening right now. Dashed border + spark badge + pulse ring.</div>
+        <div class="mrow-desc">Happening right now. Solid border + bolt badge + double pulse ring (reaches 2.6× marker size).</div>
       </div>
       <div class="mrow">
         <div class="mrow-shape"><div class="m-squircle" style="border:2px dotted #94a3b8;color:#64748b;"><i class="fa-solid fa-people-group"></i></div></div>
@@ -224,7 +224,7 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
         <div class="mrow-desc">Third-party reporting. Rounded square, white background, dotted slate border.</div>
       </div>
       <div class="mrow">
-        <div class="mrow-shape"><div class="m-squircle" style="border:2px solid #10b981;color:#10b981;background:#ecfdf5;"><i class="fa-solid fa-file-lines"></i></div></div>
+        <div class="mrow-shape"><div style="width:34px;height:34px;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;filter:drop-shadow(0 2px 4px rgba(0,0,0,.14));"><div style="position:absolute;inset:0;clip-path:polygon(25% 7%,75% 7%,100% 50%,75% 93%,25% 93%,0% 50%);background:#1D4ED8;"></div><div style="position:absolute;inset:2.5px;clip-path:polygon(25% 7%,75% 7%,100% 50%,75% 93%,25% 93%,0% 50%);background:#fff;"></div><i class="fa-solid fa-file-lines" style="position:relative;z-index:2;font-size:13px;color:#1D4ED8;"></i></div></div>
         <div class="mrow-label">Analysis</div>
         <div class="mrow-desc">Seerist analyst report. Rounded square, soft green fill, green border.</div>
       </div>
@@ -267,14 +267,14 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
         <div class="srow-note">Reported but not yet independently confirmed.</div>
       </div>
       <div class="srow">
-        <div class="srow-marker"><div class="m-circle" style="border:2px dashed #78716c;color:#78716c;"><i class="fa-solid fa-landmark"></i><div class="badge-f" style="color:#78716c;"><i class="fa-solid fa-clock"></i></div></div></div>
-        <div class="srow-label"><strong>Future</strong> — Dashed + clock</div>
-        <div class="srow-note">Scheduled or anticipated event. Clock badge bottom-right.</div>
+        <div class="srow-marker"><div class="m-circle" style="border:2px solid #78716c;color:#78716c;"><i class="fa-solid fa-landmark"></i></div></div>
+        <div class="srow-label"><strong>Future</strong> — Solid border</div>
+        <div class="srow-note">Scheduled or anticipated. Solid border — future is a confirmed state. No badge.</div>
       </div>
       <div class="srow">
-        <div class="srow-marker"><div class="m-circle" style="border:2px dashed #dc2626;color:#dc2626;"><i class="fa-solid fa-bomb"></i><div class="badge-b"><i class="fa-solid fa-bolt"></i></div></div></div>
-        <div class="srow-label"><strong>Breaking</strong> — Dashed + spark</div>
-        <div class="srow-note">Happening right now. Spark badge top-right. Animated pulse ring.</div>
+        <div class="srow-marker"><div class="m-circle" style="border:2px solid #dc2626;color:#dc2626;"><i class="fa-solid fa-bomb"></i><div class="badge-b"><i class="fa-solid fa-bolt"></i></div></div></div>
+        <div class="srow-label"><strong>Breaking</strong> — Solid + bolt badge</div>
+        <div class="srow-note">Happening right now. Bolt badge top-right. Double animated pulse ring reaching 2.6× marker size.</div>
       </div>
     </div>
 
@@ -289,13 +289,13 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
     </table>
 
     <p style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:12px;">Breaking pulse animation</p>
-    <p style="font-size:13px;color:#64748b;margin-bottom:12px;line-height:1.7;">Breaking events emit a slow pulse ring to signal urgency without being distracting.</p>
+    <p style="font-size:13px;color:#64748b;margin-bottom:12px;line-height:1.7;">Breaking events emit a <strong>double pulse ring</strong> — two overlapping rings staggered 0.5s apart — travelling far from the marker to signal live urgency. High-severity non-breaking events get a single slower pulse to indicate they need attention without matching the urgency of breaking.</p>
     <table class="doc-table" style="margin-bottom:24px;">
       <tbody>
-        <tr><td class="td-key" style="width:140px;">Scale</td><td>Expands from 0.9× to 1.8× the marker size</td></tr>
-        <tr><td class="td-key">Opacity</td><td>Fades from 0.45 → 0 over the cycle</td></tr>
-        <tr><td class="td-key">Duration</td><td>2.6 seconds per cycle</td></tr>
-        <tr><td class="td-key">Stagger</td><td>Each breaking marker offsets by 0.28 s so they don't all pulse in sync</td></tr>
+        <tr><td class="td-key" style="width:140px;">Rings</td><td>Double — outer reaches 2.6×, inner reaches 2.2× the marker size</td></tr>
+        <tr><td class="td-key">Opacity</td><td>Starts at 70%, fades to 0</td></tr>
+        <tr><td class="td-key">Duration</td><td>2s per cycle (breaking) · 3s per cycle (high severity non-breaking, single ring to 2.1×)</td></tr>
+        <tr><td class="td-key">Stagger</td><td>Each breaking marker offsets by 0.28s; second ring within each marker offsets by 0.5s</td></tr>
       </tbody>
     </table>
 
@@ -364,10 +364,10 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
 
     <table class="doc-table">
       <tbody>
-        <tr><td class="td-key" style="width:120px;">Shape</td><td>Rounded square — same shape as News & Social. Fill distinguishes them: Analysis has a soft green tint background, News & Social is white.</td></tr>
+        <tr><td class="td-key" style="width:120px;">Shape</td><td>Flat-top hexagon — categorically different from circles (events) and squircles (News &amp; Social). Rendered via CSS clip-path pseudo-elements.</td></tr>
         <tr><td class="td-key">Size</td><td>34 × 34 px</td></tr>
         <tr><td class="td-key">Fill</td><td>Soft green <code style="font-size:11px;background:#f1f5f9;padding:1px 5px;border-radius:3px;">#ecfdf5</code> — subtle, low-intrusion signal that this is Seerist-authored</td></tr>
-        <tr><td class="td-key">Border</td><td>Green <code style="font-size:11px;background:#f1f5f9;padding:1px 5px;border-radius:3px;">#10b981</code> — Seerist-authored, high trust</td></tr>
+        <tr><td class="td-key">Border</td><td>Blue <code style="font-size:11px;background:#f1f5f9;padding:1px 5px;border-radius:3px;">#1D4ED8</code> — Seerist-authored analysis, distinct from third-party slate</td></tr>
         <tr><td class="td-key">Icon</td><td>Document / file-lines — represents a written report. Icon colour matches the green border.</td></tr>
         <tr><td class="td-key">Visible from</td><td>Zoom level 2 and above</td></tr>
       </tbody>
