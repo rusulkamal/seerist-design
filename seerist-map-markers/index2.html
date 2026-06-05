@@ -60,10 +60,10 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;fl
 
 /* ══ MINI MARKERS (list) ══ */
 .mini-event{width:20px;height:20px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:7.5px;box-shadow:0 1px 3px rgba(0,0,0,.1);flex-shrink:0;margin-top:1px;border-color:currentColor;}
-.mini-event.st-breaking  {border:2px dashed currentColor;}
+.mini-event.st-breaking  {border:2px solid currentColor;}
 .mini-event.st-verified  {border:2px solid currentColor;}
 .mini-event.st-unverified{border:2px dashed currentColor;}
-.mini-event.st-future    {border:2px dashed currentColor;}
+.mini-event.st-future    {border:2px solid currentColor;}
 .sev-none  {color:#78716c;}
 .sev-medium{color:#ea580c;}
 .sev-high  {color:#dc2626;}
@@ -87,24 +87,50 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;fl
 }
 .event-marker:hover{transform:scale(1.12);}
 .event-marker.selected{box-shadow:0 0 0 3px rgba(16,185,129,.3),0 0 0 7px rgba(16,185,129,.08),0 3px 12px rgba(0,0,0,.2);}
-.st-breaking  {border:2px dashed currentColor;}
+.st-breaking  {border:2px solid currentColor;}
 .st-verified  {border:2px solid currentColor;}
 .st-unverified{border:2px dashed currentColor;}
-.st-future    {border:2px dashed currentColor;}
+.st-future    {border:2px solid currentColor;}
 .event-marker.sev-medium{color:#ea580c;}
 .event-marker.sev-high  {color:#dc2626;}
 /* Breaking inherits severity colour — no colour override here */
 
-/* ── Breaking pulse ring ── */
+/* ── Breaking pulse rings (double ring, travels further) ── */
 @keyframes pulse-break{
-  0%  {transform:scale(.9); opacity:.45;}
-  60% {transform:scale(1.6); opacity:.1;}
-  100%{transform:scale(1.8); opacity:0;}
+  0%  {transform:scale(.85); opacity:.7;}
+  70% {transform:scale(2.4); opacity:.08;}
+  100%{transform:scale(2.6); opacity:0;}
+}
+@keyframes pulse-break-2{
+  0%  {transform:scale(.85); opacity:.45;}
+  70% {transform:scale(2.0); opacity:.05;}
+  100%{transform:scale(2.2); opacity:0;}
 }
 .event-marker.st-breaking::before{
   content:'';position:absolute;inset:0;border-radius:50%;
+  border:2px solid currentColor;
+  animation:pulse-break 2s ease-out infinite;
+  animation-delay:var(--pulse-delay,0s);
+  pointer-events:none;
+}
+.event-marker.st-breaking::after{
+  content:'';position:absolute;inset:0;border-radius:50%;
   border:1.5px solid currentColor;
-  animation:pulse-break 2.6s ease-out infinite;
+  animation:pulse-break-2 2s ease-out infinite;
+  animation-delay:calc(var(--pulse-delay,0s) + 0.5s);
+  pointer-events:none;
+}
+
+/* ── High severity glow pulse ── */
+@keyframes pulse-high{
+  0%  {transform:scale(1); opacity:.55;}
+  60% {transform:scale(1.9); opacity:.08;}
+  100%{transform:scale(2.1); opacity:0;}
+}
+.event-marker.sev-high:not(.st-breaking)::before{
+  content:'';position:absolute;inset:0;border-radius:50%;
+  border:2px solid currentColor;
+  animation:pulse-high 3s ease-out infinite;
   animation-delay:var(--pulse-delay,0s);
   pointer-events:none;
 }
@@ -120,14 +146,21 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;fl
 .asset-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:#1e293b;}
 .asset-marker:hover .asset-tip{opacity:1;}
 
-/* ══ INTEL MARKERS — squircle shape; colour = source trust ══
-   Analysis  (Seerist)      → green border  — authoritative intel
-   News/Social (third-party) → slate border  — less reliable signal  */
-.intel-marker{width:34px;height:34px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;transition:transform .15s,box-shadow .2s;pointer-events:auto;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.14);}
-.intel-marker:hover{transform:scale(1.12);box-shadow:0 4px 14px rgba(0,0,0,.2);}
+/* ══ INTEL MARKERS ══
+   Analysis  (Seerist)       → flat-top hexagon, blue  — authoritative intel
+   News/Social (third-party) → squircle, slate          — external signal  */
+.intel-marker{width:34px;height:34px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;transition:transform .15s,filter .2s;pointer-events:auto;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.14);}
+.intel-marker:hover{transform:scale(1.12);}
 .intel-marker.hidden{display:none !important;}
-.intel-analysis{border:2px solid #10b981;color:#10b981;}
-.intel-analysis.lit{box-shadow:0 0 0 3px rgba(16,185,129,.3),0 2px 8px rgba(0,0,0,.14);}
+
+/* Analysis — flat-top hexagon via pseudo-elements; drop-shadow follows hex outline */
+.intel-analysis{border:none;background:transparent;border-radius:0;box-shadow:none;color:#1D4ED8;filter:drop-shadow(0 2px 6px rgba(0,0,0,.2));}
+.intel-analysis::before{content:'';position:absolute;inset:0;clip-path:polygon(25% 7%,75% 7%,100% 50%,75% 93%,25% 93%,0% 50%);background:#1D4ED8;z-index:0;}
+.intel-analysis::after{content:'';position:absolute;inset:2.5px;clip-path:polygon(25% 7%,75% 7%,100% 50%,75% 93%,25% 93%,0% 50%);background:#fff;z-index:1;}
+.intel-analysis>i{position:relative;z-index:2;}
+.intel-analysis:hover{filter:drop-shadow(0 3px 10px rgba(0,0,0,.25));}
+.intel-analysis.lit{filter:drop-shadow(0 0 5px rgba(29,78,216,.6)) drop-shadow(0 2px 6px rgba(0,0,0,.2));}
+
 .intel-news{border:2px solid #94a3b8;color:#64748b;}
 .intel-news.lit{box-shadow:0 0 0 3px rgba(148,163,184,.4),0 2px 8px rgba(0,0,0,.14);}
 /* Intel hover tooltip */
@@ -166,7 +199,7 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;fl
 .asset-leg-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10.5px;}
 
 /* rp-tb-a restored for Analysis filter button */
-.rp-tb-a{background:#d1fae5;color:#065f46;border-color:#6ee7b7;}
+.rp-tb-a{background:#dbeafe;color:#1d4ed8;border-color:#93c5fd;}
 /* ══ LAYERS PANEL ══ */
 .sb-right{position:absolute;top:0;right:0;bottom:0;width:256px;background:#fff;border-left:1px solid #e2e8f0;display:flex;flex-direction:column;overflow:hidden;z-index:25;transform:translateX(100%);transition:transform .25s cubic-bezier(.2,0,0,1);box-shadow:-4px 0 20px rgba(0,0,0,.1);}
 .sb-right.open{transform:translateX(0);}
@@ -367,12 +400,12 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;fl
         <div class="leg-section">
           <div class="leg-s-title">Content</div>
           <div class="leg-row"><div class="leg-ev" style="border-radius:4px;border:2px dotted #94a3b8;"></div>News &amp; Social</div>
-          <div class="leg-row"><div class="leg-ev" style="border-radius:4px;border:2px solid #10b981;color:#10b981;display:flex;align-items:center;justify-content:center;font-size:6px;"><i class="fa-solid fa-file-lines"></i></div>Analysis</div>
+          <div class="leg-row"><div style="width:14px;height:14px;position:relative;flex-shrink:0;"><div style="position:absolute;inset:0;clip-path:polygon(25% 7%,75% 7%,100% 50%,75% 93%,25% 93%,0% 50%);background:#1D4ED8;"></div><div style="position:absolute;inset:2px;clip-path:polygon(25% 7%,75% 7%,100% 50%,75% 93%,25% 93%,0% 50%);background:#fff;"></div></div>Analysis</div>
           <div style="font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#cbd5e1;margin-bottom:5px;margin-top:8px;">Event</div>
           <div class="leg-row" style="padding-left:8px;"><div class="leg-ev" style="border:2px solid #78716c;"></div>Verified</div>
           <div class="leg-row" style="padding-left:8px;"><div class="leg-ev" style="border:2px dashed #78716c;"></div>Unverified</div>
-          <div class="leg-row" style="padding-left:8px;"><div class="leg-ev" style="border:2px dashed #78716c;"><div style="position:absolute;bottom:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#fff;border:1.5px solid #78716c;display:flex;align-items:center;justify-content:center;font-size:4px;color:#78716c;"><i class="fa-solid fa-clock"></i></div></div>Future</div>
-          <div class="leg-row" style="padding-left:8px;"><div class="leg-ev" style="border:2px dashed #78716c;"><div style="position:absolute;top:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#dc2626;border:1.5px solid #fff;display:flex;align-items:center;justify-content:center;font-size:4px;color:#fff;"><i class="fa-solid fa-bolt"></i></div></div>Breaking</div>
+          <div class="leg-row" style="padding-left:8px;"><div class="leg-ev" style="border:2px solid #78716c;"><div style="position:absolute;bottom:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#fff;border:1.5px solid #78716c;display:flex;align-items:center;justify-content:center;font-size:4px;color:#78716c;"><i class="fa-solid fa-clock"></i></div></div>Future</div>
+          <div class="leg-row" style="padding-left:8px;"><div class="leg-ev" style="border:2px solid #78716c;"><div style="position:absolute;top:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#dc2626;border:1.5px solid #fff;display:flex;align-items:center;justify-content:center;font-size:4px;color:#fff;"><i class="fa-solid fa-bolt"></i></div></div>Breaking</div>
         </div>
         <hr class="leg-divider"/>
         <div class="leg-section">
