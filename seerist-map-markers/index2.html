@@ -121,18 +121,9 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;fl
   pointer-events:none;
 }
 
-/* ── High severity glow pulse ── */
-@keyframes pulse-high{
-  0%  {transform:scale(1); opacity:.55;}
-  60% {transform:scale(1.9); opacity:.08;}
-  100%{transform:scale(2.1); opacity:0;}
-}
-.event-marker.sev-high:not(.st-breaking)::before{
-  content:'';position:absolute;inset:0;border-radius:50%;
-  border:2px solid currentColor;
-  animation:pulse-high 3s ease-out infinite;
-  animation-delay:var(--pulse-delay,0s);
-  pointer-events:none;
+/* ── High severity static glow (no animation — reserved for breaking only) ── */
+.event-marker.sev-high:not(.st-breaking){
+  box-shadow:0 0 0 3px rgba(220,38,38,.2),0 0 10px rgba(220,38,38,.25),0 2px 8px rgba(0,0,0,.18);
 }
 
 .badge-breaking{position:absolute;top:-5px;right:-5px;width:17px;height:17px;border-radius:50%;background:#dc2626;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;pointer-events:none;box-shadow:0 1px 4px rgba(220,38,38,.4);}
