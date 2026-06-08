@@ -141,7 +141,7 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
       <div class="step-dot">1</div>
       <div class="step-info">
         <div class="step-num-lbl">Phase 1</div>
-        <div class="step-name">Content Type</div>
+        <div class="step-name">Shape + Pulse</div>
       </div>
     </div>
     <div class="step-connector"></div>
@@ -149,7 +149,7 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
       <div class="step-dot">2</div>
       <div class="step-info">
         <div class="step-num-lbl">Phase 2</div>
-        <div class="step-name">Breaking Pulse</div>
+        <div class="step-name">Category</div>
       </div>
     </div>
     <div class="step-connector"></div>
@@ -157,7 +157,7 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
       <div class="step-dot">3</div>
       <div class="step-info">
         <div class="step-num-lbl">Phase 3</div>
-        <div class="step-name">Category</div>
+        <div class="step-name">Severity</div>
       </div>
     </div>
     <div class="step-connector"></div>
@@ -165,14 +165,6 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
       <div class="step-dot">4</div>
       <div class="step-info">
         <div class="step-num-lbl">Phase 4</div>
-        <div class="step-name">Severity</div>
-      </div>
-    </div>
-    <div class="step-connector"></div>
-    <div class="step">
-      <div class="step-dot">5</div>
-      <div class="step-info">
-        <div class="step-num-lbl">Phase 5</div>
         <div class="step-name">Map Controls</div>
       </div>
     </div>
@@ -182,9 +174,9 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
   <section class="phase" id="phase-1">
     <div class="phase-header">
       <span class="phase-pill">Phase 1</span>
-      <h2>Content Type</h2>
+      <h2>Content Type &amp; Breaking Pulse</h2>
     </div>
-    <p class="phase-sub">Shape only to differentiate between content types — no colour or border variation yet. Establish the rendering baseline: can all four marker types be placed on MapLibre as overlay divs with correct sizing, positioning, and overlap behaviour at every zoom level?</p>
+    <p class="phase-sub">Establish all four marker shapes and the one status signal (breaking pulse) in a single phase. Shape differentiates content type; the double-ring animation is the sole indicator for breaking events — no border changes or badges.</p>
 
     <div class="design-note">
       <i class="fa-solid fa-circle-info"></i>
@@ -200,9 +192,20 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
         </div>
       </div>
       <div class="type-row">
+        <div style="position:relative;width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <div style="position:absolute;inset:0;border-radius:50%;border:2px solid #dc2626;opacity:0.35;transform:scale(1.6);"></div>
+          <div style="position:absolute;inset:0;border-radius:50%;border:2px solid #dc2626;opacity:0.2;transform:scale(1.9);"></div>
+          <div style="width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid #dc2626;color:#dc2626;transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;position:relative;z-index:1;"></div>
+        </div>
+        <div>
+          <div class="type-name">Event · Breaking</div>
+          <div class="type-desc">Same teardrop + pulsing double ring. No badge, no border change.</div>
+        </div>
+      </div>
+      <div class="type-row">
         <div class="m-squircle" style="border:2px solid #94a3b8;"></div>
         <div>
-          <div class="type-name">News & Social</div>
+          <div class="type-name">News &amp; Social</div>
           <div class="type-desc">Rounded square, plain solid border</div>
         </div>
       </div>
@@ -234,7 +237,7 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
         <div class="lp-body">
           <div class="lp-s-title">Content</div>
           <div class="lp-row"><div style="width:13px;height:13px;border-radius:50% 50% 50% 0;border:1.5px solid #94a3b8;transform:rotate(-45deg);background:#fff;flex-shrink:0;"></div>Event</div>
-          <div class="lp-row"><div class="lp-sq" style="border:2px solid #94a3b8;"></div>News & Social</div>
+          <div class="lp-row"><div class="lp-sq" style="border:2px solid #94a3b8;"></div>News &amp; Social</div>
           <div class="lp-row"><div style="width:13px;height:13px;clip-path:polygon(25% 7%,75% 7%,100% 50%,75% 93%,25% 93%,0% 50%);background:#1D4ED8;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><div style="width:9px;height:9px;clip-path:polygon(25% 7%,75% 7%,100% 50%,75% 93%,25% 93%,0% 50%);background:#fff;"></div></div>Analysis</div>
           <div class="lp-row"><div class="lp-dot" style="background:#94a3b8;"></div>Asset</div>
         </div>
@@ -247,10 +250,14 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
         <ul class="bt-list">
           <li>Render all marker shapes on the map in a single neutral slate colour</li>
           <li>Teardrop (30 px, border-radius: 50% 50% 50% 0, rotated −45°) for events</li>
-          <li>Rounded square with plain solid border for News & Social</li>
+          <li>Rounded square with plain solid border for News &amp; Social</li>
           <li>Flat-top hexagon (clip-path polygon), blue #1D4ED8 outline, white fill for Analysis</li>
           <li>Filled circle for Assets</li>
           <li>Cluster bubble for grouped events</li>
+          <li>Detect breaking status from event data</li>
+          <li>Apply double-ring CSS animation to breaking event markers only — outer ring 2.6×, inner 2.2×, opacity fades to 0 over 2s</li>
+          <li>Stagger pulse across markers (0.28s offset per marker); inner ring offset 0.5s within each marker</li>
+          <li>No border change, no badge — all event statuses share the same solid border</li>
         </ul>
       </div>
   </section>
@@ -261,41 +268,6 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
   <section class="phase" id="phase-2">
     <div class="phase-header">
       <span class="phase-pill">Phase 2</span>
-      <h2>Breaking Pulse</h2>
-    </div>
-    <p class="phase-sub">Add the pulsing double-ring animation to breaking events only. No border changes, no badges — the pulse is the sole visual signal for breaking status.</p>
-
-    <div class="type-list">
-      <div class="type-row">
-        <div style="position:relative;width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <div style="position:absolute;inset:0;border-radius:50%;border:2px solid #dc2626;opacity:0.35;transform:scale(1.6);"></div>
-          <div style="position:absolute;inset:0;border-radius:50%;border:2px solid #dc2626;opacity:0.2;transform:scale(1.9);"></div>
-          <div style="width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid #dc2626;color:#dc2626;transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;position:relative;z-index:1;"><i class="fa-solid fa-bomb" style="transform:rotate(45deg);font-size:11px;"></i></div>
-        </div>
-        <div><div class="type-name">Breaking</div><div class="type-desc">Teardrop + pulsing double ring. No badge. No border change vs other statuses.</div></div>
-      </div>
-    </div>
-
-    <div class="bt-grid">
-      <div class="bt-card build">
-        <div class="bt-head"><i class="fa-solid fa-hammer" style="font-size:9px;"></i>Build</div>
-        <ul class="bt-list">
-          <li>Detect breaking status from event data</li>
-          <li>Apply double-ring CSS animation to breaking event markers only</li>
-          <li>Outer ring reaches 2.6× marker size; inner ring reaches 2.2×</li>
-          <li>Opacity fades from 70% to 0 over a 2s cycle</li>
-          <li>Stagger pulse animation across markers (0.28s offset per marker); inner ring offset 0.5s within each marker</li>
-          <li>No border change, no badge — all event statuses share the same solid border</li>
-        </ul>
-      </div>
-  </section>
-
-  <hr class="phase-sep"/>
-
-  <!-- Phase 3 -->
-  <section class="phase" id="phase-3">
-    <div class="phase-header">
-      <span class="phase-pill">Phase 3</span>
       <h2>Category</h2>
     </div>
     <p class="phase-sub">Add Font Awesome icons inside markers.</p>
@@ -320,7 +292,7 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
       </div>
       <div class="type-row">
         <div style="width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid #78716c;color:#78716c;transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-crosshairs" style="transform:rotate(45deg);font-size:11px;"></i></div>
-        <div><div class="type-name">Conflict · Breaking</div><div class="type-desc">Pulse ring added in Phase 2 — no badge or border change</div></div>
+        <div><div class="type-name">Conflict · Breaking</div><div class="type-desc">Pulse ring from Phase 1 — no badge or border change</div></div>
       </div>
       <div class="type-row">
         <div style="width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid #78716c;color:#78716c;transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-hurricane" style="transform:rotate(45deg);font-size:11px;"></i></div>
@@ -349,10 +321,10 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
 
   <hr class="phase-sep"/>
 
-  <!-- Phase 4 -->
-  <section class="phase" id="phase-4">
+  <!-- Phase 3 -->
+  <section class="phase" id="phase-3">
     <div class="phase-header">
-      <span class="phase-pill">Phase 4</span>
+      <span class="phase-pill">Phase 3</span>
       <h2>Severity</h2>
     </div>
     <p class="phase-sub">Add colour as the final layer most events tend to be low severity, which is why colour comes last.</p>
@@ -397,10 +369,10 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
 
   <hr class="phase-sep"/>
 
-  <!-- Phase 5 -->
-  <section class="phase" id="phase-5">
+  <!-- Phase 4 -->
+  <section class="phase" id="phase-4">
     <div class="phase-header">
-      <span class="phase-pill">Phase 5</span>
+      <span class="phase-pill">Phase 4</span>
       <h2>Map Controls</h2>
     </div>
     <p class="phase-sub">Build the three persistent bottom-left controls: legend (collapsed by default), base layer selector, and layers panel. These are independent of marker rendering and can be developed in parallel with later marker phases.</p>
