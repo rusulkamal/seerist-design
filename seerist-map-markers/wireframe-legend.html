@@ -77,6 +77,66 @@ h1{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;c
   <div class="label">Pick one to build out</div>
 </div>
 
+<!-- OPTION D — stacked above base layer selector -->
+<div>
+  <div class="frame" style="width:100%;">
+    <div class="frame-title">D — Stacked above base layer selector <span>Groups map controls together</span></div>
+    <div class="map-shell" style="width:680px;height:240px;">
+      <div class="map-bg"></div>
+      <div class="nav-left">
+        <div class="nav-icons">
+          <div class="nav-dot"><div class="nav-dot-inner active"></div></div>
+          <div class="nav-dot"><div class="nav-dot-inner"></div></div>
+          <div class="nav-dot"><div class="nav-dot-inner"></div></div>
+          <div class="nav-dot"><div class="nav-dot-inner"></div></div>
+        </div>
+      </div>
+      <div class="zoom-ctrl"><div class="zoom-btn">+</div><div class="zoom-btn">−</div></div>
+      <!-- markers -->
+      <div class="marker sev-h" style="width:12px;height:12px;left:120px;top:60px;"></div>
+      <div class="marker sev-m" style="width:12px;height:12px;left:260px;top:85px;"></div>
+      <div class="marker" style="width:12px;height:12px;left:200px;top:140px;"></div>
+      <div class="marker sev-h" style="width:12px;height:12px;left:380px;top:70px;"></div>
+      <div class="marker sev-m" style="width:12px;height:12px;left:460px;top:110px;"></div>
+      <div class="asset-dot" style="left:320px;top:55px;background:#d97706;"></div>
+      <div class="asset-dot" style="left:160px;top:120px;background:#0891b2;"></div>
+      <div class="asset-dot" style="left:500px;top:80px;background:#7c3aed;"></div>
+      <div class="cluster" style="width:22px;height:22px;left:90px;top:100px;">12</div>
+      <div class="cluster" style="width:28px;height:28px;left:340px;top:130px;">47</div>
+      <div class="cluster" style="width:18px;height:18px;left:560px;top:60px;">5</div>
+      <!-- layers button top-right -->
+      <div style="position:absolute;top:8px;right:8px;background:#fff;border:1px solid #e2e8f0;border-radius:4px;padding:3px 6px;font-size:7px;font-weight:600;color:#334155;">⊞ Layers</div>
+
+      <!-- STACKED CONTROL GROUP: bottom-right -->
+      <div style="position:absolute;bottom:10px;right:10px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+
+        <!-- Legend panel (collapsible, sits above base layer) -->
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:7px;padding:8px 10px;min-width:90px;box-shadow:0 2px 8px rgba(0,0,0,.1);">
+          <div style="font-size:7px;font-weight:700;color:#334155;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;">
+            Legend
+            <span style="font-size:7px;color:#94a3b8;">▴</span>
+          </div>
+          <div class="lp-leg-row"><div class="lp-tear"></div><div class="lp-lbl">Event</div></div>
+          <div class="lp-leg-row"><div class="lp-dot" style="background:#0891b2;width:8px;height:8px;border-radius:50%;flex-shrink:0;"></div><div class="lp-lbl">Asset</div></div>
+          <div class="lp-leg-row"><div class="lp-hex"></div><div class="lp-lbl">Intel</div></div>
+          <div style="border-top:1px solid #f1f5f9;margin:4px 0;"></div>
+          <div class="lp-leg-row"><div class="lp-dot" style="background:#dc2626;width:8px;height:8px;border-radius:50%;flex-shrink:0;"></div><div class="lp-lbl">High</div></div>
+          <div class="lp-leg-row"><div class="lp-dot" style="background:#ea580c;width:8px;height:8px;border-radius:50%;flex-shrink:0;"></div><div class="lp-lbl">Medium</div></div>
+          <div class="lp-leg-row"><div class="lp-dot" style="background:#78716c;width:8px;height:8px;border-radius:50%;flex-shrink:0;"></div><div class="lp-lbl">Low</div></div>
+        </div>
+
+        <!-- Base layer selector below legend -->
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:7px;overflow:hidden;display:flex;box-shadow:0 2px 8px rgba(0,0,0,.1);">
+          <div style="padding:5px 10px;font-size:7px;font-weight:700;color:#fff;background:#334155;border-right:1px solid #e2e8f0;">Streets</div>
+          <div style="padding:5px 10px;font-size:7px;font-weight:500;color:#64748b;">Satellite</div>
+          <div style="padding:5px 10px;font-size:7px;font-weight:500;color:#64748b;">Terrain</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="options">
 
   <!-- OPTION 1 -->
