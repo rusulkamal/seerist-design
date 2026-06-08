@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Search Map · Seerist</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;color:#1e293b;}
+
+/* Nav */
+.top-nav{height:44px;background:#0f1117;border-bottom:1px solid #1e2030;display:flex;align-items:center;padding:0 16px;flex-shrink:0;position:relative;z-index:100;}
+.top-nav-brand{display:flex;align-items:center;gap:8px;padding-right:20px;border-right:1px solid #1e2030;margin-right:4px;}
+.top-nav-mark{width:20px;height:20px;border-radius:4px;background:linear-gradient(135deg,#10b981,#99cc10);flex-shrink:0;}
+.top-nav-wordmark{font-size:11px;font-weight:700;letter-spacing:.12em;color:#fff;}
+.top-nav-tab{display:flex;align-items:center;gap:6px;padding:0 14px;height:44px;font-size:12px;font-weight:500;color:#64748b;cursor:pointer;text-decoration:none;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;}
+.top-nav-tab:hover{color:#94a3b8;}
+.top-nav-tab.active{color:#fff;border-bottom-color:#10b981;}
+.top-nav-tab i{font-size:11px;}
+
+/* Filter bar */
+.filter-bar{
+  height:54px;background:#fff;border-bottom:1px solid #e2e8f0;
+  display:flex;align-items:center;padding:0 16px;gap:10px;
+  flex-shrink:0;position:relative;z-index:50;
+}
+.filter-search{
+  display:flex;align-items:center;gap:8px;
+  background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;
+  padding:0 12px;height:34px;min-width:240px;
+}
+.filter-search i{color:#94a3b8;font-size:12px;flex-shrink:0;}
+.filter-search input{border:none;background:transparent;font-family:'Inter',sans-serif;font-size:13px;color:#1e293b;outline:none;width:100%;}
+.filter-search input::placeholder{color:#94a3b8;}
+.filter-divider{width:1px;height:20px;background:#e2e8f0;flex-shrink:0;}
+.filter-lbl{font-size:11px;font-weight:600;color:#94a3b8;white-space:nowrap;}
+.filter-date-row{display:flex;align-items:center;gap:6px;}
+.filter-date{border:1px solid #e2e8f0;border-radius:6px;padding:0 10px;height:34px;font-family:'Inter',sans-serif;font-size:12px;color:#44403c;background:#fff;cursor:pointer;outline:none;}
+.filter-select{border:1px solid #e2e8f0;border-radius:6px;padding:0 10px;height:34px;font-family:'Inter',sans-serif;font-size:12px;color:#44403c;background:#fff;cursor:pointer;outline:none;}
+.sev-pills{display:flex;gap:4px;}
+.sev-pill{height:26px;padding:0 11px;border-radius:20px;font-size:11px;font-weight:600;border:1.5px solid;cursor:pointer;background:transparent;display:flex;align-items:center;transition:all .1s;}
+.sev-pill.high{border-color:#dc2626;color:#dc2626;}
+.sev-pill.high.on{background:#dc2626;color:#fff;}
+.sev-pill.medium{border-color:#ea580c;color:#ea580c;}
+.sev-pill.medium.on{background:#ea580c;color:#fff;}
+.sev-pill.low{border-color:#78716c;color:#78716c;}
+.sev-pill.low.on{background:#78716c;color:#fff;}
+.filter-apply{
+  margin-left:auto;height:34px;padding:0 18px;
+  background:#0f1117;color:#fff;border:none;border-radius:7px;
+  font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;
+  display:flex;align-items:center;gap:7px;transition:background .15s;flex-shrink:0;
+}
+.filter-apply:hover{background:#1e293b;}
+.filter-apply i{font-size:11px;}
+
+/* Layout */
+.main-wrap{display:flex;height:calc(100vh - 44px - 54px);overflow:hidden;}
+#map{flex:1;height:100%;position:relative;}
+
+/* Results panel */
+.results-panel{width:360px;flex-shrink:0;background:#fff;border-left:1px solid #e2e8f0;display:flex;flex-direction:column;height:100%;overflow:hidden;}
+.results-header{padding:12px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.results-count{font-size:13px;font-weight:700;color:#1e293b;}
+.results-count span{color:#94a3b8;font-weight:400;font-size:12px;}
+.results-sort-wrap{display:flex;align-items:center;gap:5px;font-size:11px;color:#94a3b8;}
+.results-sort-wrap select{border:none;background:transparent;font-family:'Inter',sans-serif;font-size:11px;color:#44403c;cursor:pointer;outline:none;}
+.results-list{flex:1;overflow-y:auto;}
+.results-list::-webkit-scrollbar{width:4px;}
+.results-list::-webkit-scrollbar-track{background:transparent;}
+.results-list::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:2px;}
+
+/* Result card */
+.result-card{display:flex;align-items:flex-start;gap:11px;padding:11px 16px;border-bottom:1px solid #f8fafc;cursor:pointer;transition:background .1s;position:relative;}
+.result-card:hover{background:#f8fafc;}
+.result-card.active{background:#f0fdf4;}
+.result-bar{width:3px;align-self:stretch;border-radius:2px;flex-shrink:0;}
+.result-body{flex:1;min-width:0;}
+.result-title{font-size:12.5px;font-weight:600;color:#1e293b;line-height:1.45;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.result-meta{font-size:11px;color:#94a3b8;display:flex;align-items:center;gap:5px;margin-bottom:5px;line-height:1;}
+.result-meta i{font-size:9px;}
+.result-chips{display:flex;gap:4px;flex-wrap:wrap;}
+.chip{font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;}
+.chip-type{background:#f1f5f9;color:#475569;}
+.chip-sev{background:transparent;}
+.chip-cat{background:#f8fafc;color:#64748b;border:1px solid #e2e8f0;font-weight:500;}
+
+/* Map marker styles */
+@keyframes pulse-ring{
+  0%{transform:rotate(45deg) scale(1);opacity:.5;}
+  100%{transform:rotate(45deg) scale(2.4);opacity:0;}
+}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="top-nav-brand">
+    <div class="top-nav-mark"></div>
+    <span class="top-nav-wordmark">SEERIST</span>
+  </div>
+  <a class="top-nav-tab" href="index3.html"><i class="fa-solid fa-map"></i>Prototype</a>
+  <a class="top-nav-tab active" href="search-map.html"><i class="fa-solid fa-map-location-dot"></i>Search Map</a>
+  <a class="top-nav-tab" href="spec3.html"><i class="fa-solid fa-book-open"></i>Spec</a>
+  <a class="top-nav-tab" href="build3.html"><i class="fa-solid fa-layer-group"></i>Approach</a>
+</nav>
+
+<div class="filter-bar">
+  <div class="filter-search">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="text" placeholder="Search events, locations, keywords…" id="q"/>
+  </div>
+
+  <div class="filter-divider"></div>
+
+  <div class="filter-date-row">
+    <span class="filter-lbl">From</span>
+    <input type="date" class="filter-date" value="2026-06-01"/>
+    <span class="filter-lbl">To</span>
+    <input type="date" class="filter-date" value="2026-06-08"/>
+  </div>
+
+  <div class="filter-divider"></div>
+
+  <select class="filter-select">
+    <option>All types</option>
+    <option>Events</option>
+    <option>News &amp; Social</option>
+    <option>Analysis</option>
+  </select>
+
+  <select class="filter-select">
+    <option>All categories</option>
+    <option>Conflict</option>
+    <option>Terrorism</option>
+    <option>Unrest</option>
+    <option>Crime</option>
+    <option>Disaster</option>
+    <option>Maritime</option>
+    <option>Political risk</option>
+  </select>
+
+  <div class="filter-divider"></div>
+
+  <div class="sev-pills">
+    <button class="sev-pill high on" onclick="this.classList.toggle('on')">High</button>
+    <button class="sev-pill medium on" onclick="this.classList.toggle('on')">Med</button>
+    <button class="sev-pill low on" onclick="this.classList.toggle('on')">Low</button>
+  </div>
+
+  <button class="filter-apply" onclick="runSearch()">
+    <i class="fa-solid fa-magnifying-glass"></i>Search
+  </button>
+</div>
+
+<div class="main-wrap">
+  <div id="map"></div>
+
+  <div class="results-panel">
+    <div class="results-header">
+      <div class="results-count" id="resultCount">14 results <span>· this week</span></div>
+      <div class="results-sort-wrap">
+        Sort:
+        <select>
+          <option>Latest</option>
+          <option>Severity</option>
+          <option>Relevance</option>
+        </select>
+      </div>
+    </div>
+    <div class="results-list" id="resultsList"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+<script>
+const SEV_COLOR = {high:'#dc2626', medium:'#ea580c', low:'#78716c'};
+
+const EVENTS = [
+  {id:1,  title:'Explosion near parliament building',                   loc:'Kabul, Afghanistan',          date:'Jun 8',  sev:'high',   cat:'terrorism', icon:'fa-bomb',         lat:34.52,  lng:69.17,   type:'event',    breaking:true},
+  {id:2,  title:'Mass protest turns violent outside presidential palace',loc:'Cairo, Egypt',               date:'Jun 7',  sev:'medium', cat:'unrest',    icon:'fa-people-group', lat:30.04,  lng:31.24,   type:'event'},
+  {id:3,  title:'Commercial vessel seized by armed group',              loc:'Red Sea, Yemen',              date:'Jun 7',  sev:'medium', cat:'maritime',  icon:'fa-anchor',       lat:15.5,   lng:43.0,    type:'event'},
+  {id:4,  title:'Heavy artillery exchange reported on eastern front',   loc:'Donetsk, Ukraine',            date:'Jun 6',  sev:'high',   cat:'conflict',  icon:'fa-crosshairs',   lat:48.0,   lng:37.8,    type:'event',    breaking:true},
+  {id:5,  title:'Flash flooding displaces over 50,000 residents',       loc:'Sylhet, Bangladesh',          date:'Jun 6',  sev:'medium', cat:'disaster',  icon:'fa-hurricane',    lat:24.89,  lng:91.87,   type:'event'},
+  {id:6,  title:'Assassination attempt on senior government minister',  loc:'Nairobi, Kenya',              date:'Jun 5',  sev:'high',   cat:'crime',     icon:'fa-handcuffs',    lat:-1.28,  lng:36.82,   type:'event'},
+  {id:7,  title:'Border skirmish reported along Line of Control',       loc:'Kashmir, India–Pakistan',     date:'Jun 5',  sev:'high',   cat:'conflict',  icon:'fa-crosshairs',   lat:33.5,   lng:74.5,    type:'event'},
+  {id:8,  title:'Pipeline sabotage cuts crude output by 15%',           loc:'Delta State, Nigeria',        date:'Jun 4',  sev:'medium', cat:'terrorism', icon:'fa-bomb',         lat:5.5,    lng:6.2,     type:'event'},
+  {id:9,  title:'Clashes erupt at opposition election rally',           loc:'Caracas, Venezuela',          date:'Jun 4',  sev:'medium', cat:'unrest',    icon:'fa-people-group', lat:10.49,  lng:-66.9,   type:'event'},
+  {id:10, title:'State-sponsored cyber attack disrupts power grid',     loc:'Seoul, South Korea',          date:'Jun 3',  sev:'low',    cat:'political', icon:'fa-landmark',     lat:37.57,  lng:126.98,  type:'news'},
+  {id:11, title:'Hostage situation at international NGO compound',      loc:'Bamako, Mali',                date:'Jun 3',  sev:'high',   cat:'crime',     icon:'fa-handcuffs',    lat:12.65,  lng:-8.0,    type:'event'},
+  {id:12, title:'Typhoon Maring makes landfall, evacuation ordered',    loc:'Metro Manila, Philippines',   date:'Jun 2',  sev:'medium', cat:'disaster',  icon:'fa-hurricane',    lat:14.6,   lng:120.98,  type:'event'},
+  {id:13, title:'Seerist Analysis: Sahel Security Outlook Q3 2026',    loc:'Sahel Region, West Africa',   date:'Jun 1',  sev:null,     cat:'analysis',  icon:'fa-file-lines',   lat:15.0,   lng:-2.0,    type:'analysis'},
+  {id:14, title:'Gunfire reported near commercial port district',       loc:'Tripoli, Libya',              date:'Jun 1',  sev:'low',    cat:'conflict',  icon:'fa-crosshairs',   lat:32.9,   lng:13.18,   type:'news'},
+];
+
+function markerIconHtml(e, size){
+  const color = SEV_COLOR[e.sev] || '#1D4ED8';
+  if(e.type === 'analysis'){
+    return `<div style="width:${size}px;height:${size}px;clip-path:polygon(25% 7%,75% 7%,100% 50%,75% 93%,25% 93%,0% 50%);background:#1D4ED8;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <div style="width:${size-6}px;height:${size-6}px;clip-path:polygon(25% 7%,75% 7%,100% 50%,75% 93%,25% 93%,0% 50%);background:#fff;display:flex;align-items:center;justify-content:center;">
+                <i class="fa-solid fa-file-lines" style="font-size:${Math.round(size*.32)}px;color:#1D4ED8;"></i>
+              </div>
+            </div>`;
+  }
+  if(e.type === 'news'){
+    return `<div style="width:${size}px;height:${size}px;border-radius:6px;background:#fff;border:2px solid #94a3b8;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fa-solid ${e.icon}" style="font-size:${Math.round(size*.36)}px;color:#94a3b8;"></i>
+            </div>`;
+  }
+  return `<div style="width:${size}px;height:${size}px;border-radius:50% 50% 50% 0;border:2px solid ${color};transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fa-solid ${e.icon}" style="transform:rotate(45deg);font-size:${Math.round(size*.38)}px;color:${color};"></i>
+          </div>`;
+}
+
+function renderResults(){
+  const list = document.getElementById('resultsList');
+  list.innerHTML = EVENTS.map(e => {
+    const color = SEV_COLOR[e.sev] || '#1D4ED8';
+    const sevChip = e.sev ? `<span class="chip chip-sev" style="background:${color}18;color:${color};">${e.sev.charAt(0).toUpperCase()+e.sev.slice(1)}</span>` : '';
+    const breakingChip = e.breaking ? `<span class="chip" style="background:#fef2f2;color:#dc2626;">Breaking</span>` : '';
+    const typeLabel = e.type === 'analysis' ? 'Analysis' : e.type === 'news' ? 'News' : 'Event';
+    return `<div class="result-card" id="card-${e.id}" onclick="selectResult(${e.id})">
+      <div class="result-bar" style="background:${color};"></div>
+      ${markerIconHtml(e, 30)}
+      <div class="result-body">
+        <div class="result-title">${e.title}</div>
+        <div class="result-meta"><i class="fa-solid fa-location-dot"></i>${e.loc}&nbsp;&nbsp;${e.date}</div>
+        <div class="result-chips">
+          <span class="chip chip-type">${typeLabel}</span>
+          ${sevChip}${breakingChip}
+          <span class="chip chip-cat">${e.cat}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+renderResults();
+
+/* Map */
+const map = new maplibregl.Map({
+  container:'map',
+  style:'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+  center:[20,15],
+  zoom:2.2,
+  attributionControl:false,
+});
+map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
+
+const markerEls = {};
+
+map.on('load', () => {
+  EVENTS.forEach(e => {
+    const color = SEV_COLOR[e.sev] || '#1D4ED8';
+
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'position:relative;width:42px;height:42px;display:flex;align-items:center;justify-content:center;cursor:pointer;';
+
+    if(e.breaking){
+      const ring = document.createElement('div');
+      ring.style.cssText = `position:absolute;inset:0;border-radius:50%;border:2px solid ${color};animation:pulse-ring 2s ease-out infinite;pointer-events:none;`;
+      wrapper.appendChild(ring);
+    }
+
+    wrapper.innerHTML += markerIconHtml(e, 30);
+    wrapper.addEventListener('click', () => selectResult(e.id));
+
+    new maplibregl.Marker({element:wrapper, anchor:'center'}).setLngLat([e.lng, e.lat]).addTo(map);
+    markerEls[e.id] = wrapper;
+  });
+});
+
+let activeId = null;
+
+function selectResult(id){
+  if(activeId){
+    document.getElementById(`card-${activeId}`)?.classList.remove('active');
+    const prev = markerEls[activeId];
+    if(prev) prev.style.outline = 'none';
+  }
+  activeId = id;
+  const e = EVENTS.find(x => x.id === id);
+  if(!e) return;
+
+  const card = document.getElementById(`card-${id}`);
+  card?.classList.add('active');
+  card?.scrollIntoView({behavior:'smooth', block:'nearest'});
+
+  map.flyTo({center:[e.lng, e.lat], zoom:Math.max(map.getZoom(), 5), duration:700, essential:true});
+
+  const el = markerEls[id];
+  if(el) el.style.outline = '3px solid rgba(16,185,129,.5)';
+}
+
+function runSearch(){
+  const btn = document.querySelector('.filter-apply');
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>Searching…';
+  btn.style.opacity = '.7';
+  setTimeout(() => {
+    btn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i>Search';
+    btn.style.opacity = '1';
+  }, 900);
+}
+</script>
+</body>
+</html>
