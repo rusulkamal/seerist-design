@@ -216,6 +216,8 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;fl
 .rp-label{font-size:12px;color:#78716c;flex:1;transition:color .1s;}
 .rp-badge{font-size:10px;font-weight:600;color:#78716c;padding:1px 5px;border-radius:3px;background:#f5f4f0;}
 .rp-saved-lbl{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#d6d3d1;margin:7px 0 5px;}
+.rp-select{width:100%;padding:6px 8px;border:1px solid #e7e5e4;border-radius:5px;font-size:12px;font-family:'Inter',sans-serif;color:#44403c;background:#fff;cursor:pointer;appearance:auto;}
+.rp-select:focus{outline:none;border-color:#10b981;}
 .rp-dropdown{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;border:1px solid #e7e5e4;border-radius:5px;cursor:pointer;}
 .rp-dropdown:hover{border-color:#d6d3d1;}
 .rp-dropdown span{font-size:11px;color:#44403c;}
@@ -390,9 +392,9 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;fl
     <div class="legend" id="legend">
       <div class="leg-header" onclick="toggleLegend()">
         <span class="leg-title">Legend</span>
-        <i class="fa-solid fa-chevron-down" id="leg-chevron" style="font-size:9px;color:#a8a29e;transition:transform .2s;"></i>
+        <i class="fa-solid fa-chevron-down" id="leg-chevron" style="font-size:9px;color:#a8a29e;transition:transform .2s;transform:rotate(-90deg);"></i>
       </div>
-      <div class="leg-content" id="leg-content">
+      <div class="leg-content" id="leg-content" style="display:none;">
         <div class="leg-section">
           <div class="leg-s-title">Content</div>
           <div class="leg-row"><div style="width:14px;height:14px;position:relative;flex-shrink:0;"><div style="position:absolute;inset:0;clip-path:polygon(25% 7%,75% 7%,100% 50%,75% 93%,25% 93%,0% 50%);background:#1D4ED8;"></div><div style="position:absolute;inset:2px;clip-path:polygon(25% 7%,75% 7%,100% 50%,75% 93%,25% 93%,0% 50%);background:#fff;"></div></div>Analysis</div>
@@ -511,10 +513,12 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;fl
       <div class="rp-body">
         <div class="rp-section">
           <div class="rp-s-title">Points</div>
-          <div class="rp-item" onclick="toggleCheck('s1')"><div class="rp-check on" id="check-s1"></div><span class="rp-label">Current Search</span><span class="rp-badge">500</span></div>
-          <div class="rp-item" onclick="toggleCheck('s2')"><div class="rp-check on" id="check-s2"></div><span class="rp-label">MENA Crisis Watch</span><span class="rp-badge">213</span></div>
-          <div class="rp-item" onclick="toggleCheck('s3')"><div class="rp-check" id="check-s3"></div><span class="rp-label">East Africa Tracker</span><span class="rp-badge">87</span></div>
-          <div class="rp-item" onclick="toggleCheck('s4')"><div class="rp-check" id="check-s4"></div><span class="rp-label">Maritime Alerts</span><span class="rp-badge">42</span></div>
+          <select class="rp-select" onchange="selectSearch(this)">
+            <option value="s1">Current Search · 500</option>
+            <option value="s2">MENA Crisis Watch · 213</option>
+            <option value="s3">East Africa Tracker · 87</option>
+            <option value="s4">Maritime Alerts · 42</option>
+          </select>
         </div>
         <div class="rp-section">
           <div class="rp-s-title">Data Layers</div>
@@ -1075,6 +1079,11 @@ function toggleLayersPanel(){
   const open=panel.classList.toggle('open');
   btn.classList.toggle('active',open);
 }
+
+/* ══════════════════════════════════════════
+   POINTS SEARCH
+══════════════════════════════════════════ */
+function selectSearch(sel){ /* swap displayed point layer — wired to data in real impl */ }
 
 /* ══════════════════════════════════════════
    BASE LAYER
