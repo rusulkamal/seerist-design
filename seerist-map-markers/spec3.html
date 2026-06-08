@@ -140,14 +140,13 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
       <ul class="toc-list">
         <li><a href="#visual-language"><span class="toc-num">01</span> Visual Language</a></li>
         <li><a href="#summary"><span class="toc-num">02</span> Quick Summary</a></li>
-        <li><a href="#events"><span class="toc-num">03</span> Event Markers</a></li>
-        <li><a href="#news"><span class="toc-num">04</span> News & Social</a></li>
-        <li><a href="#analysis"><span class="toc-num">05</span> Analysis</a></li>
-        <li><a href="#assets"><span class="toc-num">06</span> Asset Markers</a></li>
-        <li><a href="#clusters"><span class="toc-num">07</span> Clusters</a></li>
-        <li><a href="#stacks"><span class="toc-num">08</span> Same-Location Stack</a></li>
-        <li><a href="#map-controls"><span class="toc-num">09</span> Map Controls</a></li>
-        <li><a href="#interactions"><span class="toc-num">10</span> Interactions</a></li>
+        <li><a href="#news"><span class="toc-num">03</span> News & Social</a></li>
+        <li><a href="#analysis"><span class="toc-num">04</span> Analysis</a></li>
+        <li><a href="#assets"><span class="toc-num">05</span> Asset Markers</a></li>
+        <li><a href="#clusters"><span class="toc-num">06</span> Clusters</a></li>
+        <li><a href="#stacks"><span class="toc-num">07</span> Same-Location Stack</a></li>
+        <li><a href="#map-controls"><span class="toc-num">08</span> Map Controls</a></li>
+        <li><a href="#interactions"><span class="toc-num">09</span> Interactions</a></li>
       </ul>
     </div>
   </nav>
@@ -237,99 +236,10 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
     </div>
   </section>
 
-  <!-- 03 Events -->
-  <section class="section" id="events">
-    <div class="section-header">
-      <span class="section-num">03</span>
-      <h2>Event Markers</h2>
-    </div>
-    <p class="section-intro">Incidents on the ground, produced by Seerist. Teardrop shape, 30 × 30 px.</p>
-
-    <p style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:12px;">Statuses</p>
-    <div class="status-rows" style="margin-bottom:24px;">
-      <div class="srow">
-        <div class="srow-marker"><div style="width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid #ea580c;color:#ea580c;transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-people-group" style="transform:rotate(45deg);font-size:11px;"></i></div></div>
-        <div class="srow-label"><strong>Verified</strong> — Solid border</div>
-        <div class="srow-note">Confirmed by Seerist. Most common event status.</div>
-      </div>
-      <div class="srow">
-        <div class="srow-marker"><div style="width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid #ea580c;color:#ea580c;transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-crosshairs" style="transform:rotate(45deg);font-size:11px;"></i></div></div>
-        <div class="srow-label"><strong>Unverified</strong> — Solid border</div>
-        <div class="srow-note">Reported but not yet independently confirmed. Same border as verified — no visual distinction by border.</div>
-      </div>
-      <div class="srow">
-        <div class="srow-marker"><div style="width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid #78716c;color:#78716c;transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-landmark" style="transform:rotate(45deg);font-size:11px;"></i></div></div>
-        <div class="srow-label"><strong>Future</strong> — Solid border</div>
-        <div class="srow-note">Scheduled or anticipated. No badge. Same solid border as all other statuses.</div>
-      </div>
-      <div class="srow">
-        <div class="srow-marker"><div style="width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid #dc2626;color:#dc2626;transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-bomb" style="transform:rotate(45deg);font-size:11px;"></i></div></div>
-        <div class="srow-label"><strong>Breaking</strong> — Solid border + pulse</div>
-        <div class="srow-note">Happening right now. No badge, no border change — distinguished solely by pulsing double ring reaching 2.6× marker size.</div>
-      </div>
-    </div>
-
-    <p style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:12px;">Severity</p>
-    <table class="doc-table" style="margin-bottom:24px;">
-      <thead><tr><th>Level</th><th>Colour</th><th>Hex</th></tr></thead>
-      <tbody>
-        <tr><td class="td-key"><span class="chip red"><span class="dot" style="background:#dc2626;"></span>High</span></td><td>Red</td><td style="font-family:monospace;">#dc2626</td></tr>
-        <tr><td class="td-key"><span class="chip orange"><span class="dot" style="background:#ea580c;"></span>Medium</span></td><td>Orange</td><td style="font-family:monospace;">#ea580c</td></tr>
-        <tr><td class="td-key"><span class="chip grey"><span class="dot" style="background:#78716c;"></span>Low</span></td><td>Grey</td><td style="font-family:monospace;">#78716c</td></tr>
-      </tbody>
-    </table>
-
-    <p style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:12px;">Breaking pulse animation</p>
-    <p style="font-size:13px;color:#64748b;margin-bottom:12px;line-height:1.7;">Breaking events emit a <strong>double pulse ring</strong> — two overlapping rings staggered 0.5s apart — travelling far from the marker to signal live urgency. The pulse is applied to breaking events only; no other status receives a pulse ring.</p>
-    <table class="doc-table" style="margin-bottom:24px;">
-      <tbody>
-        <tr><td class="td-key" style="width:140px;">Rings</td><td>Double — outer reaches 2.6×, inner reaches 2.2× the marker size</td></tr>
-        <tr><td class="td-key">Opacity</td><td>Starts at 70%, fades to 0</td></tr>
-        <tr><td class="td-key">Duration</td><td>2s per cycle</td></tr>
-        <tr><td class="td-key">Stagger</td><td>Each breaking marker offsets by 0.28s; second ring within each marker offsets by 0.5s</td></tr>
-      </tbody>
-    </table>
-
-    <p style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:12px;">Category icons</p>
-    <p style="font-size:13px;color:#64748b;margin-bottom:12px;">The same icon appears on the map marker and in the event list — consistent across all surfaces.</p>
-    <div class="callout amber" style="margin-bottom:16px;">
-      <i class="fa-solid fa-circle-info"></i>
-      <div>4 icons below use <strong>Font Awesome Pro</strong> — currently shown as free substitutes in this prototype. Final icons: Crime → <code style="font-size:11px;background:rgba(0,0,0,.06);padding:1px 5px;border-radius:3px;">fa-siren-on</code>, Geopolitical → <code style="font-size:11px;background:rgba(0,0,0,.06);padding:1px 5px;border-radius:3px;">fa-globe-stand</code>, Anniversary → <code style="font-size:11px;background:rgba(0,0,0,.06);padding:1px 5px;border-radius:3px;">fa-calendar-star</code>, Transport disruption → <code style="font-size:11px;background:rgba(0,0,0,.06);padding:1px 5px;border-radius:3px;">fa-road-barrier</code>.</div>
-    </div>
-    <div class="icon-grid">
-      <div class="icon-item"><i class="fa-solid fa-handcuffs"></i>Crime</div>
-      <div class="icon-item"><i class="fa-solid fa-crosshairs"></i>Conflict and military</div>
-      <div class="icon-item"><i class="fa-solid fa-people-group"></i>Unrest</div>
-      <div class="icon-item"><i class="fa-solid fa-bomb"></i>Terrorism</div>
-      <div class="icon-item"><i class="fa-solid fa-anchor"></i>Maritime</div>
-      <div class="icon-item"><i class="fa-solid fa-gavel"></i>Official actions</div>
-      <div class="icon-item"><i class="fa-solid fa-hurricane"></i>Disaster</div>
-      <div class="icon-item"><i class="fa-solid fa-heart-pulse"></i>Health</div>
-      <div class="icon-item"><i class="fa-solid fa-landmark"></i>Political risk</div>
-      <div class="icon-item"><i class="fa-solid fa-road"></i>Transport disruption</div>
-      <div class="icon-item"><i class="fa-solid fa-globe"></i>Geopolitical</div>
-      <div class="icon-item"><i class="fa-solid fa-gift"></i>Holiday</div>
-      <div class="icon-item"><i class="fa-solid fa-calendar-days"></i>Anniversary</div>
-      <div class="icon-item"><i class="fa-solid fa-ticket"></i>Sporting, cultural and other</div>
-    </div>
-
-    <p style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin:20px 0 10px;">Special states</p>
-    <div class="icon-grid">
-      <div class="icon-item">
-        <i class="fa-solid fa-tags" style="width:14px;text-align:center;color:#64748b;"></i>
-        Multi-category
-      </div>
-      <div class="icon-item">
-        <i class="fa-solid fa-question" style="width:14px;text-align:center;color:#94a3b8;"></i>
-        Unset
-      </div>
-    </div>
-  </section>
-
-  <!-- 04 News & Social -->
+  <!-- 03 News & Social -->
   <section class="section" id="news">
     <div class="section-header">
-      <span class="section-num">04</span>
+      <span class="section-num">03</span>
       <h2>News & Social Markers</h2>
     </div>
     <p class="section-intro">Third-party reporting — news articles, wire feeds, and social media posts. Not independently verified by Seerist.</p>
@@ -345,10 +255,10 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
     </table>
   </section>
 
-  <!-- 05 Analysis -->
+  <!-- 04 Analysis -->
   <section class="section" id="analysis">
     <div class="section-header">
-      <span class="section-num">05</span>
+      <span class="section-num">04</span>
       <h2>Analysis Markers</h2>
     </div>
     <p class="section-intro">In-depth written assessments produced by Seerist analysts. Blue hexagon signals Seerist-authored, high trust.</p>
@@ -364,10 +274,10 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
     </table>
   </section>
 
-  <!-- 06 Assets -->
+  <!-- 05 Assets -->
   <section class="section" id="assets">
     <div class="section-header">
-      <span class="section-num">06</span>
+      <span class="section-num">05</span>
       <h2>Asset Markers</h2>
     </div>
     <p class="section-intro">The organisation's own tracked locations — offices, field teams, embassies, vessels, facilities. Completely separate from events and intel.</p>
@@ -440,10 +350,10 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
     </div>
   </section>
 
-  <!-- 07 Clusters -->
+  <!-- 06 Clusters -->
   <section class="section" id="clusters">
     <div class="section-header">
-      <span class="section-num">07</span>
+      <span class="section-num">06</span>
       <h2>Cluster Markers</h2>
     </div>
     <p class="section-intro">When multiple events are geographically close at the current zoom level, they merge into a cluster bubble to keep the map readable.</p>
@@ -474,10 +384,10 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
     </table>
   </section>
 
-  <!-- 08 Same-location stack -->
+  <!-- 07 Same-location stack -->
   <section class="section" id="stacks">
     <div class="section-header">
-      <span class="section-num">08</span>
+      <span class="section-num">07</span>
       <h2>Same-Location Stack</h2>
     </div>
     <p class="section-intro">When two or more events share the exact same coordinates, they are shown as a stacked group with a double-border circle and a count.</p>
@@ -491,10 +401,10 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
     </table>
   </section>
 
-  <!-- 09 Map Controls -->
+  <!-- 08 Map Controls -->
   <section class="section" id="map-controls">
     <div class="section-header">
-      <span class="section-num">09</span>
+      <span class="section-num">08</span>
       <h2>Map Controls</h2>
     </div>
     <p class="section-intro">Three persistent UI controls sit at the bottom-left of the map, stacked vertically in z-order from top to bottom: Legend → Base layer selector.</p>
@@ -527,10 +437,10 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
     </table>
   </section>
 
-  <!-- 10 Interactions -->
+  <!-- 09 Interactions -->
   <section class="section" id="interactions">
     <div class="section-header">
-      <span class="section-num">10</span>
+      <span class="section-num">09</span>
       <h2>Interactions</h2>
     </div>
     <p class="section-intro">What happens when users interact with markers.</p>
