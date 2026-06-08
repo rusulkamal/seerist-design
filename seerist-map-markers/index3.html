@@ -160,8 +160,18 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;fl
 }
 .intel-marker:hover .intel-tip{opacity:1;}
 
+/* ══ MAP CONTROLS (bottom-right group) ══ */
+.map-controls{position:absolute;bottom:28px;right:14px;z-index:15;display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+
+/* ── Base layer selector ── */
+.base-layer-sel{display:flex;background:#fff;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1);}
+.bl-btn{padding:6px 12px;font-size:11px;font-weight:500;color:#64748b;background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:background .1s,color .1s;white-space:nowrap;}
+.bl-btn:not(:last-child){border-right:1px solid #e2e8f0;}
+.bl-btn:hover{background:#f8fafc;color:#334155;}
+.bl-btn.active{background:#1e293b;color:#fff;}
+
 /* ══ LEGEND ══ */
-.legend{position:absolute;bottom:28px;left:14px;z-index:15;background:rgba(255,255,255,.97);border:1px solid #e2e8f0;border-radius:10px;font-size:11px;color:#475569;box-shadow:0 2px 12px rgba(0,0,0,.1);min-width:224px;overflow:hidden;}
+.legend{background:rgba(255,255,255,.97);border:1px solid #e2e8f0;border-radius:10px;font-size:11px;color:#475569;box-shadow:0 2px 12px rgba(0,0,0,.1);min-width:224px;overflow:hidden;}
 .leg-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;cursor:pointer;user-select:none;}
 .leg-title{font-size:11px;font-weight:600;color:#334155;}
 .leg-content{padding:0 14px 12px;border-top:1px solid #f1f5f9;}
@@ -373,6 +383,9 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;fl
       <i class="fa-solid fa-layer-group"></i> Layers
     </div>
 
+    <!-- BOTTOM-RIGHT CONTROL GROUP -->
+    <div class="map-controls">
+
     <!-- LEGEND -->
     <div class="legend" id="legend">
       <div class="leg-header" onclick="toggleLegend()">
@@ -437,6 +450,15 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;fl
         </div>
       </div>
     </div>
+
+    <!-- BASE LAYER SELECTOR -->
+    <div class="base-layer-sel">
+      <button class="bl-btn active" onclick="setBaseLayer('streets',this)">Streets</button>
+      <button class="bl-btn" onclick="setBaseLayer('satellite',this)">Satellite</button>
+      <button class="bl-btn" onclick="setBaseLayer('dark',this)">Dark</button>
+    </div>
+
+    </div><!-- /map-controls -->
 
     <!-- POPOVER -->
     <div class="popover" id="popover">
@@ -1061,6 +1083,21 @@ function toggleLayersPanel(){
   const btn=document.getElementById('layersBtn');
   const open=panel.classList.toggle('open');
   btn.classList.toggle('active',open);
+}
+
+/* ══════════════════════════════════════════
+   BASE LAYER
+══════════════════════════════════════════ */
+const BASE_STYLES = {
+  streets:  'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+  satellite:'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+  dark:     'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+};
+function setBaseLayer(key, btn){
+  document.querySelectorAll('.bl-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  map.setStyle(BASE_STYLES[key]);
+  map.once('styledata', ()=>{ refresh(); allAssetEls.forEach(el=>{ if(layerState.assets) el.style.display='flex'; }); });
 }
 
 /* ══════════════════════════════════════════
