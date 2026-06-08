@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Legend Placement Options</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:#f1f5f9;padding:32px;display:flex;flex-direction:column;gap:40px;}
+
+h1{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#94a3b8;margin-bottom:4px;}
+.label{font-size:11px;color:#64748b;margin-bottom:12px;}
+
+.options{display:flex;gap:24px;align-items:flex-start;}
+
+/* ── Frame ── */
+.frame{width:320px;flex-shrink:0;}
+.frame-title{font-size:12px;font-weight:700;color:#334155;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.frame-title span{font-size:10px;font-weight:500;color:#94a3b8;}
+.map-shell{width:320px;height:220px;border-radius:10px;border:1.5px solid #cbd5e1;overflow:hidden;position:relative;background:#dde8f0;box-shadow:0 2px 12px rgba(0,0,0,.08);}
+
+/* ── Map bg texture ── */
+.map-bg{position:absolute;inset:0;background:
+  repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0px,rgba(255,255,255,.05) 1px,transparent 1px,transparent 40px),
+  repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0px,rgba(255,255,255,.05) 1px,transparent 1px,transparent 40px),
+  linear-gradient(160deg,#c8dce8 0%,#d4e6ef 40%,#cce0da 70%,#d0e8d5 100%);}
+
+/* ── Shared chrome ── */
+.nav-left{position:absolute;left:0;top:0;bottom:0;width:28px;background:#0f1117;border-right:1px solid #1e2030;}
+.nav-icons{display:flex;flex-direction:column;gap:1px;padding:6px 0;}
+.nav-dot{width:28px;height:18px;display:flex;align-items:center;justify-content:center;}
+.nav-dot-inner{width:10px;height:3px;border-radius:2px;background:#334155;}
+.nav-dot-inner.active{background:#10b981;}
+.zoom-ctrl{position:absolute;left:36px;top:8px;background:#fff;border:1px solid #e2e8f0;border-radius:5px;overflow:hidden;}
+.zoom-btn{width:22px;height:18px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#64748b;border-bottom:1px solid #e2e8f0;font-weight:600;}
+.zoom-btn:last-child{border-bottom:none;}
+
+/* Markers scattered on map */
+.marker{position:absolute;background:#fff;border:1.5px solid #78716c;border-radius:50% 50% 50% 0;display:flex;align-items:center;justify-content:center;}
+.marker.sev-h{border-color:#dc2626;color:#dc2626;}
+.marker.sev-m{border-color:#ea580c;color:#ea580c;}
+.asset-dot{position:absolute;width:10px;height:10px;border-radius:50%;background:#0891b2;border:1.5px solid #fff;}
+.cluster{position:absolute;border-radius:50%;background:#fff;border:1.5px solid #94a3b8;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#334155;}
+
+/* ── Option 1: legend in layers panel ── */
+.layers-panel{position:absolute;right:0;top:0;bottom:0;width:70px;background:#fff;border-left:1px solid #e2e8f0;padding:8px 6px;}
+.lp-title{font-size:7px;font-weight:700;text-transform:uppercase;color:#94a3b8;margin-bottom:6px;}
+.lp-row{display:flex;align-items:center;gap:4px;margin-bottom:4px;}
+.lp-check{width:7px;height:7px;border-radius:2px;background:#10b981;flex-shrink:0;}
+.lp-check.off{background:#e2e8f0;}
+.lp-lbl{font-size:7px;color:#475569;}
+.lp-divider{border:none;border-top:1px solid #f1f5f9;margin:6px 0;}
+.lp-leg-row{display:flex;align-items:center;gap:4px;margin-bottom:3px;}
+.lp-tear{width:8px;height:8px;border-radius:50% 50% 50% 0;border:1.5px solid #78716c;transform:rotate(-45deg);flex-shrink:0;}
+.lp-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.lp-hex{width:8px;height:8px;flex-shrink:0;position:relative;}
+.lp-hex::before{content:'';position:absolute;inset:0;clip-path:polygon(25% 7%,75% 7%,100% 50%,75% 93%,25% 93%,0% 50%);background:#1D4ED8;}
+.lp-hex::after{content:'';position:absolute;inset:1.5px;clip-path:polygon(25% 7%,75% 7%,100% 50%,75% 93%,25% 93%,0% 50%);background:#fff;}
+.layers-btn-sm{position:absolute;top:8px;right:76px;background:#fff;border:1px solid #e2e8f0;border-radius:4px;padding:3px 6px;font-size:7px;font-weight:600;color:#334155;}
+
+/* ── Option 2: collapsed icon ── */
+.legend-chip{position:absolute;bottom:10px;left:36px;background:#fff;border:1px solid #e2e8f0;border-radius:5px;padding:4px 8px;display:flex;align-items:center;gap:5px;font-size:8px;font-weight:600;color:#334155;box-shadow:0 1px 4px rgba(0,0,0,.1);}
+.legend-chip-dot{width:7px;height:7px;border-radius:50% 50% 50% 0;border:1.5px solid #78716c;transform:rotate(-45deg);}
+
+/* ── Option 3: bottom-right ── */
+.legend-br{position:absolute;bottom:10px;right:10px;background:#fff;border:1px solid #e2e8f0;border-radius:7px;padding:8px 10px;min-width:80px;box-shadow:0 2px 8px rgba(0,0,0,.1);}
+.legend-br-title{font-size:7px;font-weight:700;color:#334155;margin-bottom:6px;}
+
+/* callout badge */
+.badge{display:inline-flex;align-items:center;justify-content:center;background:#10b981;color:#fff;font-size:9px;font-weight:700;border-radius:99px;padding:2px 8px;margin-left:8px;}
+</style>
+</head>
+<body>
+
+<div>
+  <h1>Legend Placement — Options</h1>
+  <div class="label">Pick one to build out</div>
+</div>
+
+<div class="options">
+
+  <!-- OPTION 1 -->
+  <div class="frame">
+    <div class="frame-title">A — Legend inside Layers panel <span>Cleanest map surface</span></div>
+    <div class="map-shell">
+      <div class="map-bg"></div>
+      <div class="nav-left">
+        <div class="nav-icons">
+          <div class="nav-dot"><div class="nav-dot-inner active"></div></div>
+          <div class="nav-dot"><div class="nav-dot-inner"></div></div>
+          <div class="nav-dot"><div class="nav-dot-inner"></div></div>
+          <div class="nav-dot"><div class="nav-dot-inner"></div></div>
+        </div>
+      </div>
+      <div class="zoom-ctrl"><div class="zoom-btn">+</div><div class="zoom-btn">−</div></div>
+      <!-- markers -->
+      <div class="marker sev-h" style="width:12px;height:12px;left:90px;top:55px;font-size:5px;"></div>
+      <div class="marker sev-m" style="width:12px;height:12px;left:160px;top:80px;font-size:5px;"></div>
+      <div class="marker" style="width:12px;height:12px;left:130px;top:130px;font-size:5px;"></div>
+      <div class="asset-dot" style="left:200px;top:60px;background:#d97706;"></div>
+      <div class="asset-dot" style="left:110px;top:110px;background:#0891b2;"></div>
+      <div class="cluster" style="width:22px;height:22px;left:65px;top:90px;">12</div>
+      <div class="cluster" style="width:18px;height:18px;left:200px;top:140px;">5</div>
+      <!-- layers panel open, legend inside -->
+      <div class="layers-panel">
+        <div class="lp-title">Layers</div>
+        <div class="lp-row"><div class="lp-check"></div><div class="lp-lbl">Assets</div></div>
+        <div class="lp-row"><div class="lp-check"></div><div class="lp-lbl">Incidents</div></div>
+        <div class="lp-divider"></div>
+        <div class="lp-title">Legend</div>
+        <div class="lp-leg-row"><div class="lp-tear"></div><div class="lp-lbl">Event</div></div>
+        <div class="lp-leg-row"><div class="lp-dot" style="background:#0891b2;"></div><div class="lp-lbl">Asset</div></div>
+        <div class="lp-leg-row"><div class="lp-hex"></div><div class="lp-lbl">Intel</div></div>
+        <div class="lp-divider"></div>
+        <div class="lp-title">Severity</div>
+        <div class="lp-leg-row"><div class="lp-dot" style="background:#dc2626;"></div><div class="lp-lbl">High</div></div>
+        <div class="lp-leg-row"><div class="lp-dot" style="background:#ea580c;"></div><div class="lp-lbl">Medium</div></div>
+        <div class="lp-leg-row"><div class="lp-dot" style="background:#78716c;"></div><div class="lp-lbl">Low</div></div>
+      </div>
+      <div class="layers-btn-sm">⊞ Layers</div>
+    </div>
+  </div>
+
+  <!-- OPTION 2 -->
+  <div class="frame">
+    <div class="frame-title">B — Collapsed chip <span>Minimal footprint</span></div>
+    <div class="map-shell">
+      <div class="map-bg"></div>
+      <div class="nav-left">
+        <div class="nav-icons">
+          <div class="nav-dot"><div class="nav-dot-inner active"></div></div>
+          <div class="nav-dot"><div class="nav-dot-inner"></div></div>
+          <div class="nav-dot"><div class="nav-dot-inner"></div></div>
+          <div class="nav-dot"><div class="nav-dot-inner"></div></div>
+        </div>
+      </div>
+      <div class="zoom-ctrl"><div class="zoom-btn">+</div><div class="zoom-btn">−</div></div>
+      <!-- markers -->
+      <div class="marker sev-h" style="width:12px;height:12px;left:90px;top:55px;"></div>
+      <div class="marker sev-m" style="width:12px;height:12px;left:160px;top:80px;"></div>
+      <div class="marker" style="width:12px;height:12px;left:130px;top:130px;"></div>
+      <div class="asset-dot" style="left:200px;top:60px;background:#d97706;"></div>
+      <div class="asset-dot" style="left:110px;top:110px;background:#0891b2;"></div>
+      <div class="cluster" style="width:22px;height:22px;left:65px;top:90px;">12</div>
+      <div class="cluster" style="width:18px;height:18px;left:200px;top:140px;">5</div>
+      <!-- layers button -->
+      <div style="position:absolute;top:8px;right:8px;background:#fff;border:1px solid #e2e8f0;border-radius:4px;padding:3px 6px;font-size:7px;font-weight:600;color:#334155;">⊞ Layers</div>
+      <!-- collapsed legend chip -->
+      <div class="legend-chip">
+        <div class="legend-chip-dot"></div>
+        Legend ▾
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION 3 -->
+  <div class="frame">
+    <div class="frame-title">C — Bottom-right float <span>Keeps left clear</span></div>
+    <div class="map-shell">
+      <div class="map-bg"></div>
+      <div class="nav-left">
+        <div class="nav-icons">
+          <div class="nav-dot"><div class="nav-dot-inner active"></div></div>
+          <div class="nav-dot"><div class="nav-dot-inner"></div></div>
+          <div class="nav-dot"><div class="nav-dot-inner"></div></div>
+          <div class="nav-dot"><div class="nav-dot-inner"></div></div>
+        </div>
+      </div>
+      <div class="zoom-ctrl"><div class="zoom-btn">+</div><div class="zoom-btn">−</div></div>
+      <!-- markers -->
+      <div class="marker sev-h" style="width:12px;height:12px;left:90px;top:55px;"></div>
+      <div class="marker sev-m" style="width:12px;height:12px;left:160px;top:80px;"></div>
+      <div class="marker" style="width:12px;height:12px;left:130px;top:130px;"></div>
+      <div class="asset-dot" style="left:200px;top:60px;background:#d97706;"></div>
+      <div class="asset-dot" style="left:110px;top:110px;background:#0891b2;"></div>
+      <div class="cluster" style="width:22px;height:22px;left:65px;top:90px;">12</div>
+      <div class="cluster" style="width:18px;height:18px;left:170px;top:140px;">5</div>
+      <!-- layers button -->
+      <div style="position:absolute;top:8px;right:8px;background:#fff;border:1px solid #e2e8f0;border-radius:4px;padding:3px 6px;font-size:7px;font-weight:600;color:#334155;">⊞ Layers</div>
+      <!-- bottom-right legend -->
+      <div class="legend-br">
+        <div class="legend-br-title">Legend</div>
+        <div class="lp-leg-row"><div class="lp-tear"></div><div class="lp-lbl">Event</div></div>
+        <div class="lp-leg-row"><div class="lp-dot" style="background:#0891b2;width:8px;height:8px;border-radius:50%;flex-shrink:0;"></div><div class="lp-lbl">Asset</div></div>
+        <div class="lp-leg-row"><div class="lp-hex"></div><div class="lp-lbl">Intel</div></div>
+        <div style="border-top:1px solid #f1f5f9;margin:5px 0;"></div>
+        <div class="lp-leg-row"><div class="lp-dot" style="background:#dc2626;width:8px;height:8px;border-radius:50%;flex-shrink:0;"></div><div class="lp-lbl">High</div></div>
+        <div class="lp-leg-row"><div class="lp-dot" style="background:#ea580c;width:8px;height:8px;border-radius:50%;flex-shrink:0;"></div><div class="lp-lbl">Medium</div></div>
+        <div class="lp-leg-row"><div class="lp-dot" style="background:#78716c;width:8px;height:8px;border-radius:50%;flex-shrink:0;"></div><div class="lp-lbl">Low</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
