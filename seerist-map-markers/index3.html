@@ -1,0 +1,1107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Seerist Map — v3</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.css" rel="stylesheet"/>
+<script src="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+.shell{display:flex;width:100%;flex:1;min-height:0;}
+
+/* ══ TOP NAV ══ */
+.top-nav{height:44px;background:#0f1117;border-bottom:1px solid #1e2030;display:flex;align-items:center;padding:0 16px;gap:0;flex-shrink:0;z-index:50;}
+.top-nav-brand{display:flex;align-items:center;gap:8px;padding-right:20px;border-right:1px solid #1e2030;margin-right:4px;}
+.top-nav-mark{width:20px;height:20px;border-radius:4px;background:linear-gradient(135deg,#10b981,#99cc10);flex-shrink:0;}
+.top-nav-wordmark{font-size:11px;font-weight:700;letter-spacing:.12em;color:#fff;}
+.top-nav-tab{display:flex;align-items:center;gap:6px;padding:0 14px;height:44px;font-size:12px;font-weight:500;color:#64748b;cursor:pointer;text-decoration:none;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;}
+.top-nav-tab:hover{color:#94a3b8;}
+.top-nav-tab.active{color:#fff;border-bottom-color:#10b981;}
+.top-nav-tab i{font-size:11px;}
+
+/* ══ PLATFORM NAV ══ */
+.nav{width:172px;flex-shrink:0;background:#0f1117;border-right:1px solid #1e2030;display:flex;flex-direction:column;overflow:hidden;z-index:30;}
+.nav-brand{padding:15px 16px 13px;border-bottom:1px solid #1e2030;display:flex;align-items:center;gap:8px;}
+.nav-mark{width:22px;height:22px;border-radius:5px;background:linear-gradient(135deg,#10b981,#99cc10);flex-shrink:0;}
+.nav-wordmark{font-size:11px;font-weight:700;letter-spacing:.12em;color:#fff;}
+.nav-scroll{flex:1;overflow-y:auto;padding-bottom:8px;}
+.nav-scroll::-webkit-scrollbar{width:0;}
+.nav-group{padding:16px 0 4px;}
+.nav-group-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#444;padding:0 16px 8px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;color:#666;font-size:12px;transition:background .1s,color .1s;}
+.nav-item i{width:14px;text-align:center;font-size:11px;flex-shrink:0;}
+.nav-item:hover{background:rgba(255,255,255,.04);color:#aaa;}
+.nav-item.active{background:rgba(255,255,255,.08);color:#fff;}
+.nav-footer{padding:10px 0;border-top:1px solid #1e2030;}
+
+/* ══ LIST PANEL ══ */
+.list-panel{width:0;flex-shrink:0;overflow:hidden;background:#fff;border-right:1px solid #e7e5e4;display:flex;flex-direction:column;transition:width .22s cubic-bezier(.2,0,0,1);z-index:20;}
+.list-panel.open{width:272px;}
+.lp-head{padding:12px 14px;border-bottom:1px solid #e7e5e4;flex-shrink:0;display:flex;align-items:center;gap:8px;}
+.lp-back{width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#a8a29e;font-size:11px;cursor:pointer;transition:background .1s;flex-shrink:0;}
+.lp-back:hover{background:#f5f4f0;color:#44403c;}
+.lp-title{font-size:13px;font-weight:700;color:#1c1917;flex:1;white-space:nowrap;}
+.lp-count{font-size:10px;font-weight:600;padding:1px 6px;border-radius:999px;background:#f5f4f0;color:#78716c;flex-shrink:0;}
+.lp-body{flex:1;overflow-y:auto;}
+.lp-body::-webkit-scrollbar{width:3px;}
+.lp-body::-webkit-scrollbar-thumb{background:#e7e5e4;border-radius:2px;}
+.ev-divider{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#d6d3d1;padding:10px 14px 3px;}
+.ev-row{display:flex;align-items:flex-start;gap:9px;padding:8px 14px;cursor:pointer;border-left:2px solid transparent;transition:background .1s,border-color .1s;}
+.ev-row:hover{background:#fafaf9;}
+.ev-row.active{background:#f0fdf4;border-left-color:#10b981;}
+.ev-row-body{flex:1;min-width:0;}
+.ev-title{font-size:12px;font-weight:600;color:#1c1917;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ev-meta{font-size:10.5px;color:#a8a29e;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ev-time{font-size:10px;color:#d6d3d1;margin-top:1px;}
+
+/* ══ MINI MARKERS (list) ══ */
+.mini-event{width:20px;height:20px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:7.5px;box-shadow:0 1px 3px rgba(0,0,0,.1);flex-shrink:0;margin-top:1px;border-color:currentColor;}
+.mini-event.st-breaking  {border:2px solid currentColor;}
+.mini-event.st-verified  {border:2px solid currentColor;}
+.mini-event.st-unverified{border:2px dashed currentColor;}
+.mini-event.st-future    {border:2px solid currentColor;}
+.sev-none  {color:#78716c;}
+.sev-medium{color:#ea580c;}
+.sev-high  {color:#dc2626;}
+
+/* ══ MAP ══ */
+.map-main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.map-wrap{flex:1;position:relative;overflow:hidden;}
+#map{position:absolute;inset:0;}
+#connectors{position:absolute;inset:0;pointer-events:none;z-index:10;overflow:visible;}
+
+/* ══ EVENT MARKERS (overlay) ══ */
+.event-marker{
+  width:30px;height:30px;
+  border-radius:50% 50% 50% 0;
+  background:#fff;
+  border:2px solid currentColor;
+  transform:rotate(-45deg);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;
+  box-shadow:0 3px 10px rgba(0,0,0,.2);
+  cursor:pointer;transition:transform .15s,box-shadow .2s;
+  color:#78716c;
+  pointer-events:auto;
+  position:relative;
+}
+.event-marker > i{transform:rotate(45deg);}
+.event-marker:hover{transform:rotate(-45deg) scale(1.12);}
+.event-marker.selected{transform:rotate(-45deg);box-shadow:0 0 0 3px rgba(16,185,129,.3),0 0 0 7px rgba(16,185,129,.08),0 3px 12px rgba(0,0,0,.2);}
+.event-marker.sev-medium{color:#ea580c;}
+.event-marker.sev-high  {color:#dc2626;}
+
+/* ── Breaking pulse rings ── */
+@keyframes pulse-break{
+  0%  {transform:scale(.85); opacity:.7;}
+  70% {transform:scale(2.4); opacity:.08;}
+  100%{transform:scale(2.6); opacity:0;}
+}
+@keyframes pulse-break-2{
+  0%  {transform:scale(.85); opacity:.45;}
+  70% {transform:scale(2.0); opacity:.05;}
+  100%{transform:scale(2.2); opacity:0;}
+}
+.event-marker.st-breaking::before{
+  content:'';position:absolute;inset:0;border-radius:50%;
+  border:2px solid currentColor;
+  animation:pulse-break 2s ease-out infinite;
+  animation-delay:var(--pulse-delay,0s);
+  pointer-events:none;
+}
+.event-marker.st-breaking::after{
+  content:'';position:absolute;inset:0;border-radius:50%;
+  border:1.5px solid currentColor;
+  animation:pulse-break-2 2s ease-out infinite;
+  animation-delay:calc(var(--pulse-delay,0s) + 0.5s);
+  pointer-events:none;
+}
+
+/* ══ ASSET MARKERS (maplibre — no clustering) ══ */
+.asset-marker{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.22),0 0 0 2.5px #fff;cursor:pointer;position:relative;transition:transform .15s;pointer-events:auto;overflow:visible;}
+.asset-marker:hover{transform:scale(1.1);}
+.asset-marker.selected{box-shadow:0 0 0 3px rgba(99,102,241,.35),0 0 0 7px rgba(99,102,241,.1),0 2px 8px rgba(0,0,0,.22),0 0 0 2.5px #fff;}
+.asset-tip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1e293b;color:#f8fafc;font-size:10px;font-family:'Inter',sans-serif;padding:4px 9px;border-radius:5px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:60;box-shadow:0 2px 8px rgba(0,0,0,.2);}
+.asset-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:#1e293b;}
+.asset-marker:hover .asset-tip{opacity:1;}
+
+/* ══ INTEL MARKERS ══
+   Analysis  (Seerist)       → flat-top hexagon, blue  — authoritative intel
+   News/Social (third-party) → squircle, slate          — external signal  */
+.intel-marker{width:34px;height:34px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;transition:transform .15s,filter .2s;pointer-events:auto;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.14);}
+.intel-marker:hover{transform:scale(1.12);}
+.intel-marker.hidden{display:none !important;}
+
+/* Analysis — flat-top hexagon via pseudo-elements; drop-shadow follows hex outline */
+.intel-analysis{border:none;background:transparent;border-radius:0;box-shadow:none;color:#1D4ED8;filter:drop-shadow(0 2px 6px rgba(0,0,0,.2));}
+.intel-analysis::before{content:'';position:absolute;inset:0;clip-path:polygon(25% 7%,75% 7%,100% 50%,75% 93%,25% 93%,0% 50%);background:#1D4ED8;z-index:0;}
+.intel-analysis::after{content:'';position:absolute;inset:2.5px;clip-path:polygon(25% 7%,75% 7%,100% 50%,75% 93%,25% 93%,0% 50%);background:#fff;z-index:1;}
+.intel-analysis>i{position:relative;z-index:2;}
+.intel-analysis:hover{filter:drop-shadow(0 3px 10px rgba(0,0,0,.25));}
+.intel-analysis.lit{filter:drop-shadow(0 0 5px rgba(29,78,216,.6)) drop-shadow(0 2px 6px rgba(0,0,0,.2));}
+
+.intel-news{border:2px solid #94a3b8;color:#64748b;}
+.intel-news.lit{box-shadow:0 0 0 3px rgba(148,163,184,.4),0 2px 8px rgba(0,0,0,.14);}
+/* Intel hover tooltip */
+.intel-tip{
+  position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);
+  background:#1e293b;color:#f8fafc;font-size:10px;line-height:1.4;font-family:'Inter',sans-serif;
+  padding:5px 9px;border-radius:6px;white-space:nowrap;max-width:200px;white-space:normal;
+  text-align:center;pointer-events:none;opacity:0;transition:opacity .15s;z-index:60;
+  box-shadow:0 4px 12px rgba(0,0,0,.2);
+}
+.intel-tip::after{
+  content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:5px solid transparent;border-top-color:#1e293b;
+}
+.intel-marker:hover .intel-tip{opacity:1;}
+
+/* ══ LEGEND ══ */
+.legend{position:absolute;bottom:28px;left:14px;z-index:15;background:rgba(255,255,255,.97);border:1px solid #e2e8f0;border-radius:10px;font-size:11px;color:#475569;box-shadow:0 2px 12px rgba(0,0,0,.1);min-width:224px;overflow:hidden;}
+.leg-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;cursor:pointer;user-select:none;}
+.leg-title{font-size:11px;font-weight:600;color:#334155;}
+.leg-content{padding:0 14px 12px;border-top:1px solid #f1f5f9;}
+.leg-section{padding-top:10px;}
+.leg-divider{border:none;border-top:1px solid #f1f5f9;margin:4px 0 0;}
+.leg-s-title{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin-bottom:7px;}
+.leg-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:11px;color:#475569;}
+.leg-row:last-child{margin-bottom:0;}
+.leg-ev{width:14px;height:14px;border-radius:50%;background:#fff;flex-shrink:0;position:relative;}
+.leg-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:6px;}
+.leg-num{border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;color:#1e293b;flex-shrink:0;}
+.leg-assets-hd{display:flex;align-items:center;gap:5px;cursor:pointer;margin-bottom:0;}
+.leg-assets-hd .leg-s-title{margin-bottom:0;}
+.leg-assets-count{font-size:9px;font-weight:600;color:#94a3b8;background:#f1f5f9;padding:1px 5px;border-radius:8px;margin-left:4px;}
+.assets-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;padding-top:7px;}
+.asset-leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#475569;min-width:0;}
+.asset-leg-dot{width:16px;height:16px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:6px;color:#fff;}
+.asset-leg-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10.5px;}
+
+/* rp-tb-a restored for Analysis filter button */
+.rp-tb-a{background:#dbeafe;color:#1d4ed8;border-color:#93c5fd;}
+/* ══ LAYERS PANEL ══ */
+.sb-right{position:absolute;top:0;right:0;bottom:0;width:256px;background:#fff;border-left:1px solid #e2e8f0;display:flex;flex-direction:column;overflow:hidden;z-index:25;transform:translateX(100%);transition:transform .25s cubic-bezier(.2,0,0,1);box-shadow:-4px 0 20px rgba(0,0,0,.1);}
+.sb-right.open{transform:translateX(0);}
+.rp-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #f1f5f9;flex-shrink:0;}
+.rp-head-title{font-size:13px;font-weight:600;color:#1e293b;white-space:nowrap;}
+.rp-close{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:12px;cursor:pointer;transition:background .1s;flex-shrink:0;}
+.rp-close:hover{background:#f1f5f9;color:#475569;}
+.layers-btn{position:absolute;top:14px;right:14px;z-index:15;background:#fff;border:1px solid #e2e8f0;border-radius:7px;padding:7px 13px;display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#334155;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.1);transition:background .15s,color .15s,border-color .15s;}
+.layers-btn:hover{background:#f8fafc;}
+.layers-btn.active{background:#1e293b;color:#fff;border-color:#1e293b;}
+.rp-body{flex:1;overflow-y:auto;}
+.rp-body::-webkit-scrollbar{width:3px;}
+.rp-body::-webkit-scrollbar-thumb{background:#e7e5e4;}
+.rp-section{padding:16px 18px;border-bottom:1px solid #f1f5f9;}
+.rp-s-title{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#94a3b8;margin-bottom:12px;}
+.rp-item{display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;}
+.rp-item:hover .rp-label{color:#1c1917;}
+.rp-check{width:15px;height:15px;border-radius:3px;border:1.5px solid #d6d3d1;display:flex;align-items:center;justify-content:center;font-size:8px;transition:all .1s;flex-shrink:0;}
+.rp-check.on{background:#10b981;border-color:#10b981;color:#fff;}
+.rp-check.on::after{content:'✓';font-weight:700;}
+.rp-label{font-size:12px;color:#78716c;flex:1;transition:color .1s;}
+.rp-badge{font-size:10px;font-weight:600;color:#78716c;padding:1px 5px;border-radius:3px;background:#f5f4f0;}
+.rp-saved-lbl{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#d6d3d1;margin:7px 0 5px;}
+.rp-dropdown{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;border:1px solid #e7e5e4;border-radius:5px;cursor:pointer;}
+.rp-dropdown:hover{border-color:#d6d3d1;}
+.rp-dropdown span{font-size:11px;color:#44403c;}
+.rp-type-row{display:flex;gap:4px;margin-top:8px;}
+.rp-type-btn{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;cursor:pointer;border:1.5px solid transparent;transition:opacity .15s,transform .15s;}
+.rp-type-btn:hover{opacity:.75;}
+.rp-type-btn.off{opacity:.22;transform:scale(.8);}
+.rp-tb-b{background:#fee2e2;color:#b91c1c;border-color:#fca5a5;}
+.rp-tb-v{background:#f5f5f4;color:#44403c;border-color:#e7e5e4;}
+.rp-tb-u{background:#fef3c7;color:#92400e;border-color:#fde68a;}
+.rp-tb-f{background:#ede9fe;color:#4338ca;border-color:#c4b5fd;}
+.rp-tb-o{background:#e0f2fe;color:#0369a1;border-color:#7dd3fc;}
+.rp-info{font-size:10px;color:#d6d3d1;flex-shrink:0;cursor:pointer;}
+.rp-info:hover{color:#a8a29e;}
+.rp-sub-lbl{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#d6d3d1;margin-top:8px;margin-bottom:4px;}
+.rp-risk-row{display:flex;gap:4px;margin-top:4px;}
+.rp-risk-dot{width:18px;height:18px;border-radius:50%;flex-shrink:0;cursor:pointer;transition:opacity .15s,transform .15s;border:2px solid rgba(0,0,0,.18);}
+.rp-risk-dot.off{opacity:.22;transform:scale(.82);border-color:transparent;}
+.rp-risk-dot:hover{transform:scale(1.12);}
+.rp-risk-dot.off:hover{transform:scale(.92);}
+.rp-risk-lbls{display:flex;gap:4px;margin-top:3px;}
+.rp-risk-lbl{font-size:8px;color:#a8a29e;width:18px;text-align:center;}
+
+/* MapLibre overrides */
+.maplibregl-ctrl-group{background:#fff!important;border:1px solid #e7e5e4!important;box-shadow:0 1px 4px rgba(0,0,0,.08)!important;border-radius:6px!important;}
+.maplibregl-ctrl-group button{background:transparent!important;border-bottom:1px solid #e7e5e4!important;}
+.maplibregl-ctrl-group button:last-child{border-bottom:none!important;}
+.maplibregl-ctrl-attrib{background:rgba(255,255,255,.75)!important;color:#a8a29e!important;font-size:9px!important;}
+.maplibregl-ctrl-attrib a{color:#78716c!important;}
+
+/* ══ POPOVER ══ */
+.popover{position:absolute;z-index:40;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.16),0 2px 8px rgba(0,0,0,.08);width:340px;opacity:0;pointer-events:none;transform:translateY(6px) scale(.98);transition:opacity .18s ease,transform .18s ease;}
+.popover.open{opacity:1;pointer-events:all;transform:none;}
+.pop-arrow{position:absolute;left:50%;transform:translateX(-50%);width:14px;height:7px;pointer-events:none;}
+.pop-arrow.below{bottom:-7px;}
+.pop-arrow::before{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:7px solid #e2e8f0;}
+.pop-arrow::after{content:'';position:absolute;bottom:1px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:6px solid #fff;}
+.detail-view{padding:16px 18px;}
+.detail-top{display:flex;align-items:flex-start;gap:13px;}
+.detail-icon{width:40px;height:40px;border-radius:50%;background:#fff;border:2px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-size:17px;color:#1e293b;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.08);}
+.detail-body{flex:1;min-width:0;}
+.detail-meta{display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap;}
+.detail-type{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;}
+.detail-date{font-size:11px;color:#94a3b8;}
+.detail-loc{font-size:11px;color:#94a3b8;margin-bottom:5px;}
+.detail-title{font-size:14px;font-weight:600;color:#1e293b;line-height:1.4;margin-bottom:3px;}
+.detail-source{font-size:11px;color:#94a3b8;}
+.pop-x{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#94a3b8;cursor:pointer;flex-shrink:0;transition:background .1s;}
+.pop-x:hover{background:#f1f5f9;color:#475569;}
+.detail-actions{display:flex;gap:7px;margin-top:13px;padding-top:13px;border-top:1px solid #f1f5f9;}
+.btn-primary{background:#1e293b;color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .1s;}
+.btn-primary:hover{background:#334155;}
+.btn-secondary{background:#f8fafc;color:#334155;border:1px solid #e2e8f0;border-radius:6px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;transition:background .1s;}
+.btn-secondary:hover{background:#f1f5f9;}
+.stack-view{display:none;flex-direction:column;}
+.stack-view.active{display:flex;}
+.stack-header{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid #f1f5f9;}
+.stack-header h4{font-size:13px;font-weight:600;color:#1e293b;margin-bottom:2px;}
+.stack-header span{font-size:11px;color:#94a3b8;}
+.stack-list{max-height:260px;overflow-y:auto;}
+.stack-item{display:flex;align-items:center;gap:11px;padding:10px 18px;border-bottom:1px solid #f8fafc;cursor:pointer;transition:background .1s;}
+.stack-item:hover{background:#f8fafc;}
+.stack-item:last-child{border-bottom:none;}
+.stack-item-icon{width:28px;height:28px;border-radius:50%;background:#fff;border:1.5px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.stack-item-body{flex:1;min-width:0;}
+.stack-item-title{font-size:12px;font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
+.stack-item-meta{font-size:10px;color:#94a3b8;}
+.stack-item-arrow{color:#cbd5e1;font-size:11px;flex-shrink:0;}
+.cluster-tip{position:absolute;bottom:calc(100% + 12px);left:50%;transform:translateX(-50%);background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 13px;box-shadow:0 6px 20px rgba(0,0,0,.12);font-size:11px;min-width:150px;pointer-events:none;opacity:0;transition:opacity .15s;white-space:nowrap;z-index:50;}
+.cluster-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#fff;}
+.cluster-tip::before{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#e2e8f0;margin-top:-1px;}
+.ct-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:6px;}
+.ct-row{display:flex;align-items:center;gap:6px;padding:2px 0;border-bottom:1px solid #f1f5f9;}
+.ct-row:last-child{border-bottom:none;}
+.ct-ico{width:14px;height:14px;border-radius:50%;background:#f8fafc;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-size:6px;color:#334155;flex-shrink:0;}
+.ct-lbl{flex:1;color:#475569;font-size:10px;}
+.ct-cnt{font-weight:700;color:#1e293b;font-size:10px;}
+.sameloc-wrap{position:absolute;width:34px;height:34px;cursor:pointer;pointer-events:auto;}
+.sameloc-front{position:absolute;inset:0;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#1e293b;border:2px solid #334155;box-shadow:0 0 0 3px #fff,0 0 0 5.5px #94a3b8,0 2px 8px rgba(0,0,0,.14);}
+.sameloc-wrap:hover .sameloc-front{border-color:#1e293b;box-shadow:0 0 0 3px #fff,0 0 0 5.5px #475569,0 4px 12px rgba(0,0,0,.2);}
+.rel-empty{font-size:12px;color:#d6d3d1;font-style:italic;}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="top-nav-brand">
+    <div class="top-nav-mark"></div>
+    <span class="top-nav-wordmark">SEERIST</span>
+  </div>
+  <a class="top-nav-tab active" href="index3.html"><i class="fa-solid fa-map"></i>Prototype</a>
+  <a class="top-nav-tab" href="spec.html"><i class="fa-solid fa-book-open"></i>Spec</a>
+  <a class="top-nav-tab" href="build.html"><i class="fa-solid fa-layer-group"></i>Approach</a>
+</nav>
+
+<div class="shell">
+
+<!-- ══ PLATFORM NAV ══ -->
+<nav class="nav">
+  <div class="nav-brand">
+    <div class="nav-mark"></div>
+    <span class="nav-wordmark">SEERIST</span>
+  </div>
+  <div class="nav-scroll">
+    <div class="nav-group">
+      <div class="nav-group-label">Explore</div>
+      <div class="nav-item" onclick="openPanel('latest',this)"><i class="fa-solid fa-house"></i>Latest</div>
+      <div class="nav-item" onclick="openPanel('search',this)"><i class="fa-solid fa-magnifying-glass"></i>Search</div>
+      <div class="nav-item active" onclick="openPanel('map',this)"><i class="fa-solid fa-map"></i>Map</div>
+      <div class="nav-item" onclick="openPanel('monitor',this)"><i class="fa-solid fa-display"></i>Monitor</div>
+      <div class="nav-item" onclick="openPanel('alerts',this)"><i class="fa-solid fa-bell"></i>Alerts</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Analysis</div>
+      <div class="nav-item" onclick="openPanel('askanna',this)"><i class="fa-solid fa-wand-magic-sparkles"></i>AskAnna</div>
+      <div class="nav-item" onclick="openPanel('profiles',this)"><i class="fa-solid fa-globe"></i>Country Profiles</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Tools</div>
+      <div class="nav-item" onclick="openPanel('folders',this)"><i class="fa-solid fa-folder"></i>Content Folders</div>
+      <div class="nav-item" onclick="openPanel('reports',this)"><i class="fa-solid fa-file-lines"></i>Reports</div>
+    </div>
+  </div>
+  <div class="nav-footer">
+    <div class="nav-item"><i class="fa-solid fa-circle-user"></i>Account</div>
+  </div>
+</nav>
+
+<!-- ══ LIST PANEL ══ -->
+<div class="list-panel" id="list-panel">
+  <div class="lp-head">
+    <div class="lp-back" onclick="closePanel()"><i class="fa-solid fa-xmark"></i></div>
+    <span class="lp-title" id="lp-title">Latest</span>
+    <span class="lp-count" id="lp-count">11</span>
+  </div>
+  <div class="lp-body" id="lp-body">
+    <div class="ev-divider">Breaking · 3</div>
+    <div class="ev-row" data-eid="e1"><div style="flex-shrink:0;padding-top:1px;"><div class="mini-event st-breaking sev-high"><i class="fa-solid fa-bomb"></i></div></div><div class="ev-row-body"><div class="ev-title">IED detonated near checkpoint</div><div class="ev-meta">Terrorism · Baghdad, Iraq</div><div class="ev-time">8 min ago</div></div></div>
+    <div class="ev-row" data-eid="e2"><div style="flex-shrink:0;padding-top:1px;"><div class="mini-event st-breaking sev-high"><i class="fa-solid fa-crosshairs"></i></div></div><div class="ev-row-body"><div class="ev-title">Artillery fire on residential district</div><div class="ev-meta">Conflict & military · Sumy Oblast</div><div class="ev-time">19 min ago</div></div></div>
+    <div class="ev-row" data-eid="e3"><div style="flex-shrink:0;padding-top:1px;"><div class="mini-event st-breaking sev-medium"><i class="fa-solid fa-anchor"></i></div></div><div class="ev-row-body"><div class="ev-title">Tanker boarded — crew unaccounted</div><div class="ev-meta">Maritime · Red Sea</div><div class="ev-time">34 min ago</div></div></div>
+    <div class="ev-divider">Verified · 4</div>
+    <div class="ev-row" data-eid="e4"><div style="flex-shrink:0;padding-top:1px;"><div class="mini-event st-verified sev-medium"><i class="fa-solid fa-hurricane"></i></div></div><div class="ev-row-body"><div class="ev-title">Flash flood — emergency declared</div><div class="ev-meta">Disaster · Benghazi, Libya</div><div class="ev-time">3h ago</div></div></div>
+    <div class="ev-row" data-eid="e5"><div style="flex-shrink:0;padding-top:1px;"><div class="mini-event st-verified sev-none"><i class="fa-solid fa-people-group"></i></div></div><div class="ev-row-body"><div class="ev-title">Demonstration — Taksim Square</div><div class="ev-meta">Unrest · Istanbul, Türkiye</div><div class="ev-time">2h ago</div></div></div>
+    <div class="ev-row" data-eid="e6"><div style="flex-shrink:0;padding-top:1px;"><div class="mini-event st-verified sev-high"><i class="fa-solid fa-shield-halved"></i></div></div><div class="ev-row-body"><div class="ev-title">Kidnap for ransom — expat targeted</div><div class="ev-meta">Crime · Lagos, Nigeria</div><div class="ev-time">5h ago</div></div></div>
+    <div class="ev-row" data-eid="e7"><div style="flex-shrink:0;padding-top:1px;"><div class="mini-event st-verified sev-medium"><i class="fa-solid fa-gavel"></i></div></div><div class="ev-row-body"><div class="ev-title">Travel advisory — Level 3</div><div class="ev-meta">Official actions · Khartoum</div><div class="ev-time">6h ago</div></div></div>
+    <div class="ev-divider">Unverified · 2</div>
+    <div class="ev-row" data-eid="e8"><div style="flex-shrink:0;padding-top:1px;"><div class="mini-event st-unverified sev-medium"><i class="fa-solid fa-bomb"></i></div></div><div class="ev-row-body"><div class="ev-title">Explosion reported — unconfirmed</div><div class="ev-meta">Terrorism · Beirut, Lebanon</div><div class="ev-time">41 min ago</div></div></div>
+    <div class="ev-row" data-eid="e9"><div style="flex-shrink:0;padding-top:1px;"><div class="mini-event st-unverified sev-none"><i class="fa-solid fa-crosshairs"></i></div></div><div class="ev-row-body"><div class="ev-title">Troop movement — unconfirmed</div><div class="ev-meta">Conflict & military · Armenia–Azer.</div><div class="ev-time">1h ago</div></div></div>
+    <div class="ev-divider">Future · 2</div>
+    <div class="ev-row" data-eid="e10"><div style="flex-shrink:0;padding-top:1px;"><div class="mini-event st-future sev-none"><i class="fa-solid fa-landmark"></i></div></div><div class="ev-row-body"><div class="ev-title">General election — heightened security</div><div class="ev-meta">Political risk · Nairobi, Kenya</div><div class="ev-time">Sat 07:00</div></div></div>
+    <div class="ev-row" data-eid="e11"><div style="flex-shrink:0;padding-top:1px;"><div class="mini-event st-future sev-none"><i class="fa-solid fa-people-group"></i></div></div><div class="ev-row-body"><div class="ev-title">Planned protest — city centre</div><div class="ev-meta">Unrest · Nairobi, Kenya</div><div class="ev-time">Tomorrow 10:00</div></div></div>
+  </div>
+</div>
+
+<!-- ══ MAP ══ -->
+<div class="map-main">
+  <div class="map-wrap">
+    <div id="map"></div>
+    <svg id="connectors"></svg>
+    <!-- Overlay layers — plain divs, positioned via map.project(), never drifts during zoom -->
+    <div id="marker-overlay" style="position:absolute;inset:0;pointer-events:none;z-index:11;"></div>
+    <div id="cluster-layer"  style="position:absolute;inset:0;pointer-events:none;z-index:13;"></div>
+
+    <div class="layers-btn" id="layersBtn" onclick="toggleLayersPanel()">
+      <i class="fa-solid fa-layer-group"></i> Layers
+    </div>
+
+    <!-- LEGEND -->
+    <div class="legend" id="legend">
+      <div class="leg-header" onclick="toggleLegend()">
+        <span class="leg-title">Legend</span>
+        <i class="fa-solid fa-chevron-down" id="leg-chevron" style="font-size:9px;color:#a8a29e;transition:transform .2s;"></i>
+      </div>
+      <div class="leg-content" id="leg-content">
+        <div class="leg-section">
+          <div class="leg-s-title">Content</div>
+          <div class="leg-row"><div class="leg-ev" style="border-radius:4px;border:2px dotted #94a3b8;"></div>News &amp; Social</div>
+          <div class="leg-row"><div style="width:14px;height:14px;position:relative;flex-shrink:0;"><div style="position:absolute;inset:0;clip-path:polygon(25% 7%,75% 7%,100% 50%,75% 93%,25% 93%,0% 50%);background:#1D4ED8;"></div><div style="position:absolute;inset:2px;clip-path:polygon(25% 7%,75% 7%,100% 50%,75% 93%,25% 93%,0% 50%);background:#fff;"></div></div>Analysis</div>
+          <div style="font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#cbd5e1;margin-bottom:5px;margin-top:8px;">Event</div>
+          <div class="leg-row" style="padding-left:8px;"><div class="leg-ev" style="border:2px solid #78716c;"></div>Verified</div>
+          <div class="leg-row" style="padding-left:8px;"><div class="leg-ev" style="border:2px dashed #78716c;"></div>Unverified</div>
+          <div class="leg-row" style="padding-left:8px;"><div class="leg-ev" style="border:2px solid #78716c;"><div style="position:absolute;bottom:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#fff;border:1.5px solid #78716c;display:flex;align-items:center;justify-content:center;font-size:4px;color:#78716c;"><i class="fa-solid fa-clock"></i></div></div>Future</div>
+          <div class="leg-row" style="padding-left:8px;"><div class="leg-ev" style="border:2px solid #78716c;"><div style="position:absolute;top:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#dc2626;border:1.5px solid #fff;display:flex;align-items:center;justify-content:center;font-size:4px;color:#fff;"><i class="fa-solid fa-bolt"></i></div></div>Breaking</div>
+        </div>
+        <hr class="leg-divider"/>
+        <div class="leg-section">
+          <div class="leg-s-title">Severity</div>
+          <div class="leg-row"><div class="leg-ev" style="background:#a8a29e;border:2px solid #78716c;"></div>Low</div>
+          <div class="leg-row"><div class="leg-ev" style="background:#ea580c;border:2px solid #c2410c;"></div>Medium</div>
+          <div class="leg-row"><div class="leg-ev" style="background:#dc2626;border:2px solid #b91c1c;"></div>High</div>
+        </div>
+        <hr class="leg-divider"/>
+        <div class="leg-section">
+          <div class="leg-s-title">Markers</div>
+          <div class="leg-row"><div class="leg-num" style="width:20px;height:20px;font-size:8px;border:2px solid #334155;box-shadow:0 0 0 2px #fff,0 0 0 3.5px #94a3b8;">2</div>Same location</div>
+          <div class="leg-row"><div class="leg-num" style="width:24px;height:24px;font-size:9px;border:1.5px solid #c8d4e0;box-shadow:0 1px 4px rgba(0,0,0,.12);">12</div>Cluster · zoom to expand</div>
+        </div>
+        <hr class="leg-divider"/>
+        <div class="leg-section">
+          <div class="leg-assets-hd" onclick="toggleCatLeg()" style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+            <span class="leg-s-title" style="margin-bottom:0;">Categories</span>
+            <i class="fa-solid fa-chevron-down" id="cat-leg-chevron" style="font-size:8px;color:#94a3b8;margin-left:auto;transition:transform .15s;"></i>
+          </div>
+          <div id="cat-leg-list" style="">
+            <div class="assets-grid" style="margin-top:7px;">
+              <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"><i class="fa-solid fa-shield-halved"></i></div><span class="asset-leg-label">Crime</span></div>
+              <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"><i class="fa-solid fa-crosshairs"></i></div><span class="asset-leg-label">Conflict</span></div>
+              <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"><i class="fa-solid fa-people-group"></i></div><span class="asset-leg-label">Unrest</span></div>
+              <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"><i class="fa-solid fa-bomb"></i></div><span class="asset-leg-label">Terrorism</span></div>
+              <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"><i class="fa-solid fa-anchor"></i></div><span class="asset-leg-label">Maritime</span></div>
+              <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"><i class="fa-solid fa-gavel"></i></div><span class="asset-leg-label">Official</span></div>
+              <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"><i class="fa-solid fa-hurricane"></i></div><span class="asset-leg-label">Disaster</span></div>
+              <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"><i class="fa-solid fa-heart-pulse"></i></div><span class="asset-leg-label">Health</span></div>
+              <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"><i class="fa-solid fa-landmark"></i></div><span class="asset-leg-label">Political</span></div>
+              <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"><i class="fa-solid fa-truck-fast"></i></div><span class="asset-leg-label">Transport</span></div>
+              <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"><i class="fa-solid fa-globe"></i></div><span class="asset-leg-label">Geopolitical</span></div>
+              <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"><i class="fa-solid fa-ticket"></i></div><span class="asset-leg-label">Sporting</span></div>
+              <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"><i class="fa-solid fa-gift"></i></div><span class="asset-leg-label">Holiday</span></div>
+              <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"><i class="fa-solid fa-calendar-days"></i></div><span class="asset-leg-label">Anniversary</span></div>
+              <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"><i class="fa-solid fa-tags"></i></div><span class="asset-leg-label">Multi-cat</span></div>
+              <div class="asset-leg-item"><div class="asset-leg-dot" style="background:#f1f5f9;color:#94a3b8;border:1px solid #e2e8f0;"><i class="fa-solid fa-question"></i></div><span class="asset-leg-label">Unset</span></div>
+            </div>
+          </div>
+        </div>
+        <hr class="leg-divider"/>
+        <div class="leg-section">
+          <div class="leg-assets-hd" onclick="toggleAssetsLeg()" style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+            <span class="leg-s-title" style="margin-bottom:0;">Assets</span>
+            <span class="leg-assets-count" id="leg-assets-count">10</span>
+            <i class="fa-solid fa-chevron-down" id="assets-leg-chevron" style="font-size:8px;color:#94a3b8;margin-left:auto;transition:transform .15s;"></i>
+          </div>
+          <div class="assets-grid" id="assets-leg-list" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- POPOVER -->
+    <div class="popover" id="popover">
+      <div class="detail-view active" id="detailView">
+        <div class="detail-top">
+          <div class="detail-icon" id="detailIcon"></div>
+          <div class="detail-body">
+            <div class="detail-meta"><span class="detail-type" id="detailType"></span><span class="detail-date" id="detailDate"></span></div>
+            <div class="detail-loc"><i class="fa-solid fa-location-dot" style="font-size:9px;margin-right:4px;color:#cbd5e1;"></i><span id="detailLoc"></span></div>
+            <div class="detail-title" id="detailTitle"></div>
+            <div class="detail-source"><i class="fa-solid fa-tag" style="font-size:9px;margin-right:4px;color:#cbd5e1;"></i><span id="detailSub"></span></div>
+          </div>
+          <div class="pop-x" onclick="clearSel()"><i class="fa-solid fa-xmark"></i></div>
+        </div>
+        <div class="detail-actions">
+          <button class="btn-primary">Open full article</button>
+          <button class="btn-secondary"><i class="fa-solid fa-bookmark"></i>Save</button>
+          <button class="btn-secondary"><i class="fa-solid fa-share-nodes"></i>Share</button>
+        </div>
+      </div>
+      <div class="stack-view" id="stackView">
+        <div class="stack-header">
+          <div><h4 id="stackTitle"></h4><span>Same location · select to view</span></div>
+          <div class="pop-x" onclick="clearSel()"><i class="fa-solid fa-xmark"></i></div>
+        </div>
+        <div class="stack-list" id="stackList"></div>
+      </div>
+      <div class="asset-view" id="assetView" style="display:none;">
+        <div class="detail-view" style="display:block;">
+          <div class="detail-top">
+            <div class="detail-icon" id="assetIcon" style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;"></div>
+            <div class="detail-body">
+              <div class="detail-title" id="assetName" style="margin-bottom:4px;"></div>
+              <div class="detail-loc"><i class="fa-solid fa-location-dot" style="font-size:9px;margin-right:4px;color:#cbd5e1;"></i><span id="assetLoc"></span></div>
+            </div>
+            <div class="pop-x" onclick="clearSel()"><i class="fa-solid fa-xmark"></i></div>
+          </div>
+        </div>
+      </div>
+      <div class="pop-arrow below" id="popArrow"></div>
+    </div>
+
+    <!-- LAYERS PANEL -->
+    <aside class="sb-right" id="sb-right">
+      <div class="rp-head">
+        <span class="rp-head-title">Layers</span>
+        <div class="rp-close" onclick="toggleLayersPanel()"><i class="fa-solid fa-xmark"></i></div>
+      </div>
+      <div class="rp-body">
+        <div class="rp-section">
+          <div class="rp-s-title">Points</div>
+          <div class="rp-item" style="cursor:default;"><div class="rp-check on"></div><span class="rp-label">Current Search</span><span class="rp-badge">500</span></div>
+          <div class="rp-saved-lbl">Saved Searches</div>
+          <div class="rp-dropdown"><span>All content</span><i class="fa-solid fa-chevron-down" style="font-size:9px;color:#a8a29e;"></i></div>
+          <div class="rp-type-row">
+            <div class="rp-type-btn rp-tb-b" title="Breaking"        onclick="toggleTypeFilter('breaking',this)"><i class="fa-solid fa-bolt"></i></div>
+            <div class="rp-type-btn rp-tb-v" title="Verified"        onclick="toggleTypeFilter('verified',this)"><i class="fa-solid fa-check"></i></div>
+            <div class="rp-type-btn rp-tb-u" title="Unverified"      onclick="toggleTypeFilter('unverified',this)"><i class="fa-solid fa-circle-info"></i></div>
+            <div class="rp-type-btn rp-tb-f" title="Future"          onclick="toggleTypeFilter('future',this)"><i class="fa-solid fa-clock"></i></div>
+            <div class="rp-type-btn rp-tb-a" title="Analysis"        onclick="toggleTypeFilter('analysis',this)"><i class="fa-solid fa-file-lines"></i></div>
+            <div class="rp-type-btn rp-tb-o" title="News &amp; Social" onclick="toggleTypeFilter('news',this)"><i class="fa-solid fa-newspaper"></i></div>
+          </div>
+        </div>
+        <div class="rp-section">
+          <div class="rp-s-title">Data Layers</div>
+          <div class="rp-item" onclick="toggleMapLayer('assets',this)"><div class="rp-check on" id="check-assets"></div><span class="rp-label">Assets</span></div>
+          <div class="rp-item" onclick="toggleMapLayer('events',this)"><div class="rp-check on" id="check-events"></div><span class="rp-label">Incidents</span></div>
+        </div>
+        <div class="rp-section">
+          <div class="rp-s-title">External Layers</div>
+          <div class="rp-item" onclick="toggleCheck('us-crime')"><div class="rp-check" id="check-us-crime"></div><span class="rp-label">US Crime</span><i class="fa-solid fa-circle-info rp-info"></i></div>
+          <div class="rp-item" onclick="toggleCheck('mx-crime')"><div class="rp-check" id="check-mx-crime"></div><span class="rp-label">Mexico Crime</span><i class="fa-solid fa-circle-info rp-info"></i></div>
+          <div class="rp-item" onclick="toggleCheck('jwc')"><div class="rp-check" id="check-jwc"></div><span class="rp-label">JWC Listed Areas</span><i class="fa-solid fa-circle-info rp-info"></i></div>
+        </div>
+        <div class="rp-section">
+          <div class="rp-s-title">Overlay</div>
+          <div class="rp-item" onclick="toggleRiskRatings()"><div class="rp-check" id="check-risk"></div><span class="rp-label">Risk Ratings</span></div>
+          <div id="riskSub" style="opacity:.35;pointer-events:none;transition:opacity .2s;margin-top:8px;">
+            <div class="rp-sub-lbl">Risk Type</div>
+            <div class="rp-dropdown" style="margin-top:4px;"><span style="font-size:11px;color:#44403c;">Political Stability</span><i class="fa-solid fa-chevron-down" style="font-size:9px;color:#a8a29e;"></i></div>
+            <div class="rp-sub-lbl" style="margin-top:10px;">Color scale</div>
+            <div class="rp-risk-row" style="margin-top:6px;">
+              <div class="rp-risk-dot" style="background:#7f1d1d;" title="Critical" onclick="toggleRiskLevel(this)"></div>
+              <div class="rp-risk-dot" style="background:#dc2626;" title="High"     onclick="toggleRiskLevel(this)"></div>
+              <div class="rp-risk-dot" style="background:#f59e0b;" title="Medium"   onclick="toggleRiskLevel(this)"></div>
+              <div class="rp-risk-dot" style="background:#86efac;" title="Low"      onclick="toggleRiskLevel(this)"></div>
+              <div class="rp-risk-dot" style="background:#16a34a;" title="V.Low"    onclick="toggleRiskLevel(this)"></div>
+            </div>
+            <div class="rp-risk-lbls"><div class="rp-risk-lbl">Crit</div><div class="rp-risk-lbl">High</div><div class="rp-risk-lbl">Med</div><div class="rp-risk-lbl">Low</div><div class="rp-risk-lbl">V.Low</div></div>
+          </div>
+          <div class="rp-item" onclick="togglePulse(this)" style="margin-top:10px;"><div class="rp-check" id="check-pulse"></div><span class="rp-label">Pulse</span><span style="font-size:10px;color:#a8a29e;margin-left:auto;">live</span></div>
+        </div>
+      </div>
+    </aside>
+
+  </div><!-- /map-wrap -->
+</div><!-- /map-main -->
+</div><!-- /shell -->
+
+<script>
+/* ══════════════════════════════════════════
+   DATA
+══════════════════════════════════════════ */
+const EVENTS = [
+  {id:'e1', status:'breaking',  sev:'high',   cat:'Terrorism',            icon:'fa-bomb',  title:'IED detonated near checkpoint',            place:'Baghdad, Iraq',         time:'8 min ago',      sub:'IED attack',           related:['a1','a2'], lnglat:[44.44,33.34]},
+  {id:'e2', status:'breaking',  sev:'high',   cat:'Conflict and military',icon:'fa-crosshairs',   title:'Artillery fire on residential district',    place:'Sumy Oblast, Ukraine',  time:'19 min ago',     sub:'Cross-border shelling',related:['a3','a4'], lnglat:[34.80,50.90]},
+  {id:'e3', status:'breaking',  sev:'medium', cat:'Maritime',             icon:'fa-anchor',        title:'Tanker boarded — crew unaccounted',         place:'Red Sea, Hudaydah',     time:'34 min ago',     sub:'Vessel boarding',      related:['a5','a6'], lnglat:[42.90,14.80]},
+  {id:'e4', status:'verified',  sev:'medium', cat:'Disaster',             icon:'fa-hurricane',     title:'Flash flood — emergency declared',          place:'Benghazi, Libya',       time:'3h ago',         sub:'Flash flood',          related:['a7'],      lnglat:[20.07,32.11]},
+  {id:'e5', status:'verified',  sev:'medium', cat:'Unrest',               icon:'fa-people-group',      title:'Demonstration — Taksim Square',             place:'Istanbul, Türkiye',     time:'2h ago',         sub:'Protests',             related:['a4','a8'], lnglat:[28.98,41.01]},
+  {id:'e6', status:'verified',  sev:'high',   cat:'Crime',                icon:'fa-shield-halved', title:'Kidnap for ransom — expat targeted',        place:'Lagos, Nigeria',        time:'5h ago',         sub:'Kidnapping',           related:['a9'],      lnglat:[3.38,6.45]},
+  {id:'e7', status:'verified',  sev:'medium', cat:'Official actions',     icon:'fa-gavel',         title:'Travel advisory issued — Level 3',          place:'Khartoum, Sudan',       time:'6h ago',         sub:'Travel advisory',      related:['a7','a9'], lnglat:[32.53,15.55]},
+  {id:'e8', status:'unverified',sev:'medium', cat:'Terrorism',            icon:'fa-bomb',  title:'Explosion reported — unconfirmed',          place:'Beirut, Lebanon',       time:'41 min ago',     sub:'Attack',               related:['a2','a10'],lnglat:[35.50,33.89]},
+  {id:'e9', status:'unverified',sev:'high',   cat:'Conflict and military',icon:'fa-crosshairs',   title:'Troop movement — unconfirmed',              place:'Armenia–Azerbaijan',    time:'1h ago',         sub:'Military activity',    related:['a3'],      lnglat:[46.00,40.30]},
+  {id:'e10',status:'future',    sev:'medium', cat:'Political risk',       icon:'fa-landmark',      title:'General election — heightened security',    place:'Nairobi, Kenya',        time:'Sat 07:00',      sub:'Election',             related:['a9'],      lnglat:[36.820,-1.290]},
+  {id:'e11',status:'future',    sev:'medium', cat:'Unrest',               icon:'fa-people-group',      title:'Planned protest — city centre',             place:'Nairobi, Kenya',        time:'Tomorrow 10:00', sub:'Protest',              related:['a10'],     lnglat:[36.820,-1.290]},
+  {id:'e15',status:'breaking',  sev:'high',   cat:'Crime',                icon:'fa-shield-halved', title:'Grenade attack near bus terminal',          place:'Nairobi, Kenya',        time:'1h ago',         sub:'Attack',               related:['a9'],      lnglat:[36.820,-1.290]},
+  {id:'e16',status:'verified',  sev:'medium', cat:'Unrest',               icon:'fa-people-group',      title:'Protests outside parliament building',      place:'Baghdad, Iraq',         time:'3h ago',         sub:'Protests',             related:['a1'],      lnglat:[44.440,33.340]},
+  {id:'e17',status:'future',    sev:'medium', cat:'Official actions',     icon:'fa-gavel',         title:'Emergency session — national security',     place:'Baghdad, Iraq',         time:'Tomorrow 09:00', sub:'Official',             related:['a1'],      lnglat:[44.440,33.340]},
+  {id:'e18',status:'verified',  sev:'medium', cat:'Disaster',             icon:'fa-hurricane',     title:'Flash flooding cuts Addis–Djibouti highway',place:'Addis Ababa, Ethiopia', time:'2h ago',         sub:'Disaster',             related:['a9'],      lnglat:[38.74,9.01]},
+  {id:'e19',status:'breaking',  sev:'high',   cat:'Terrorism',            icon:'fa-bomb',  title:'Al-Shabaab ambush on aid convoy',           place:'Mandera, Kenya',        time:'22 min ago',     sub:'Attack',               related:['a9'],      lnglat:[41.85,3.94]},
+  {id:'e20',status:'unverified',sev:'high',   cat:'Conflict and military',icon:'fa-crosshairs',   title:'Airstrikes reported — Mogadishu outskirts', place:'Mogadishu, Somalia',    time:'15 min ago',     sub:'Airstrike',            related:['a9'],      lnglat:[45.34,2.05]},
+  {id:'e21',status:'verified',  sev:'high',   cat:'Political risk',       icon:'fa-landmark',      title:'Coalition government collapses',            place:'Dire Dawa, Ethiopia',   time:'4h ago',         sub:'Politics',             related:['a9'],      lnglat:[41.87,9.59]},
+  {id:'e22',status:'unverified',sev:'medium', cat:'Crime',                icon:'fa-shield-halved', title:'Armed robbery at humanitarian depot',       place:'Jigjiga, Ethiopia',     time:'6h ago',         sub:'Crime',                related:['a9'],      lnglat:[42.78,9.35]},
+  {id:'e23',status:'verified',  sev:'high',   cat:'Maritime',             icon:'fa-anchor',        title:'Vessel seized — Gulf of Aden',              place:'Berbera, Somaliland',   time:'3h ago',         sub:'Piracy',               related:['a9'],      lnglat:[44.99,10.44]},
+  {id:'e12',status:'verified',  sev:'high',   cat:'Crime',                icon:'fa-shield-halved', title:'Armed robbery — diplomatic district',       place:'Amman, Jordan',         time:'2h ago',         sub:'Crime',                related:['a2'],      lnglat:[35.93,31.95]},
+  {id:'e13',status:'breaking',  sev:'high',   cat:'Unrest',               icon:'fa-people-group',      title:'Clashes erupt near parliament',             place:'Tel Aviv, Israel',      time:'12 min ago',     sub:'Unrest',               related:['a2'],      lnglat:[34.78,32.08]},
+  {id:'e14',status:'verified',  sev:'medium', cat:'Terrorism',            icon:'fa-bomb',  title:'Vehicle ramming — border crossing',         place:'Damascus, Syria',       time:'4h ago',         sub:'Attack',               related:['a2'],      lnglat:[36.29,33.51]},
+  /* ── Europe ── */
+  {id:'e30',status:'breaking',  sev:'high',   cat:'Terrorism',            icon:'fa-bomb',  title:'Stabbing attack in metro station',          place:'Paris, France',         time:'6 min ago',      sub:'Attack',               related:[],          lnglat:[2.35,48.85]},
+  {id:'e31',status:'verified',  sev:'medium', cat:'Unrest',               icon:'fa-people-group',      title:'Far-right protests turn violent',           place:'Berlin, Germany',       time:'3h ago',         sub:'Protest',              related:[],          lnglat:[13.40,52.52]},
+  {id:'e32',status:'unverified',sev:'medium', cat:'Terrorism',            icon:'fa-bomb',  title:'Suspicious device found at station',        place:'Madrid, Spain',         time:'55 min ago',     sub:'IED threat',           related:[],          lnglat:[-3.70,40.41]},
+  {id:'e33',status:'verified',  sev:'high',   cat:'Conflict and military',icon:'fa-crosshairs',   title:'Drone strike intercept — eastern border',   place:'Warsaw, Poland',        time:'1h ago',         sub:'Air defence',          related:['a3'],      lnglat:[21.01,52.23]},
+  {id:'e34',status:'future',    sev:'medium', cat:'Political risk',       icon:'fa-landmark',      title:'Snap elections called — security alert',    place:'Rome, Italy',           time:'Fri 09:00',      sub:'Election',             related:[],          lnglat:[12.50,41.90]},
+  {id:'e35',status:'verified',  sev:'medium', cat:'Unrest',               icon:'fa-people-group',      title:'General strike — transport disrupted',      place:'Athens, Greece',        time:'4h ago',         sub:'Strike',               related:[],          lnglat:[23.73,37.98]},
+  {id:'e36',status:'breaking',  sev:'high',   cat:'Conflict and military',icon:'fa-crosshairs',   title:'Missile barrage targets energy grid',       place:'Kharkiv, Ukraine',      time:'9 min ago',      sub:'Strike',               related:['a3'],      lnglat:[36.25,49.99]},
+  {id:'e37',status:'verified',  sev:'medium', cat:'Crime',                icon:'fa-shield-halved', title:'Organized crime crackdown — 40 arrested',  place:'Naples, Italy',         time:'5h ago',         sub:'Law enforcement',      related:[],          lnglat:[14.27,40.85]},
+  /* ── Middle East / Central Asia ── */
+  {id:'e38',status:'breaking',  sev:'high',   cat:'Conflict and military',icon:'fa-crosshairs',   title:'Airstrikes hit port infrastructure',        place:'Sanaa, Yemen',          time:'18 min ago',     sub:'Airstrike',            related:['a5'],      lnglat:[44.20,15.35]},
+  {id:'e39',status:'verified',  sev:'high',   cat:'Terrorism',            icon:'fa-bomb',  title:'Suicide bombing near government complex',   place:'Kabul, Afghanistan',    time:'2h ago',         sub:'Bombing',              related:[],          lnglat:[69.17,34.52]},
+  {id:'e40',status:'unverified',sev:'high',   cat:'Conflict and military',icon:'fa-crosshairs',   title:'Cross-border shelling — civilians fled',    place:'Kandahar, Afghanistan', time:'3h ago',         sub:'Shelling',             related:[],          lnglat:[65.71,31.61]},
+  {id:'e41',status:'verified',  sev:'medium', cat:'Unrest',               icon:'fa-people-group',      title:'Anti-government protests — thousands march',place:'Tehran, Iran',          time:'6h ago',         sub:'Protest',              related:[],          lnglat:[51.39,35.69]},
+  {id:'e42',status:'future',    sev:'medium', cat:'Official actions',     icon:'fa-gavel',         title:'OPEC+ emergency meeting — production cuts', place:'Riyadh, Saudi Arabia',  time:'Tomorrow 14:00', sub:'Policy',               related:[],          lnglat:[46.68,24.69]},
+  {id:'e43',status:'unverified',sev:'medium', cat:'Terrorism',            icon:'fa-bomb',  title:'Bombing near bazaar — casualties reported', place:'Quetta, Pakistan',      time:'1h ago',         sub:'Bombing',              related:[],          lnglat:[66.99,30.18]},
+  {id:'e44',status:'verified',  sev:'high',   cat:'Crime',                icon:'fa-shield-halved', title:'Kidnapping of aid workers confirmed',       place:'Peshawar, Pakistan',    time:'4h ago',         sub:'Kidnapping',           related:[],          lnglat:[71.57,34.01]},
+  /* ── South & Southeast Asia ── */
+  {id:'e45',status:'verified',  sev:'medium', cat:'Disaster',             icon:'fa-hurricane',     title:'Cyclone landfall — coastal evacuation',     place:'Dhaka, Bangladesh',     time:'2h ago',         sub:'Cyclone',              related:[],          lnglat:[90.41,23.81]},
+  {id:'e46',status:'breaking',  sev:'high',   cat:'Unrest',               icon:'fa-people-group',      title:'Clashes between protesters and police',     place:'Dhaka, Bangladesh',     time:'28 min ago',     sub:'Unrest',               related:[],          lnglat:[90.40,23.72]},
+  {id:'e47',status:'verified',  sev:'medium', cat:'Political risk',       icon:'fa-landmark',      title:'Opposition leader arrested — protests erupt',place:'Yangon, Myanmar',      time:'5h ago',         sub:'Politics',             related:[],          lnglat:[96.16,16.85]},
+  {id:'e48',status:'unverified',sev:'high',   cat:'Conflict and military',icon:'fa-crosshairs',   title:'Military convoy ambushed on highway',       place:'Mandalay, Myanmar',     time:'3h ago',         sub:'Ambush',               related:[],          lnglat:[96.08,21.97]},
+  {id:'e49',status:'verified',  sev:'medium', cat:'Terrorism',            icon:'fa-bomb',  title:'Bomb disposal at shopping district',        place:'Manila, Philippines',   time:'6h ago',         sub:'IED',                  related:[],          lnglat:[120.98,14.60]},
+  /* ── Africa ── */
+  {id:'e50',status:'breaking',  sev:'high',   cat:'Conflict and military',icon:'fa-crosshairs',   title:'Rebel advance on provincial capital',       place:'Goma, DR Congo',        time:'14 min ago',     sub:'Armed conflict',       related:[],          lnglat:[29.24,-1.68]},
+  {id:'e51',status:'verified',  sev:'high',   cat:'Terrorism',            icon:'fa-bomb',  title:'JNIM attack on UN peacekeepers',            place:'Bamako, Mali',          time:'3h ago',         sub:'Attack',               related:[],          lnglat:[-8.00,12.65]},
+  {id:'e52',status:'unverified',sev:'medium', cat:'Unrest',               icon:'fa-people-group',      title:'Post-election violence — roads blocked',    place:'Abidjan, Côte d\'Ivoire',time:'4h ago',        sub:'Unrest',               related:[],          lnglat:[-4.03,5.35]},
+  {id:'e53',status:'verified',  sev:'medium', cat:'Political risk',       icon:'fa-landmark',      title:'Coup attempt reported — military on streets',place:'N\'Djamena, Chad',     time:'2h ago',         sub:'Coup',                 related:[],          lnglat:[15.05,12.11]},
+  {id:'e54',status:'verified',  sev:'high',   cat:'Conflict and military',icon:'fa-crosshairs',   title:'Air raid on rebel-held town',               place:'Khartoum North, Sudan', time:'5h ago',         sub:'Airstrike',            related:[],          lnglat:[32.56,15.63]},
+  {id:'e55',status:'breaking',  sev:'high',   cat:'Terrorism',            icon:'fa-bomb',  title:'IED hits military vehicle — 4 dead',        place:'Ouagadougou, Burkina',   time:'32 min ago',     sub:'IED',                  related:[],          lnglat:[-1.52,12.36]},
+  /* ── Americas ── */
+  {id:'e56',status:'verified',  sev:'high',   cat:'Crime',                icon:'fa-shield-halved', title:'Cartel roadblock — highway shutdown',       place:'Culiacán, Mexico',      time:'3h ago',         sub:'Cartel',               related:[],          lnglat:[-107.39,24.80]},
+  {id:'e57',status:'unverified',sev:'medium', cat:'Unrest',               icon:'fa-people-group',      title:'Riots after fuel price hike',               place:'Caracas, Venezuela',    time:'5h ago',         sub:'Riot',                 related:[],          lnglat:[-66.90,10.49]},
+  {id:'e58',status:'verified',  sev:'medium', cat:'Crime',                icon:'fa-shield-halved', title:'Gang violence — 12 killed overnight',       place:'Port-au-Prince, Haiti', time:'4h ago',         sub:'Gang violence',        related:[],          lnglat:[-72.34,18.54]},
+];
+const ASSETS = [
+  {label:'Kyiv Crisis Team',     icon:'fa-person-walking',  color:'#dc2626',lnglat:[30.52,50.45]},
+  {label:'Istanbul Office',      icon:'fa-building-columns',color:'#0891b2',lnglat:[28.95,41.05]},
+  {label:'Hormuz Logistics Hub', icon:'fa-anchor',          color:'#1e40af',lnglat:[56.50,26.50]},
+  {label:'Algiers Facility',     icon:'fa-industry',        color:'#0f766e',lnglat:[3.06,36.74]},
+  {label:'Nairobi Field Team',   icon:'fa-users',           color:'#d97706',lnglat:[36.92,-1.35]},
+  {label:'Beirut Embassy',       icon:'fa-flag',            color:'#7c3aed',lnglat:[35.48,33.93]},
+  {label:'Cairo Media Office',   icon:'fa-satellite-dish',  color:'#475569',lnglat:[31.32,30.10]},
+  {label:'London HQ',            icon:'fa-building',        color:'#334155',lnglat:[-0.12,51.50]},
+  {label:'Frankfurt Data Center',icon:'fa-server',          color:'#6366f1',lnglat:[8.68,50.11]},
+  {label:'Johannesburg Office',  icon:'fa-building-user',   color:'#0d9488',lnglat:[28.05,-26.20]},
+];
+const INTEL = [
+  {id:'a1', type:'analysis',title:'Iraq: threat environment — week 18',          source:'Seerist Analyst',lnglat:[44.70,33.20]},
+  {id:'a2', type:'analysis',title:'Levant: escalation indicators',               source:'Seerist Analyst',lnglat:[35.80,34.00]},
+  {id:'a3', type:'analysis',title:'Ukraine frontline stability — week 18',       source:'Seerist Analyst',lnglat:[34.50,51.10]},
+  {id:'a4', type:'news',    icon:'fa-crosshairs',  title:'NATO emergency session on Ukraine aid',       source:'Reuters',        lnglat:[28.60,50.60]},
+  {id:'a5', type:'analysis',title:'Red Sea shipping risk — May 2026',            source:'Seerist Analyst',lnglat:[43.40,14.40]},
+  {id:'a6', type:'news',    icon:'fa-anchor',       title:'Houthi threat to commercial vessels',         source:'AP',             lnglat:[42.40,15.10]},
+  {id:'a7', type:'analysis',title:'North Africa stability overview — May',       source:'Seerist Analyst',lnglat:[19.80,31.80]},
+  {id:'a8', type:'news',    icon:'fa-people-group',     title:'Protests spread across Turkish cities',       source:'BBC',            lnglat:[29.20,41.40]},
+  {id:'a9', type:'analysis',title:'Sub-Saharan Africa risk brief — Q2',          source:'Seerist Analyst',lnglat:[36.60,-1.55]},
+  {id:'a10',type:'news',    icon:'fa-people-group',     title:'Egypt: opposition groups plan demonstrations',source:'Al Jazeera',     lnglat:[31.00,29.80]},
+];
+const INTEL_MAP    = Object.fromEntries(INTEL.map(i=>[i.id,i]));
+const STATUS_LABEL = {breaking:'Breaking',verified:'Verified',unverified:'Unverified',future:'Future Event'};
+
+/* ══════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════ */
+const locKey    = ev => ev.lnglat[0].toFixed(3)+','+ev.lnglat[1].toFixed(3);
+const locGroups = {};
+EVENTS.forEach(ev=>{ const k=locKey(ev);(locGroups[k]=locGroups[k]||[]).push(ev); });
+
+/* Logical pins for clustering — all statuses including breaking. */
+const PINS = [];
+{
+  const seen = new Set();
+  EVENTS.forEach(ev=>{
+    const lk = locKey(ev);
+    if(locGroups[lk].length>1){
+      if(!seen.has(lk)){ seen.add(lk); PINS.push({kind:'group',lk,grp:locGroups[lk],lnglat:ev.lnglat}); }
+    } else {
+      PINS.push({kind:'event',ev,lnglat:ev.lnglat});
+    }
+  });
+}
+
+/* ══════════════════════════════════════════
+   STATE
+══════════════════════════════════════════ */
+let selectedEvent = null;
+let selectedGroup = null;
+const layerState  = {assets:true,events:true};
+const allAssetEls = [];
+const ghostMarkerEls = new Map();   // lk → sameloc-wrap el
+const clusterEls     = [];          // {el, lnglat, sz} — plain divs, NOT maplibre markers
+const typeFilters    = {breaking:true,verified:true,unverified:true,future:true,analysis:true,news:true};
+
+/* ══════════════════════════════════════════
+   OVERLAY POSITIONING
+   All event/intel markers are plain <div>s
+   in #marker-overlay. We track their lnglat
+   and update left/top on every map 'move'.
+══════════════════════════════════════════ */
+const markerOverlay = document.getElementById('marker-overlay');
+const clusterLayer  = document.getElementById('cluster-layer');
+
+/* Registry: el → {lnglat, w, h} */
+const markerReg = new Map();
+
+function regMarker(el, lnglat, w, h){
+  el.style.position = 'absolute';
+  markerReg.set(el, {lnglat, w, h});
+}
+
+function placeMarker(el){
+  const r  = markerReg.get(el); if(!r) return;
+  const pt = map.project(r.lnglat);
+  el.style.left = (pt.x - r.w/2)+'px';
+  el.style.top  = (pt.y - r.h/2)+'px';
+}
+
+/* ══════════════════════════════════════════
+   MAP
+══════════════════════════════════════════ */
+const map = new maplibregl.Map({
+  container:'map',
+  style:'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+  center:[22,25], zoom:2.5, attributionControl:false,
+});
+map.addControl(new maplibregl.AttributionControl({compact:true}),'bottom-right');
+map.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-left');
+
+map.on('load', ()=>{
+
+  /* ── Event markers ── */
+  let breakingIdx = 0;
+  EVENTS.forEach(ev=>{
+    const el = document.createElement('div');
+    el.className = `event-marker st-${ev.status} sev-${ev.sev||'none'}`;
+    el.innerHTML = `<i class="fa-solid ${ev.icon}"></i>`;
+    if(ev.status==='breaking'){
+      el.style.setProperty('--pulse-delay', `${(breakingIdx++ * 0.28).toFixed(2)}s`);
+    }
+    el.style.display='none';
+    el.addEventListener('click',e=>{e.stopPropagation();selectEvent(ev);});
+    markerOverlay.appendChild(el);
+    regMarker(el, ev.lnglat, 30, 30);
+    ev.el = el;
+  });
+
+  /* ── Same-location stacks — double-border circle, all statuses ── */
+  Object.values(locGroups).filter(g=>g.length>1).forEach(grp=>{
+    const wrap  = document.createElement('div'); wrap.className='sameloc-wrap';
+    const front = document.createElement('div'); front.className='sameloc-front';
+    front.textContent = grp.length;
+    wrap.appendChild(front);
+    wrap.style.display='none';
+    wrap.addEventListener('click',e=>{e.stopPropagation();selectGroup(grp);});
+    markerOverlay.appendChild(wrap);
+    regMarker(wrap, grp[0].lnglat, 34, 34);
+    ghostMarkerEls.set(locKey(grp[0]), wrap);
+  });
+
+  /* ── Intel markers — squircle; analysis=green (Seerist), news=slate (third-party) ── */
+  INTEL.forEach(it=>{
+    const el = document.createElement('div');
+    el.className = `intel-marker intel-${it.type}`;
+    el.innerHTML = `<i class="fa-solid ${it.type==='analysis'?'fa-file-lines':(it.icon||'fa-newspaper')}"></i>`;
+    const tip = document.createElement('div'); tip.className='intel-tip';
+    tip.textContent = it.title;
+    el.appendChild(tip);
+    el.style.display='none';
+    markerOverlay.appendChild(el);
+    regMarker(el, it.lnglat, 34, 34);
+    it.el = el;
+  });
+
+  /* ── Asset markers — overlay divs (same system as events, zero drift) ── */
+  ASSETS.forEach(a=>{
+    const el = document.createElement('div');
+    el.className='asset-marker';
+    el.style.background=a.color;
+    el.innerHTML=`<i class="fa-solid ${a.icon}"></i><div class="asset-tip">${a.label}</div>`;
+    el.addEventListener('click',e=>{e.stopPropagation();selectAsset(a);});
+    markerOverlay.appendChild(el);
+    regMarker(el, a.lnglat, 32, 32);
+    placeMarker(el);
+    el.style.display='flex';
+    a.el=el; allAssetEls.push(el);
+  });
+
+  buildAssetsLegend();
+  refresh();
+});
+
+/* Reposition all overlay markers on every map move (fires during zoom animation too) */
+map.on('move', ()=>{
+  markerReg.forEach((r,el)=>{ if(el.style.display!=='none') placeMarker(el); });
+  clusterEls.forEach(c=>{
+    const pt=map.project(c.lnglat);
+    c.el.style.left=(pt.x-c.sz/2)+'px';
+    c.el.style.top =(pt.y-c.sz/2)+'px';
+  });
+  if(selectedEvent){ positionPopover(selectedEvent.lnglat); drawConnectors(selectedEvent); }
+  if(selectedGroup)  positionPopover(selectedGroup[0].lnglat);
+});
+
+map.on('zoomend', refresh);
+
+/* ══════════════════════════════════════════
+   CLUSTERING
+══════════════════════════════════════════ */
+/* Geographic cell size in degrees per zoom tier — pan-invariant clustering */
+function cellDeg(){
+  const z=map.getZoom();
+  if(z<1.5) return 999;
+  if(z<2.5) return 22;
+  if(z<3)   return 14;
+  if(z<4)   return 7;
+  if(z<5)   return 3.5;
+  if(z<6)   return 1.8;
+  if(z<7)   return 0.9;
+  return 0;
+}
+
+function refresh(){
+  const zoom = map.getZoom();
+
+  /* 1 · hide all event + group markers */
+  EVENTS.forEach(ev=>{ if(ev.el) ev.el.style.display='none'; });
+  ghostMarkerEls.forEach(el=>{ el.style.display='none'; });
+
+  /* 2 · remove old cluster divs */
+  while(clusterEls.length){ const c=clusterEls.pop(); c.el.remove(); }
+
+  /* 3 · intel markers — show at zoom ≥ 2 */
+  INTEL.forEach(it=>{
+    const t = it.type==='analysis' ? 'analysis' : 'news';
+    if(it.el && typeFilters[t] && zoom>=2){
+      placeMarker(it.el); it.el.style.display='flex';
+    }
+  });
+
+  /* 4 · cluster by geographic grid — stable regardless of pan position */
+  const cell = cellDeg();
+  if(cell===0){ PINS.forEach(p=>showPin(p)); return; }
+
+  const cells={};
+  PINS.forEach(p=>{
+    const key=`${Math.floor(p.lnglat[0]/cell)},${Math.floor(p.lnglat[1]/cell)}`;
+    (cells[key]=cells[key]||[]).push(p);
+  });
+
+  Object.values(cells).forEach(members=>{
+    if(members.length===1){ showPin(members[0]); return; }
+    let count=0, maxSev='none', sumLng=0, sumLat=0;
+    members.forEach(p=>{
+      const evts=p.kind==='group'?p.grp:[p.ev];
+      count+=evts.length;
+      sumLng+=p.lnglat[0]; sumLat+=p.lnglat[1];
+      evts.forEach(ev=>{
+        if(ev.sev==='high') maxSev='high';
+        else if(ev.sev==='medium'&&maxSev!=='high') maxSev='medium';
+      });
+    });
+    const centroid=[sumLng/members.length, sumLat/members.length];
+    const sz=count>15?46:count>7?40:34;
+    const el=makeClusterEl(centroid,count,sz);
+    clusterLayer.appendChild(el);
+    const pt=map.project(centroid);
+    el.style.left=(pt.x-sz/2)+'px';
+    el.style.top =(pt.y-sz/2)+'px';
+    clusterEls.push({el,lnglat:centroid,sz});
+  });
+}
+
+function showPin(p){
+  if(p.kind==='event'){
+    if(!p.ev.el||!typeFilters[p.ev.status]) return;
+    placeMarker(p.ev.el);
+    p.ev.el.style.display='flex';
+  } else if(p.kind==='group'){
+    const el=ghostMarkerEls.get(p.lk); if(!el) return;
+    placeMarker(el);
+    el.style.display='block';
+  }
+}
+
+function makeClusterEl(lnglat, count, sz){
+  const el=document.createElement('div');
+  Object.assign(el.style,{
+    position:'absolute', width:sz+'px', height:sz+'px', borderRadius:'50%',
+    background:'#fff', border:'2px solid #94a3b8',
+    boxShadow:'0 2px 10px rgba(0,0,0,.18)',
+    display:'flex', alignItems:'center', justifyContent:'center',
+    fontFamily:"'Inter',sans-serif", fontSize:(sz>40?14:12)+'px', fontWeight:'700',
+    color:'#334155', cursor:'pointer', userSelect:'none',
+    pointerEvents:'auto', overflow:'visible', transition:'transform .15s',
+  });
+  const span=document.createElement('span');
+  span.textContent=count>99?'99+':String(count);
+  el.appendChild(span);
+  const tip=document.createElement('div'); tip.className='cluster-tip';
+  tip.innerHTML=`<div class="ct-title">${count} in area</div>`;
+  el.appendChild(tip);
+  el.addEventListener('mouseenter',()=>{ el.style.transform='scale(1.08)'; tip.style.opacity='1'; });
+  el.addEventListener('mouseleave',()=>{ el.style.transform='';            tip.style.opacity='0'; });
+  el.addEventListener('click',e=>{ e.stopPropagation(); map.easeTo({center:lnglat,zoom:map.getZoom()+2.5}); });
+  return el;
+}
+
+/* ══════════════════════════════════════════
+   CONNECTORS
+══════════════════════════════════════════ */
+function drawConnectors(ev){
+  const svg=document.getElementById('connectors'); svg.innerHTML='';
+  INTEL.forEach(i=>{ if(i.el) i.el.classList.remove('lit'); });
+  const p1=map.project(ev.lnglat);
+  ev.related.forEach(id=>{
+    const it=INTEL_MAP[id];
+    if(!it||!it.el||it.el.classList.contains('hidden')) return;
+    it.el.classList.add('lit');
+    const p2=map.project(it.lnglat);
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',p1.x); line.setAttribute('y1',p1.y);
+    line.setAttribute('x2',p2.x); line.setAttribute('y2',p2.y);
+    line.setAttribute('stroke','rgba(16,185,129,.45)');
+    line.setAttribute('stroke-width','1.5');
+    line.setAttribute('stroke-dasharray','4 3');
+    svg.appendChild(line);
+  });
+}
+
+/* ══════════════════════════════════════════
+   POPOVER
+══════════════════════════════════════════ */
+const popover  = document.getElementById('popover');
+const popArrow = document.getElementById('popArrow');
+
+function positionPopover(lnglat){
+  const wrap=document.querySelector('.map-wrap');
+  const pt=map.project(lnglat);
+  const pw=340;
+  let left=pt.x-pw/2;
+  left=Math.max(8,Math.min(left,wrap.clientWidth-pw-8));
+  popover.style.left  =left+'px';
+  popover.style.bottom=(wrap.clientHeight-pt.y+16)+'px';
+  popover.style.top   ='auto';
+  const ax=Math.max(24,Math.min(pt.x-left,pw-24));
+  popArrow.style.left=ax+'px';
+  popArrow.style.transform='translateX(-50%)';
+}
+
+let selectedAsset = null;
+
+function clearSel(){
+  if(selectedEvent) selectedEvent.el?.classList.remove('selected');
+  if(selectedAsset){ selectedAsset.el?.classList.remove('selected'); selectedAsset=null; }
+  INTEL.forEach(i=>{ if(i.el) i.el.classList.remove('lit'); });
+  document.getElementById('connectors').innerHTML='';
+  document.getElementById('assetView').style.display='none';
+  document.getElementById('detailView').style.display='';
+  popover.classList.remove('open');
+  document.querySelectorAll('.ev-row.active').forEach(r=>r.classList.remove('active'));
+  selectedEvent=null; selectedGroup=null;
+}
+
+function selectAsset(a){
+  if(selectedAsset===a){clearSel();return;}
+  clearSel();
+  selectedAsset=a;
+  a.el?.classList.add('selected');
+  document.getElementById('detailView').style.display='none';
+  document.getElementById('stackView').classList.remove('active');
+  document.getElementById('assetView').style.display='block';
+  const icon=document.getElementById('assetIcon');
+  icon.innerHTML=`<i class="fa-solid ${a.icon}"></i>`;
+  icon.style.background=a.color+'22';
+  icon.style.border=`2px solid ${a.color}44`;
+  icon.style.color=a.color;
+  document.getElementById('assetName').textContent=a.label;
+  document.getElementById('assetLoc').textContent=`${Math.abs(a.lnglat[1]).toFixed(2)}°${a.lnglat[1]>=0?'N':'S'}, ${Math.abs(a.lnglat[0]).toFixed(2)}°${a.lnglat[0]>=0?'E':'W'}`;
+  positionPopover(a.lnglat);
+  popover.classList.add('open');
+}
+
+function showDetailView(ev){
+  document.getElementById('detailView').style.display='';
+  document.getElementById('stackView').classList.remove('active');
+  const SEV_COLOR={high:'#dc2626',medium:'#ea580c',none:'#78716c'};
+  const sev=ev.sev||'none';
+  const icon=document.getElementById('detailIcon');
+  icon.innerHTML=`<i class="fa-solid ${ev.icon}"></i>`;
+  icon.style.color=SEV_COLOR[sev];
+  icon.style.borderColor=SEV_COLOR[sev]+'44';
+  document.getElementById('detailType').textContent =STATUS_LABEL[ev.status]||ev.status;
+  document.getElementById('detailDate').textContent =ev.time;
+  document.getElementById('detailLoc').textContent  =ev.place;
+  document.getElementById('detailTitle').textContent=ev.title;
+  document.getElementById('detailSub').textContent  =ev.cat+(ev.sub?' · '+ev.sub:'');
+}
+
+function selectEvent(ev){
+  if(selectedEvent===ev){clearSel();return;}
+  clearSel(); selectedEvent=ev;
+  ev.el?.classList.add('selected');
+  const row=document.querySelector(`.ev-row[data-eid="${ev.id}"]`);
+  if(row){row.classList.add('active');row.scrollIntoView({block:'nearest',behavior:'smooth'});}
+  showDetailView(ev);
+  positionPopover(ev.lnglat);
+  popover.classList.add('open');
+  drawConnectors(ev);
+}
+
+function selectGroup(grp){
+  clearSel(); selectedGroup=grp;
+  document.getElementById('detailView').style.display='none';
+  const sv=document.getElementById('stackView'); sv.classList.add('active');
+  document.getElementById('stackTitle').textContent=grp[0].place;
+  document.getElementById('stackList').innerHTML=grp.map(ev=>`
+    <div class="stack-item" onclick="selectFromStack('${ev.id}')">
+      <div class="stack-item-icon sev-${ev.sev||'none'}" style="border-color:currentColor;color:inherit;">
+        <i class="fa-solid ${ev.icon}" style="font-size:11px;"></i>
+      </div>
+      <div class="stack-item-body">
+        <div class="stack-item-title">${ev.title}</div>
+        <div class="stack-item-meta">${STATUS_LABEL[ev.status]} · ${ev.time}</div>
+      </div>
+      <i class="fa-solid fa-chevron-right stack-item-arrow"></i>
+    </div>
+  `).join('');
+  positionPopover(grp[0].lnglat);
+  popover.classList.add('open');
+}
+
+function selectFromStack(eid){
+  const ev=EVENTS.find(e=>e.id===eid); if(!ev) return;
+  clearSel(); selectedEvent=ev;
+  showDetailView(ev);
+  positionPopover(ev.lnglat);
+  popover.classList.add('open');
+  drawConnectors(ev);
+}
+
+map.on('click',e=>{ if(!e.originalEvent.target.closest('.popover')) clearSel(); });
+
+/* ══════════════════════════════════════════
+   LAYER / FILTER TOGGLES
+══════════════════════════════════════════ */
+function toggleMapLayer(type){
+  layerState[type]=!layerState[type];
+  document.getElementById(`check-${type}`)?.classList.toggle('on',layerState[type]);
+  if(type==='events'){
+    EVENTS.forEach(ev=>{ if(ev.el) ev.el.classList.toggle('hidden',!layerState[type]); });
+    ghostMarkerEls.forEach(el=>el.classList.toggle('hidden',!layerState[type]));
+  }
+  if(type==='assets') allAssetEls.forEach(el=>{ el.style.display=layerState[type]?'flex':'none'; });
+}
+function toggleCheck(id){ document.getElementById('check-'+id)?.classList.toggle('on'); }
+function toggleTypeFilter(type,btn){
+  typeFilters[type]=!typeFilters[type];
+  btn.classList.toggle('off',!typeFilters[type]);
+  refresh();
+}
+function toggleRiskRatings(){
+  const check=document.getElementById('check-risk');
+  const sub=document.getElementById('riskSub');
+  const on=check.classList.toggle('on');
+  check.innerHTML=on?'<i class="fa-solid fa-check"></i>':'';
+  sub.style.opacity=on?'1':'0.35'; sub.style.pointerEvents=on?'auto':'none';
+}
+function toggleRiskLevel(dot){ dot.classList.toggle('off'); }
+function togglePulse(item){
+  const check=document.getElementById('check-pulse');
+  const on=check.classList.toggle('on');
+  check.innerHTML=on?'<i class="fa-solid fa-check"></i>':'';
+}
+
+/* ══════════════════════════════════════════
+   NAV / PANELS
+══════════════════════════════════════════ */
+const NAV_LABELS={latest:'Latest',search:'Search',map:'Map',monitor:'Monitor',alerts:'Alerts',askanna:'AskAnna',profiles:'Country Profiles',folders:'Content Folders',reports:'Reports'};
+function openPanel(item,el){
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  if(el) el.classList.add('active');
+  const lp=document.getElementById('list-panel');
+  if(item==='map'){lp.classList.remove('open');return;}
+  document.getElementById('lp-title').textContent=NAV_LABELS[item]||item;
+  lp.classList.add('open');
+}
+function closePanel(){
+  document.getElementById('list-panel').classList.remove('open');
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  document.querySelector('[onclick*="\'map\'"]').classList.add('active');
+}
+function toggleLayersPanel(){
+  const panel=document.getElementById('sb-right');
+  const btn=document.getElementById('layersBtn');
+  const open=panel.classList.toggle('open');
+  btn.classList.toggle('active',open);
+}
+
+/* ══════════════════════════════════════════
+   LEGEND
+══════════════════════════════════════════ */
+function toggleLegend(){
+  const c=document.getElementById('leg-content');
+  const ch=document.getElementById('leg-chevron');
+  const open=c.style.display!=='none';
+  c.style.display=open?'none':''; ch.style.transform=open?'rotate(-90deg)':'';
+}
+function toggleAssetsLeg(){
+  const list=document.getElementById('assets-leg-list');
+  const ch=document.getElementById('assets-leg-chevron');
+  const open=list.style.display!=='none';
+  list.style.display=open?'none':''; ch.style.transform=open?'rotate(-90deg)':'';
+}
+function toggleCatLeg(){
+  const list=document.getElementById('cat-leg-list');
+  const ch=document.getElementById('cat-leg-chevron');
+  const open=list.style.display!=='none';
+  list.style.display=open?'none':''; ch.style.transform=open?'rotate(-90deg)':'';
+}
+function buildAssetsLegend(){
+  const list=document.getElementById('assets-leg-list'); if(!list) return;
+  document.getElementById('leg-assets-count').textContent=ASSETS.length;
+  list.innerHTML=ASSETS.map(a=>`
+    <div class="asset-leg-item">
+      <div class="asset-leg-dot" style="background:${a.color};"><i class="fa-solid ${a.icon}"></i></div>
+      <span class="asset-leg-label">${a.label}</span>
+    </div>`).join('');
+}
+
+/* List panel row clicks */
+document.querySelectorAll('.ev-row[data-eid]').forEach(r=>{
+  r.addEventListener('click',()=>{ const ev=EVENTS.find(e=>e.id===r.dataset.eid); if(ev) selectEvent(ev); });
+});
+</script>
+</body>
+</html>
