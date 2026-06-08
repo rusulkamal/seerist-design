@@ -1052,14 +1052,11 @@ function toggleRiskRatings(){
   const check=document.getElementById('check-risk');
   const sub=document.getElementById('riskSub');
   const on=check.classList.toggle('on');
-  check.innerHTML=on?'<i class="fa-solid fa-check"></i>':'';
   sub.style.opacity=on?'1':'0.35'; sub.style.pointerEvents=on?'auto':'none';
 }
 function toggleRiskLevel(dot){ dot.classList.toggle('off'); }
 function togglePulse(item){
-  const check=document.getElementById('check-pulse');
-  const on=check.classList.toggle('on');
-  check.innerHTML=on?'<i class="fa-solid fa-check"></i>':'';
+  document.getElementById('check-pulse').classList.toggle('on');
 }
 
 /* ══════════════════════════════════════════
