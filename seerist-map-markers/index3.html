@@ -161,13 +161,13 @@ body{font-family:'Inter',sans-serif;height:100vh;overflow:hidden;display:flex;fl
 .intel-marker:hover .intel-tip{opacity:1;}
 
 /* ══ MAP CONTROLS (bottom-right group) ══ */
-.map-controls{position:absolute;bottom:28px;right:14px;z-index:15;display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+.map-controls{position:absolute;bottom:28px;right:14px;z-index:20;display:flex;flex-direction:column;align-items:flex-end;gap:16px;}
 
-/* ── Base layer selector ── */
-.base-layer-sel{display:flex;background:#fff;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1);}
-.bl-btn{padding:6px 12px;font-size:11px;font-weight:500;color:#64748b;background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:background .1s,color .1s;white-space:nowrap;}
-.bl-btn:not(:last-child){border-right:1px solid #e2e8f0;}
-.bl-btn:hover{background:#f8fafc;color:#334155;}
+/* ── Base layer selector — matches MapLibre ctrl group style ── */
+.base-layer-sel{display:flex;background:#fff!important;border:1px solid #e7e5e4!important;border-radius:6px!important;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08)!important;}
+.bl-btn{padding:7px 13px;font-size:12px;font-weight:500;color:#44403c;background:transparent;border:none;border-right:1px solid #e7e5e4;cursor:pointer;font-family:'Inter',sans-serif;transition:background .1s,color .1s;white-space:nowrap;}
+.bl-btn:last-child{border-right:none;}
+.bl-btn:hover{background:rgba(0,0,0,.04);color:#1c1917;}
 .bl-btn.active{background:#1e293b;color:#fff;}
 
 /* ══ LEGEND ══ */
