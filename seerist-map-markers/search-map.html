@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-<link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;color:#1e293b;font-size:13px;}
@@ -105,14 +104,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;color:#1e29
 #map{flex:1;height:100%;}
 
 
-/* MapLibre overrides */
-.maplibregl-ctrl-bottom-right{bottom:16px;right:16px;}
-.maplibregl-ctrl-group{border:1px solid #e7e5e4!important;border-radius:6px!important;box-shadow:0 1px 4px rgba(0,0,0,.1)!important;}
-
-@keyframes pulse-ring{
-  0%{transform:scale(1);opacity:.45;}
-  100%{transform:scale(2.2);opacity:0;}
-}
 </style>
 </head>
 <body style="display:flex;flex-direction:column;height:100vh;">
@@ -178,11 +169,10 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;color:#1e29
   </div>
 
   <!-- Map (RIGHT) -->
-  <div id="map"></div>
+  <iframe src="index3.html" style="flex:1;height:100%;border:none;" title="Map"></iframe>
 
 </div>
 
-<script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
 <script>
 // ── Result data ──────────────────────────────────────────
 const RESULTS = [
@@ -284,12 +274,6 @@ const RESULTS = [
   },
 ];
 
-// ── Category icons (matching prototype) ──────────────────
-const CAT_ICON = {
-  terrorism:'fa-bomb', conflict:'fa-crosshairs', unrest:'fa-people-group',
-  crime:'fa-handcuffs', disaster:'fa-hurricane', maritime:'fa-anchor',
-  political:'fa-landmark', geopolitical:'fa-globe',
-};
 
 // ── Render results ────────────────────────────────────────
 function renderResults(){
@@ -342,72 +326,14 @@ function switchTab(btn, tab){
   btn.classList.add('active');
 }
 
-// ── Map ───────────────────────────────────────────────────
-const map = new maplibregl.Map({
-  container: 'map',
-  style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-  center: [20, 20],
-  zoom: 2.2,
-  attributionControl: false,
-});
-map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
-
-const markerEls = {};
-
-map.on('load', () => {
-  RESULTS.filter(r => r.lat).forEach((r, i) => {
-    const sevColor = {high:'#dc2626', medium:'#ea580c', low:'#78716c'}[r.sev] || '#78716c';
-    const catIcon  = CAT_ICON[(r.category||'').toLowerCase()] || 'fa-circle-dot';
-
-    const wrapper = document.createElement('div');
-    wrapper.style.cssText = 'position:relative;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto;';
-
-    if(r.status === 'breaking'){
-      ['1.9s','1.2s'].forEach((delay, idx) => {
-        const ring = document.createElement('div');
-        const scale = idx === 0 ? 2.6 : 2.2;
-        ring.style.cssText = `position:absolute;width:30px;height:30px;border-radius:50%;border:2px solid ${sevColor};opacity:0;transform:scale(1);pointer-events:none;animation:pulse-ring ${delay} ease-out infinite;animation-delay:${i*0.28}s;`;
-        wrapper.appendChild(ring);
-      });
-    }
-
-    if(r.type === 'news'){
-      const el = document.createElement('div');
-      el.style.cssText = `width:30px;height:30px;border-radius:6px;background:#fff;border:2px solid #94a3b8;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.15);`;
-      el.innerHTML = `<i class="fa-solid ${catIcon}" style="font-size:11px;color:#94a3b8;"></i>`;
-      wrapper.appendChild(el);
-    } else {
-      const el = document.createElement('div');
-      el.style.cssText = `width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid ${sevColor};transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.2);`;
-      el.innerHTML = `<i class="fa-solid ${catIcon}" style="transform:rotate(45deg);font-size:11px;color:${sevColor};"></i>`;
-      wrapper.appendChild(el);
-    }
-
-    wrapper.addEventListener('click', () => selectResult(r.id));
-    new maplibregl.Marker({element:wrapper, anchor:'center'}).setLngLat([r.lng, r.lat]).addTo(map);
-    markerEls[r.id] = wrapper;
-  });
-});
-
 // ── Select result ─────────────────────────────────────────
 let activeId = null;
 
 function selectResult(id){
-  if(activeId){
-    document.getElementById(`card-${activeId}`)?.classList.remove('active');
-    if(markerEls[activeId]) markerEls[activeId].style.filter = 'none';
-  }
+  if(activeId) document.getElementById(`card-${activeId}`)?.classList.remove('active');
   activeId = id;
-  const r = RESULTS.find(x => x.id === id);
-  if(!r) return;
-
   document.getElementById(`card-${id}`)?.classList.add('active');
   document.getElementById(`card-${id}`)?.scrollIntoView({behavior:'smooth', block:'nearest'});
-
-  if(r.lat){
-    map.flyTo({center:[r.lng, r.lat], zoom:Math.max(map.getZoom(), 6), duration:600, essential:true});
-    if(markerEls[id]) markerEls[id].style.filter = 'drop-shadow(0 0 5px rgba(0,0,0,.45))';
-  }
 }
 </script>
 </body>
