@@ -164,7 +164,7 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
         <div class="rule-ico"><i class="fa-solid fa-shapes"></i></div>
         <div>
           <div class="rule-title">Shape → Content type</div>
-          <div class="rule-desc">Teardrop = Event. Flat-top hexagon = Analysis (Seerist). Rounded square = News &amp; Social (third-party). Filled circle = Asset.</div>
+          <div class="rule-desc">Circle = Event (approximate area). Flat-top hexagon = Analysis (Seerist). Rounded square = News &amp; Social (third-party). Teardrop pin = Asset (precise location).</div>
         </div>
       </div>
       <div class="rule">
@@ -200,14 +200,14 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
     <p class="section-intro">All marker types at a glance.</p>
     <div class="marker-rows">
       <div class="mrow">
-        <div class="mrow-shape"><div style="width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid #ea580c;color:#ea580c;transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-people-group" style="transform:rotate(45deg);font-size:11px;"></i></div></div>
+        <div class="mrow-shape"><div style="width:30px;height:30px;border-radius:50%;border:2px solid #ea580c;color:#ea580c;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-people-group" style="font-size:11px;"></i></div></div>
         <div class="mrow-label">Event</div>
-        <div class="mrow-desc">Teardrop shape. Solid border — same border for all statuses (verified, unverified, future). Colour reflects severity.</div>
+        <div class="mrow-desc">Circle shape — conveys approximate location, not a precise point. Solid border, same for all statuses. Colour reflects severity.</div>
       </div>
       <div class="mrow">
-        <div class="mrow-shape"><div style="width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid #dc2626;color:#dc2626;transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-bomb" style="transform:rotate(45deg);font-size:11px;"></i></div></div>
+        <div class="mrow-shape"><div style="width:30px;height:30px;border-radius:50%;border:2px solid #dc2626;color:#dc2626;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-bomb" style="font-size:11px;"></i></div></div>
         <div class="mrow-label">Event — Breaking</div>
-        <div class="mrow-desc">Happening right now. Same teardrop shape and solid border — distinguished only by pulsing double ring (reaches 2.6× marker size). No badge.</div>
+        <div class="mrow-desc">Happening right now. Same circle shape and solid border — distinguished only by pulsing double ring (reaches 2.6× marker size). No badge.</div>
       </div>
       <div class="mrow">
         <div class="mrow-shape"><div class="m-squircle" style="border:2px solid #94a3b8;color:#64748b;"><i class="fa-solid fa-people-group"></i></div></div>
@@ -220,9 +220,9 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
         <div class="mrow-desc">Seerist analyst report. Flat-top hexagon, blue border, white fill.</div>
       </div>
       <div class="mrow">
-        <div class="mrow-shape"><div class="m-asset" style="background:#0891b2;"><i class="fa-solid fa-building-columns"></i></div></div>
+        <div class="mrow-shape"><div style="width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#0891b2;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;box-shadow:0 1px 4px rgba(0,0,0,.18);flex-shrink:0;"><i class="fa-solid fa-building-columns" style="transform:rotate(45deg);"></i></div></div>
         <div class="mrow-label">Asset</div>
-        <div class="mrow-desc">Your tracked locations. Filled circle, never clusters.</div>
+        <div class="mrow-desc">Teardrop pin — conveys a precise location. Filled with the asset type colour. Never clusters.</div>
       </div>
       <div class="mrow">
         <div class="mrow-shape"><div class="m-cluster">12</div></div>
@@ -266,7 +266,7 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
 
     <table class="doc-table">
       <tbody>
-        <tr><td class="td-key" style="width:120px;">Shape</td><td>Flat-top hexagon — categorically different from teardrops (events) and squircles (News &amp; Social). Rendered via CSS clip-path pseudo-elements.</td></tr>
+        <tr><td class="td-key" style="width:120px;">Shape</td><td>Flat-top hexagon — categorically different from circles (events) and squircles (News &amp; Social). Rendered via CSS clip-path pseudo-elements.</td></tr>
         <tr><td class="td-key">Size</td><td>34 × 34 px</td></tr>
         <tr><td class="td-key">Fill</td><td>White inner fill with blue <code style="font-size:11px;background:#f1f5f9;padding:1px 5px;border-radius:3px;">#1D4ED8</code> hexagon outline — rendered as two stacked clip-path polygons</td></tr>
         <tr><td class="td-key">Icon</td><td>Document / file-lines — represents a written report. Blue <code style="font-size:11px;background:#f1f5f9;padding:1px 5px;border-radius:3px;">#1D4ED8</code>.</td></tr>
@@ -285,7 +285,7 @@ hr.doc-hr{border:none;border-top:1px solid #f1f5f9;margin:40px 0;}
 
     <table class="doc-table" style="margin-bottom:24px;">
       <tbody>
-        <tr><td class="td-key" style="width:140px;">Shape</td><td>Circle with solid colour fill — instantly distinct from all other markers (no white background)</td></tr>
+        <tr><td class="td-key" style="width:140px;">Shape</td><td>Teardrop pin (border-radius: 50% 50% 50% 0, rotated −45°) — signals a precise, fixed location. Solid colour fill instantly distinct from event circles.</td></tr>
         <tr><td class="td-key">Size</td><td>32 × 32 px</td></tr>
         <tr><td class="td-key">Icon colour</td><td>Always white — sits on top of the fill colour</td></tr>
         <tr><td class="td-key">Fill colour</td><td>Each asset type gets its own colour, assigned by the organisation. No severity meaning — purely for identification.</td></tr>

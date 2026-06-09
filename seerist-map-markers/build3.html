@@ -186,21 +186,21 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
 
     <div class="type-list">
       <div class="type-row">
-        <div style="width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid #94a3b8;transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"></div>
+        <div style="width:30px;height:30px;border-radius:50%;border:2px solid #94a3b8;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"></div>
         <div>
           <div class="type-name">Event</div>
-          <div class="type-desc">Teardrop, 30 px</div>
+          <div class="type-desc">Circle, 30 px — conveys approximate location</div>
         </div>
       </div>
       <div class="type-row">
         <div style="position:relative;width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
           <div style="position:absolute;inset:0;border-radius:50%;border:2px solid #dc2626;opacity:0.35;transform:scale(1.6);"></div>
           <div style="position:absolute;inset:0;border-radius:50%;border:2px solid #dc2626;opacity:0.2;transform:scale(1.9);"></div>
-          <div style="width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid #dc2626;color:#dc2626;transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;position:relative;z-index:1;"></div>
+          <div style="width:30px;height:30px;border-radius:50%;border:2px solid #dc2626;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;position:relative;z-index:1;"></div>
         </div>
         <div>
           <div class="type-name">Event · Breaking</div>
-          <div class="type-desc">Same teardrop + pulsing double ring. No badge, no border change.</div>
+          <div class="type-desc">Same circle + pulsing double ring. No badge, no border change.</div>
         </div>
       </div>
       <div class="type-row">
@@ -220,10 +220,10 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
         </div>
       </div>
       <div class="type-row">
-        <div class="m-asset" style="background:#94a3b8;"></div>
+        <div style="width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#94a3b8;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.14);flex-shrink:0;"></div>
         <div>
           <div class="type-name">Asset</div>
-          <div class="type-desc">Filled circle</div>
+          <div class="type-desc">Teardrop pin — precise location</div>
         </div>
       </div>
     </div>
@@ -237,10 +237,10 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
         </div>
         <div class="lp-body">
           <div class="lp-s-title">Content</div>
-          <div class="lp-row"><div style="width:13px;height:13px;border-radius:50% 50% 50% 0;border:1.5px solid #94a3b8;transform:rotate(-45deg);background:#fff;flex-shrink:0;"></div>Event</div>
+          <div class="lp-row"><div style="width:13px;height:13px;border-radius:50%;border:1.5px solid #94a3b8;background:#fff;flex-shrink:0;"></div>Event</div>
           <div class="lp-row"><div class="lp-sq" style="border:2px solid #94a3b8;"></div>News &amp; Social</div>
           <div class="lp-row"><div style="width:13px;height:13px;clip-path:polygon(25% 7%,75% 7%,100% 50%,75% 93%,25% 93%,0% 50%);background:#1D4ED8;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><div style="width:9px;height:9px;clip-path:polygon(25% 7%,75% 7%,100% 50%,75% 93%,25% 93%,0% 50%);background:#fff;"></div></div>Analysis</div>
-          <div class="lp-row"><div class="lp-dot" style="background:#94a3b8;"></div>Asset</div>
+          <div class="lp-row"><div style="width:13px;height:13px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#94a3b8;flex-shrink:0;"></div>Asset</div>
         </div>
       </div>
     </div>
@@ -250,10 +250,10 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
         <div class="bt-head"><i class="fa-solid fa-hammer" style="font-size:9px;"></i>Build</div>
         <ul class="bt-list">
           <li>Render all marker shapes on the map in a single neutral slate colour</li>
-          <li>Teardrop (30 px, border-radius: 50% 50% 50% 0, rotated −45°) for events</li>
+          <li>Filled circle (30 px, border-radius: 50%) for events — shape signals approximate location</li>
           <li>Rounded square with plain solid border for News &amp; Social</li>
           <li>Flat-top hexagon (clip-path polygon), blue #1D4ED8 outline, white fill for Analysis</li>
-          <li>Filled circle for Assets</li>
+          <li>Teardrop pin (border-radius: 50% 50% 50% 0, rotated −45°) for Assets — shape signals precise location</li>
           <li>Cluster bubble for grouped events</li>
           <li>Detect breaking status from event data</li>
           <li>Apply double-ring CSS animation to breaking event markers only — outer ring 2.6×, inner 2.2×, opacity fades to 0 over 2s</li>
@@ -280,31 +280,31 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
 
     <div class="type-list">
       <div class="type-row">
-        <div style="width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid #78716c;color:#78716c;transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-people-group" style="transform:rotate(45deg);font-size:11px;"></i></div>
+        <div style="width:30px;height:30px;border-radius:50%;border:2px solid #78716c;color:#78716c;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-people-group" style="font-size:11px;"></i></div>
         <div><div class="type-name">Unrest</div></div>
       </div>
       <div class="type-row">
-        <div style="width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid #78716c;color:#78716c;transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-bomb" style="transform:rotate(45deg);font-size:11px;"></i></div>
+        <div style="width:30px;height:30px;border-radius:50%;border:2px solid #78716c;color:#78716c;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-bomb" style="font-size:11px;"></i></div>
         <div><div class="type-name">Terrorism</div></div>
       </div>
       <div class="type-row">
-        <div style="width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid #78716c;color:#78716c;transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-anchor" style="transform:rotate(45deg);font-size:11px;"></i></div>
+        <div style="width:30px;height:30px;border-radius:50%;border:2px solid #78716c;color:#78716c;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-anchor" style="font-size:11px;"></i></div>
         <div><div class="type-name">Maritime</div></div>
       </div>
       <div class="type-row">
-        <div style="width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid #78716c;color:#78716c;transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-crosshairs" style="transform:rotate(45deg);font-size:11px;"></i></div>
+        <div style="width:30px;height:30px;border-radius:50%;border:2px solid #78716c;color:#78716c;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-crosshairs" style="font-size:11px;"></i></div>
         <div><div class="type-name">Conflict · Breaking</div><div class="type-desc">Pulse ring from Phase 1 — no badge or border change</div></div>
       </div>
       <div class="type-row">
-        <div style="width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid #78716c;color:#78716c;transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-hurricane" style="transform:rotate(45deg);font-size:11px;"></i></div>
+        <div style="width:30px;height:30px;border-radius:50%;border:2px solid #78716c;color:#78716c;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-hurricane" style="font-size:11px;"></i></div>
         <div><div class="type-name">Disaster · Future</div><div class="type-desc">No badge — future uses same solid border</div></div>
       </div>
       <div class="type-row">
-        <div style="width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid #78716c;color:#78716c;transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-tags" style="transform:rotate(45deg);font-size:11px;"></i></div>
+        <div style="width:30px;height:30px;border-radius:50%;border:2px solid #78716c;color:#78716c;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-tags" style="font-size:11px;"></i></div>
         <div><div class="type-name">Multi-cat</div></div>
       </div>
       <div class="type-row">
-        <div style="width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid #78716c;color:#94a3b8;transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-question" style="transform:rotate(45deg);font-size:11px;"></i></div>
+        <div style="width:30px;height:30px;border-radius:50%;border:2px solid #78716c;color:#94a3b8;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-question" style="font-size:11px;"></i></div>
         <div><div class="type-name">Unset</div></div>
       </div>
     </div>
@@ -332,26 +332,26 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;line-height:1.
 
     <div class="type-list">
       <div class="type-row">
-        <div style="width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid #dc2626;color:#dc2626;transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-bomb" style="transform:rotate(45deg);font-size:11px;"></i></div>
+        <div style="width:30px;height:30px;border-radius:50%;border:2px solid #dc2626;color:#dc2626;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-bomb" style="font-size:11px;"></i></div>
         <div><div class="type-name">High</div></div>
       </div>
       <div class="type-row">
-        <div style="width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid #ea580c;color:#ea580c;transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-people-group" style="transform:rotate(45deg);font-size:11px;"></i></div>
+        <div style="width:30px;height:30px;border-radius:50%;border:2px solid #ea580c;color:#ea580c;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-people-group" style="font-size:11px;"></i></div>
         <div><div class="type-name">Medium</div></div>
       </div>
       <div class="type-row">
-        <div style="width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid #78716c;color:#78716c;transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-gavel" style="transform:rotate(45deg);font-size:11px;"></i></div>
+        <div style="width:30px;height:30px;border-radius:50%;border:2px solid #78716c;color:#78716c;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-gavel" style="font-size:11px;"></i></div>
         <div><div class="type-name">Low</div></div>
       </div>
       <div class="type-row">
         <div style="position:relative;width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
           <div style="position:absolute;inset:0;border-radius:50%;border:2px solid #dc2626;opacity:0.3;transform:scale(1.6);"></div>
-          <div style="width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid #dc2626;color:#dc2626;transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;position:relative;z-index:1;"><i class="fa-solid fa-crosshairs" style="transform:rotate(45deg);font-size:11px;"></i></div>
+          <div style="width:30px;height:30px;border-radius:50%;border:2px solid #dc2626;color:#dc2626;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;position:relative;z-index:1;"><i class="fa-solid fa-crosshairs" style="font-size:11px;"></i></div>
         </div>
         <div><div class="type-name">Breaking · High</div><div class="type-desc">Solid border + pulse ring. No badge.</div></div>
       </div>
       <div class="type-row">
-        <div style="width:30px;height:30px;border-radius:50% 50% 50% 0;border:2px solid #ea580c;color:#ea580c;transform:rotate(-45deg);background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-anchor" style="transform:rotate(45deg);font-size:11px;"></i></div>
+        <div style="width:30px;height:30px;border-radius:50%;border:2px solid #ea580c;color:#ea580c;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);flex-shrink:0;"><i class="fa-solid fa-anchor" style="font-size:11px;"></i></div>
         <div><div class="type-name">Future · Medium</div><div class="type-desc">Solid border. No badge.</div></div>
       </div>
     </div>
