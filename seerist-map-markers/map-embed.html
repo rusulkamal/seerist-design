@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link href="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.css" rel="stylesheet"/>
+<script src="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Inter',sans-serif;}
+#map{width:100%;height:100%;}
+
+.top-nav{height:44px;background:#0f1117;border-bottom:1px solid #1e2030;display:flex;align-items:center;padding:0 16px;flex-shrink:0;z-index:100;}
+.top-nav-brand{display:flex;align-items:center;gap:8px;padding-right:20px;border-right:1px solid #1e2030;margin-right:4px;}
+.top-nav-mark{width:20px;height:20px;border-radius:4px;background:linear-gradient(135deg,#10b981,#99cc10);flex-shrink:0;}
+.top-nav-wordmark{font-size:11px;font-weight:700;letter-spacing:.12em;color:#fff;}
+.top-nav-tab{display:flex;align-items:center;gap:6px;padding:0 14px;height:44px;font-size:12px;font-weight:500;color:#64748b;cursor:pointer;text-decoration:none;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;}
+.top-nav-tab:hover{color:#94a3b8;}
+.top-nav-tab.active{color:#fff;border-bottom-color:#fff;}
+.top-nav-tab i{font-size:11px;}
+
+body.embed .top-nav{display:none;}
+body.embed #map{height:100vh;}
+#overlay{position:absolute;inset:0;pointer-events:none;z-index:11;}
+#clusters{position:absolute;inset:0;pointer-events:none;z-index:13;}
+
+.event-marker{width:30px;height:30px;border-radius:50% 50% 50% 0;background:#fff;border:2px solid currentColor;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;font-size:11px;box-shadow:0 3px 10px rgba(0,0,0,.2);cursor:pointer;color:#78716c;pointer-events:auto;position:relative;}
+.event-marker>i{transform:rotate(45deg);}
+.event-marker:hover{filter:brightness(.92);}
+.event-marker.selected{box-shadow:0 0 0 3px rgba(100,116,139,.35),0 0 0 7px rgba(100,116,139,.1),0 3px 12px rgba(0,0,0,.2);}
+
+@keyframes pulse{0%{transform:scale(.9);opacity:.7;}100%{transform:scale(2.6);opacity:0;}}
+@keyframes pulse2{0%{transform:scale(.9);opacity:.5;}100%{transform:scale(2.2);opacity:0;}}
+.pulse-ring{position:absolute;inset:0;border-radius:50%;border:2px solid currentColor;pointer-events:none;animation:pulse 2s ease-out infinite;}
+.pulse-ring2{position:absolute;inset:0;border-radius:50%;border:2px solid currentColor;pointer-events:none;animation:pulse2 2s ease-out infinite;animation-delay:.5s;}
+
+.cluster-bubble{border-radius:50%;background:#fff;border:2px solid #94a3b8;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-size:12px;font-weight:700;color:#334155;box-shadow:0 2px 8px rgba(0,0,0,.12);cursor:pointer;pointer-events:auto;}
+</style>
+</head>
+<body>
+<nav class="top-nav">
+  <div class="top-nav-brand">
+    <div class="top-nav-mark"></div>
+    <span class="top-nav-wordmark">SEERIST</span>
+  </div>
+  <a class="top-nav-tab" href="index3.html"><i class="fa-solid fa-map"></i>Prototype</a>
+  <a class="top-nav-tab" href="search-map.html"><i class="fa-solid fa-map-location-dot"></i>Search Map</a>
+  <a class="top-nav-tab" href="spec3.html"><i class="fa-solid fa-book-open"></i>Spec</a>
+  <a class="top-nav-tab" href="build3.html"><i class="fa-solid fa-layer-group"></i>Approach</a>
+</nav>
+<div id="map" style="position:relative;height:calc(100vh - 44px);">
+  <div id="overlay"></div>
+  <div id="clusters"></div>
+</div>
+
+<script>
+const SEV_COLOR = {high:'#dc2626',medium:'#ea580c',low:'#78716c'};
+
+const EVENTS = [
+  {id:'e1', status:'breaking',  sev:'high',   icon:'fa-bomb',          lnglat:[44.44,33.34]},
+  {id:'e2', status:'breaking',  sev:'high',   icon:'fa-crosshairs',    lnglat:[34.80,50.90]},
+  {id:'e3', status:'breaking',  sev:'medium', icon:'fa-anchor',        lnglat:[42.90,14.80]},
+  {id:'e4', status:'verified',  sev:'medium', icon:'fa-hurricane',     lnglat:[20.07,32.11]},
+  {id:'e5', status:'verified',  sev:'medium', icon:'fa-people-group',  lnglat:[28.98,41.01]},
+  {id:'e6', status:'verified',  sev:'high',   icon:'fa-shield-halved', lnglat:[3.38,6.45]},
+  {id:'e7', status:'verified',  sev:'medium', icon:'fa-gavel',         lnglat:[32.53,15.55]},
+  {id:'e8', status:'unverified',sev:'medium', icon:'fa-bomb',          lnglat:[35.50,33.89]},
+  {id:'e9', status:'unverified',sev:'high',   icon:'fa-crosshairs',    lnglat:[46.00,40.30]},
+  {id:'e10',status:'future',    sev:'medium', icon:'fa-landmark',      lnglat:[36.820,-1.290]},
+  {id:'e11',status:'future',    sev:'medium', icon:'fa-people-group',  lnglat:[36.825,-1.295]},
+  {id:'e15',status:'breaking',  sev:'high',   icon:'fa-shield-halved', lnglat:[36.830,-1.285]},
+  {id:'e16',status:'verified',  sev:'medium', icon:'fa-people-group',  lnglat:[44.445,33.345]},
+  {id:'e17',status:'future',    sev:'medium', icon:'fa-gavel',         lnglat:[44.450,33.350]},
+  {id:'e18',status:'verified',  sev:'medium', icon:'fa-hurricane',     lnglat:[38.74,9.01]},
+  {id:'e19',status:'breaking',  sev:'high',   icon:'fa-bomb',          lnglat:[41.85,3.94]},
+  {id:'e20',status:'unverified',sev:'high',   icon:'fa-crosshairs',    lnglat:[45.34,2.05]},
+  {id:'e21',status:'verified',  sev:'high',   icon:'fa-landmark',      lnglat:[41.87,9.59]},
+  {id:'e22',status:'unverified',sev:'medium', icon:'fa-shield-halved', lnglat:[42.78,9.35]},
+  {id:'e23',status:'verified',  sev:'high',   icon:'fa-anchor',        lnglat:[44.99,10.44]},
+  {id:'e12',status:'verified',  sev:'high',   icon:'fa-shield-halved', lnglat:[35.93,31.95]},
+  {id:'e13',status:'breaking',  sev:'high',   icon:'fa-people-group',  lnglat:[34.78,32.08]},
+  {id:'e14',status:'verified',  sev:'medium', icon:'fa-bomb',          lnglat:[36.29,33.51]},
+  {id:'e30',status:'breaking',  sev:'high',   icon:'fa-bomb',          lnglat:[2.35,48.85]},
+  {id:'e31',status:'verified',  sev:'medium', icon:'fa-people-group',  lnglat:[13.40,52.52]},
+  {id:'e32',status:'unverified',sev:'medium', icon:'fa-bomb',          lnglat:[-3.70,40.41]},
+  {id:'e33',status:'verified',  sev:'high',   icon:'fa-crosshairs',    lnglat:[21.01,52.23]},
+  {id:'e34',status:'future',    sev:'medium', icon:'fa-landmark',      lnglat:[12.50,41.90]},
+  {id:'e35',status:'verified',  sev:'medium', icon:'fa-people-group',  lnglat:[23.73,37.98]},
+  {id:'e36',status:'breaking',  sev:'high',   icon:'fa-crosshairs',    lnglat:[36.25,49.99]},
+  {id:'e37',status:'verified',  sev:'medium', icon:'fa-shield-halved', lnglat:[14.27,40.85]},
+  {id:'e38',status:'breaking',  sev:'high',   icon:'fa-crosshairs',    lnglat:[44.20,15.35]},
+  {id:'e39',status:'verified',  sev:'high',   icon:'fa-bomb',          lnglat:[69.17,34.52]},
+  {id:'e40',status:'unverified',sev:'high',   icon:'fa-crosshairs',    lnglat:[65.71,31.61]},
+  {id:'e41',status:'verified',  sev:'medium', icon:'fa-people-group',  lnglat:[51.39,35.69]},
+  {id:'e42',status:'future',    sev:'medium', icon:'fa-gavel',         lnglat:[46.68,24.69]},
+  {id:'e43',status:'unverified',sev:'medium', icon:'fa-bomb',          lnglat:[66.99,30.18]},
+  {id:'e44',status:'verified',  sev:'high',   icon:'fa-shield-halved', lnglat:[71.57,34.01]},
+  {id:'e45',status:'verified',  sev:'medium', icon:'fa-hurricane',     lnglat:[90.41,23.81]},
+  {id:'e46',status:'breaking',  sev:'high',   icon:'fa-people-group',  lnglat:[90.40,23.72]},
+  {id:'e47',status:'verified',  sev:'medium', icon:'fa-landmark',      lnglat:[96.16,16.85]},
+  {id:'e48',status:'unverified',sev:'high',   icon:'fa-crosshairs',    lnglat:[96.08,21.97]},
+  {id:'e49',status:'verified',  sev:'medium', icon:'fa-bomb',          lnglat:[120.98,14.60]},
+  {id:'e50',status:'breaking',  sev:'high',   icon:'fa-crosshairs',    lnglat:[29.24,-1.68]},
+  {id:'e51',status:'verified',  sev:'high',   icon:'fa-bomb',          lnglat:[-8.00,12.65]},
+  {id:'e52',status:'unverified',sev:'medium', icon:'fa-people-group',  lnglat:[-4.03,5.35]},
+  {id:'e53',status:'verified',  sev:'medium', icon:'fa-landmark',      lnglat:[15.05,12.11]},
+  {id:'e54',status:'verified',  sev:'high',   icon:'fa-crosshairs',    lnglat:[32.56,15.63]},
+  {id:'e55',status:'breaking',  sev:'high',   icon:'fa-bomb',          lnglat:[-1.52,12.36]},
+  {id:'e56',status:'verified',  sev:'high',   icon:'fa-shield-halved', lnglat:[-107.39,24.80]},
+  {id:'e57',status:'unverified',sev:'medium', icon:'fa-people-group',  lnglat:[-66.90,10.49]},
+  {id:'e58',status:'verified',  sev:'medium', icon:'fa-shield-halved', lnglat:[-72.34,18.54]},
+  {id:'e60',status:'breaking',  sev:'high',   icon:'fa-crosshairs',    lnglat:[125.74,39.03]},
+  {id:'e61',status:'verified',  sev:'medium', icon:'fa-people-group',  lnglat:[114.17,22.32]},
+  {id:'e62',status:'unverified',sev:'medium', icon:'fa-landmark',      lnglat:[120.96,24.80]},
+  {id:'e63',status:'verified',  sev:'low',    icon:'fa-hurricane',     lnglat:[127.68,26.33]},
+  {id:'e64',status:'verified',  sev:'medium', icon:'fa-people-group',  lnglat:[113.26,23.13]},
+  {id:'e65',status:'unverified',sev:'medium', icon:'fa-shield-halved', lnglat:[126.98,37.57]},
+  {id:'e66',status:'breaking',  sev:'high',   icon:'fa-bomb',          lnglat:[74.34,31.55]},
+  {id:'e67',status:'verified',  sev:'medium', icon:'fa-people-group',  lnglat:[77.21,28.61]},
+  {id:'e68',status:'verified',  sev:'medium', icon:'fa-crosshairs',    lnglat:[94.73,27.10]},
+  {id:'e69',status:'unverified',sev:'high',   icon:'fa-hurricane',     lnglat:[85.32,27.71]},
+  {id:'e70',status:'verified',  sev:'medium', icon:'fa-landmark',      lnglat:[79.86,6.93]},
+  {id:'e71',status:'verified',  sev:'medium', icon:'fa-people-group',  lnglat:[74.59,42.87]},
+  {id:'e72',status:'unverified',sev:'medium', icon:'fa-shield-halved', lnglat:[76.95,43.24]},
+  {id:'e73',status:'breaking',  sev:'high',   icon:'fa-crosshairs',    lnglat:[37.62,55.75]},
+  {id:'e74',status:'verified',  sev:'medium', icon:'fa-people-group',  lnglat:[30.32,59.93]},
+  {id:'e75',status:'verified',  sev:'medium', icon:'fa-hurricane',     lnglat:[92.87,56.01]},
+  {id:'e76',status:'verified',  sev:'medium', icon:'fa-hurricane',     lnglat:[106.85,-6.21]},
+  {id:'e77',status:'unverified',sev:'high',   icon:'fa-crosshairs',    lnglat:[92.90,20.15]},
+  {id:'e78',status:'verified',  sev:'medium', icon:'fa-landmark',      lnglat:[100.50,13.75]},
+  {id:'e79',status:'verified',  sev:'low',    icon:'fa-anchor',        lnglat:[114.20,10.60]},
+  {id:'e80',status:'breaking',  sev:'high',   icon:'fa-shield-halved', lnglat:[-72.51,7.89]},
+  {id:'e81',status:'verified',  sev:'medium', icon:'fa-people-group',  lnglat:[-68.13,-16.50]},
+  {id:'e82',status:'verified',  sev:'medium', icon:'fa-shield-halved', lnglat:[-79.90,-2.17]},
+  {id:'e83',status:'unverified',sev:'medium', icon:'fa-people-group',  lnglat:[-77.04,-12.04]},
+  {id:'e84',status:'verified',  sev:'high',   icon:'fa-shield-halved', lnglat:[-43.17,-22.91]},
+  {id:'e85',status:'verified',  sev:'medium', icon:'fa-hurricane',     lnglat:[-60.02,-3.10]},
+  {id:'e86',status:'verified',  sev:'high',   icon:'fa-shield-halved', lnglat:[-89.19,13.70]},
+  {id:'e87',status:'unverified',sev:'medium', icon:'fa-people-group',  lnglat:[-90.52,14.64]},
+  {id:'e88',status:'verified',  sev:'medium', icon:'fa-people-group',  lnglat:[28.04,-26.20]},
+  {id:'e89',status:'breaking',  sev:'high',   icon:'fa-crosshairs',    lnglat:[40.52,-12.32]},
+  {id:'e90',status:'verified',  sev:'medium', icon:'fa-landmark',      lnglat:[31.03,-17.83]},
+  {id:'e91',status:'verified',  sev:'medium', icon:'fa-bomb',          lnglat:[6.07,31.67]},
+  {id:'e92',status:'unverified',sev:'medium', icon:'fa-people-group',  lnglat:[-7.59,33.59]},
+];
+
+const map = new maplibregl.Map({
+  container:'map',
+  style:'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+  center:[20,20], zoom:2.2,
+  attributionControl:false,
+});
+
+const overlay  = document.getElementById('overlay');
+const clusterL = document.getElementById('clusters');
+let markerEls  = [];
+
+function project(lnglat){
+  const p = map.project(lnglat);
+  return {x:p.x, y:p.y};
+}
+
+function refresh(){
+  overlay.innerHTML  = '';
+  clusterL.innerHTML = '';
+  markerEls = [];
+
+  const zoom = map.getZoom();
+  const cell = zoom < 1.5 ? 999 : zoom < 2.5 ? 22 : zoom < 3 ? 14 : zoom < 4 ? 7 : zoom < 5 ? 3.5 : zoom < 6 ? 1.8 : zoom < 7 ? 0.9 : 0;
+
+  if(cell === 0){
+    EVENTS.forEach((ev,i) => placeMarker(ev, i));
+  } else {
+    const groups = {};
+    EVENTS.forEach(ev => {
+      const k = `${Math.floor(ev.lnglat[0]/cell)},${Math.floor(ev.lnglat[1]/cell)}`;
+      (groups[k] = groups[k]||[]).push(ev);
+    });
+    Object.values(groups).forEach(grp => {
+      if(grp.length === 1){ placeMarker(grp[0], 0); return; }
+      const cx = grp.reduce((s,e)=>s+e.lnglat[0],0)/grp.length;
+      const cy = grp.reduce((s,e)=>s+e.lnglat[1],0)/grp.length;
+      placeCluster([cx,cy], grp.length);
+    });
+  }
+}
+
+function placeMarker(ev, idx){
+  const color = SEV_COLOR[ev.sev] || '#78716c';
+  const {x,y} = project(ev.lnglat);
+  const wrap = document.createElement('div');
+  wrap.style.cssText = `position:absolute;left:${x-15}px;top:${y-15}px;width:30px;height:30px;pointer-events:none;`;
+
+  if(ev.status === 'breaking'){
+    const r1 = document.createElement('div');
+    r1.className = 'pulse-ring';
+    r1.style.color = color;
+    r1.style.animationDelay = `${idx*0.28}s`;
+    const r2 = document.createElement('div');
+    r2.className = 'pulse-ring2';
+    r2.style.color = color;
+    r2.style.animationDelay = `${idx*0.28+0.5}s`;
+    wrap.appendChild(r1);
+    wrap.appendChild(r2);
+  }
+
+  const el = document.createElement('div');
+  el.className = 'event-marker';
+  el.style.color = color;
+  el.innerHTML = `<i class="fa-solid ${ev.icon}"></i>`;
+  el.style.pointerEvents = 'auto';
+  wrap.appendChild(el);
+  overlay.appendChild(wrap);
+  markerEls.push({ev, wrap});
+}
+
+function placeCluster(lnglat, count){
+  const {x,y} = project(lnglat);
+  const sz = count > 20 ? 46 : count > 7 ? 40 : 34;
+  const el = document.createElement('div');
+  el.className = 'cluster-bubble';
+  el.style.cssText = `position:absolute;left:${x-sz/2}px;top:${y-sz/2}px;width:${sz}px;height:${sz}px;`;
+  el.textContent = count > 99 ? '99+' : count;
+  el.addEventListener('click', e => { e.stopPropagation(); map.easeTo({center:lnglat,zoom:map.getZoom()+2.5}); });
+  clusterL.appendChild(el);
+}
+
+map.on('load', refresh);
+map.on('move', refresh);
+
+if(location.search.includes('embed'))document.body.classList.add('embed');
+</script>
+</body>
+</html>
