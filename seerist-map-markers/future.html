@@ -99,53 +99,6 @@ hr.divider{border:none;border-top:1px solid #f1f5f9;margin:32px 0;}
 
   </div>
 
-  <div class="section-label" style="margin-top:32px;">Interactions</div>
-  <div class="ideas-list">
-
-    <div class="idea-card">
-      <div class="idea-icon blue"><i class="fa-solid fa-hand-pointer"></i></div>
-      <div class="idea-body">
-        <div class="idea-top">
-          <div class="idea-title">Clicking a cluster should show a mini-list before zooming</div>
-          <span class="idea-tag tag-ux">UX</span>
-        </div>
-        <div class="idea-desc">Right now clusters zoom in on click. A first click could instead show a small popover listing the events inside (title + severity), letting the user decide whether to zoom or navigate directly to one.</div>
-        <div class="idea-rationale"><strong>Rationale:</strong> Avoids disorienting map jumps when the user only cares about one event inside a cluster of many.</div>
-      </div>
-    </div>
-
-    <div class="idea-card">
-      <div class="idea-icon amber"><i class="fa-solid fa-filter"></i></div>
-      <div class="idea-body">
-        <div class="idea-top">
-          <div class="idea-title">Filter by severity should affect clustering radius</div>
-          <span class="idea-tag tag-ux">UX</span>
-          <span class="idea-tag tag-data">Data</span>
-        </div>
-        <div class="idea-desc">When a user filters to high-severity events only, the reduced marker count makes aggressive clustering unnecessary. The clustering cell size could shrink to show more separation at the same zoom level.</div>
-        <div class="idea-rationale"><strong>Rationale:</strong> Clustering is a density problem. Filtering reduces density — the cluster threshold should adapt rather than stay fixed.</div>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="section-label" style="margin-top:32px;">Marker Design</div>
-  <div class="ideas-list">
-
-    <div class="idea-card">
-      <div class="idea-icon slate"><i class="fa-solid fa-layer-group"></i></div>
-      <div class="idea-body">
-        <div class="idea-top">
-          <div class="idea-title">Stacked markers should show the highest severity on top</div>
-          <span class="idea-tag tag-ux">UX</span>
-        </div>
-        <div class="idea-desc">When multiple events share the exact same coordinates, the current stack shows a count. The colour of the stack indicator should reflect the most severe event inside, not a neutral grey.</div>
-        <div class="idea-rationale"><strong>Rationale:</strong> If one of the stacked events is high-severity, the red signal should still surface at a glance — even before the user opens the stack.</div>
-      </div>
-    </div>
-
-  </div>
-
 </div>
 </body>
 </html>
