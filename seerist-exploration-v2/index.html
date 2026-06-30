@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seerist Feed — v2</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ── PrimeVue Aura surface tokens ── */
+  :root {
+    --p-surface-0:   #ffffff;
+    --p-surface-50:  #f8fafc;
+    --p-surface-100: #f1f5f9;
+    --p-surface-200: #e2e8f0;
+    --p-surface-300: #cbd5e1;
+    --p-surface-400: #94a3b8;
+    --p-surface-500: #64748b;
+    --p-surface-600: #475569;
+    --p-surface-700: #334155;
+    --p-surface-800: #1e293b;
+    --p-surface-900: #0f172a;
+    --p-surface-950: #020617;
+    --p-primary-color:          #00A651;
+    --p-primary-contrast-color: #ffffff;
+  }
+
+  /* ── Icon fallbacks (no CDN in Artifact) ── */
+  i[class*="fa-"] { font-style: normal; font-family: system-ui, sans-serif; display: inline-flex; align-items: center; justify-content: center; }
+  .fa-table-columns::before    { content: '⊟'; }
+  .fa-sidebar::before          { content: '▤'; }
+  .fa-circle-check::before     { content: '✓'; font-weight: 700; }
+  .fa-ellipsis::before         { content: '···'; letter-spacing: -1px; }
+  .fa-chevron-down::before     { content: '▾'; }
+  .fa-arrow-up-wide-short::before { content: '⇅'; }
+  .fa-link::before             { content: '🔗'; font-size: 8px; }
+  .fa-copy::before             { content: '⧉'; }
+  .fa-bookmark::before         { content: '🔖'; font-size: 8px; }
+  .fa-eye::before              { content: '◉'; }
+  .fa-flag::before             { content: '⚑'; }
+  .fa-newspaper::before        { content: '⬚'; }
+  .fa-wand-magic-sparkles::before { content: '✦'; }
+  .fa-file-lines::before       { content: '≡'; font-size: 11px; }
+  .fa-layer-group::before      { content: '⊞'; }
+  .fa-rotate::before           { content: '↻'; }
+  .fa-calendar::before         { content: '▦'; }
+  .fa-calendar-days::before    { content: '▦'; }
+  .fa-circle::before           { content: '○'; }
+  .fa-circle-exclamation::before { content: '⚠'; }
+  /* Category icons */
+  .fa-people-group::before     { content: '⚯'; }
+  .fa-crosshairs::before       { content: '✛'; }
+  .fa-bomb::before             { content: '◈'; }
+  .fa-hurricane::before        { content: '⟳'; }
+  .fa-landmark::before         { content: '⌂'; }
+  .fa-shield-halved::before    { content: '⛨'; }
+  .fa-anchor::before           { content: '⚓'; font-size: 9px; }
+  .fa-gavel::before            { content: '⚖'; }
+  .fa-heart-pulse::before      { content: '♥'; }
+
+  /* ── Category chip — primary signal ── */
+  .cat-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; font-weight: 700; color: var(--p-surface-900);
+    background: var(--p-surface-100); border-radius: 5px; padding: 3px 8px;
+    flex-shrink: 0; white-space: nowrap;
+  }
+  .cat-chip i { font-size: 10px; color: var(--p-surface-600); }
+
+  /* ── Severity: High + Medium visible, Low quiet ── */
+  .sev-high   { background: #fef2f2; color: #dc2626; font-size: 10px; font-weight: 700; padding: 2px 7px; }
+  .sev-medium { background: #fefce8; color: #ca8a04; font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 20px; }
+  .sev-low    { background: transparent; color: var(--p-surface-300); font-size: 9px; font-weight: 500; padding: 0; letter-spacing: 0; }
+
+  /* ── Content type tags — demoted to quiet labels ── */
+  .tag-verified   { background: transparent; color: var(--p-surface-400); font-size: 9px; font-weight: 500; padding: 1px 4px; }
+  .tag-verified i { color: var(--p-surface-300); }
+  .tag-analysis   { background: transparent; color: var(--p-surface-400); font-size: 9px; font-weight: 500; padding: 1px 4px; }
+  .tag-analysis i { color: var(--p-surface-300); }
+  .tag-discover   { background: transparent; color: var(--p-surface-400); font-size: 9px; font-weight: 500; padding: 1px 4px; }
+  .tag-discover i { color: var(--p-surface-300); }
+  .type-tag:not(.tag-breaking):not(.tag-verified):not(.tag-analysis):not(.tag-discover):not(.tag-unverified) {
+    background: transparent; color: var(--p-surface-400); font-size: 9px; padding: 1px 4px;
+  }
+
+  /* ── Title line: tags + title text flow together ── */
+  .title-line { line-height: 1.6; }
+  .title-line .type-tag,
+  .title-line .sev,
+  .title-line .date-chip { display: inline-flex; vertical-align: middle; margin-right: 4px; }
+  .title-line .title { display: inline; overflow: visible; -webkit-line-clamp: unset; -webkit-box-orient: unset; vertical-align: middle; }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--p-surface-100); color: var(--p-surface-900); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+  /* ── Top bar ── */
+  .topbar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 20px; height: 52px;
+    background: var(--p-surface-0); border-bottom: 1px solid var(--p-surface-200);
+    box-shadow: 0 1px 3px rgba(15,23,42,0.05); flex-shrink: 0;
+  }
+  .topbar-title { font-size: 14px; font-weight: 600; color: var(--p-surface-900); letter-spacing: -0.01em; }
+  .topbar-count {
+    font-size: 11px; font-weight: 600; color: var(--p-primary-contrast-color);
+    background: var(--p-primary-color); border-radius: 20px; padding: 2px 8px;
+  }
+  .topbar-spacer { flex: 1; }
+
+  /* View toggle */
+  .view-toggle {
+    display: flex; align-items: center;
+    background: var(--p-surface-100); border-radius: 8px; padding: 3px; gap: 2px;
+  }
+  .view-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 12px; font-size: 11px; font-weight: 500;
+    font-family: 'Inter', system-ui, sans-serif; border: none; cursor: pointer;
+    background: transparent; color: var(--p-surface-400); border-radius: 6px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .view-btn i { font-size: 10px; }
+  .view-btn.active { background: var(--p-surface-0); color: var(--p-surface-900); box-shadow: 0 1px 3px rgba(15,23,42,0.1); }
+
+  /* ── Shared card tokens ── */
+  .card {
+    background: var(--p-surface-0); border: 1px solid var(--p-surface-200); border-radius: 10px;
+    padding: 12px 14px; display: flex; flex-direction: column; gap: 6px;
+    cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s;
+    position: relative;
+  }
+  .card:hover { box-shadow: 0 4px 16px rgba(15,23,42,0.08); border-color: var(--p-surface-300); }
+  .card.active { border-color: var(--p-primary-color) !important; box-shadow: 0 0 0 2px rgba(0,166,81,0.15); }
+
+  .row-top { display: flex; align-items: center; gap: 6px; }
+
+  .title {
+    font-size: 13px; font-weight: 500; color: var(--p-surface-800);
+    line-height: 1.55; display: -webkit-box;
+    -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+    letter-spacing: -0.01em;
+  }
+  .title.preview { color: var(--p-surface-500); font-style: italic; font-weight: 400; }
+  .card.unread .title { font-weight: 600; }
+
+  .row-cat { font-size: 10px; color: var(--p-surface-500); letter-spacing: 0.02em; }
+
+  .row-locs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+
+  .row-meta { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+  .meta-right { display: flex; align-items: center; gap: 3px; flex-shrink: 0; }
+
+  .row-revised { font-size: 10px; font-weight: 500; color: #d97706; text-align: left; font-variant-numeric: tabular-nums; font-family: 'SF Mono', 'Fira Code', 'Fira Mono', monospace; letter-spacing: -0.02em; }
+
+  /* Severity */
+  .sev { font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 20px; letter-spacing: 0.04em; text-transform: uppercase; flex-shrink: 0; }
+  .sev-critical { background: #fef2f2; color: #dc2626; }
+  .sev-high     { background: #fef2f2; color: #dc2626; }
+  .sev-medium   { background: #fefce8; color: #ca8a04; }
+  .sev-low      { background: var(--p-surface-50); color: var(--p-surface-500); }
+  .sev-border-critical { border-left: 3px solid #dc2626; }
+  .sev-border-high     { border-left: 3px solid #dc2626; }
+  .sev-border-medium   { border-left: 3px solid var(--p-surface-200); }
+  .sev-border-low      { border-left: 3px solid var(--p-surface-200); }
+
+  /* Time */
+  .time { font-size: 10px; color: var(--p-surface-300); white-space: nowrap; flex-shrink: 0; font-variant-numeric: tabular-nums; margin-left: auto; font-family: 'SF Mono', 'Fira Code', 'Fira Mono', monospace; letter-spacing: -0.02em; }
+
+  /* Tags — pill shape */
+  .type-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 500; border-radius: 5px; padding: 2px 7px; flex-shrink: 0; white-space: nowrap; color: var(--p-surface-500); background: var(--p-surface-100); }
+  .type-tag i { font-size: 9px; }
+  .tag-verified   { background: #ecfdf5; color: var(--p-primary-color); }
+  @keyframes pulse-ring {
+    0%   { box-shadow: 0 0 0 0 rgba(220,38,38,.7); }
+    60%  { box-shadow: 0 0 0 7px rgba(220,38,38,0); }
+    100% { box-shadow: 0 0 0 0 rgba(220,38,38,0); }
+  }
+  .tag-breaking {
+    background: #dc2626; color: #fff; font-weight: 700;
+    letter-spacing: 0.04em; text-transform: uppercase; font-size: 9.5px;
+    position: relative;
+  }
+  .tag-breaking::before {
+    content: '';
+    display: inline-block;
+    width: 7px; height: 7px;
+    background: #fff; border-radius: 50%;
+    margin-right: 5px; flex-shrink: 0;
+    animation: pulse-ring-white 1s ease-out infinite;
+  }
+  @keyframes pulse-ring-white {
+    0%   { box-shadow: 0 0 0 0 rgba(255,255,255,.8); }
+    60%  { box-shadow: 0 0 0 8px rgba(255,255,255,0); }
+    100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+  }
+  .tag-unverified { background: transparent; color: var(--p-surface-400); border: 1.5px dashed var(--p-surface-300); }
+
+  /* Breaking row/card */
+  .sev-border-breaking { border-left: 3px solid #fca5a5; background: #fffcfc !important; }
+
+  /* Social author line */
+  .social-author {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 600; color: var(--p-surface-700);
+  }
+  .social-author i { font-size: 10px; color: var(--p-surface-400); }
+  .social-author .handle { color: var(--p-surface-500); font-weight: 400; }
+  .tag-analysis   { background: #eff6ff; color: #2563eb; }
+  .tag-discover   { background: #f0fdfa; color: #0d9488; }
+  .date-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; color: #7c3aed; background: #faf5ff; border-radius: 5px; padding: 2px 7px; flex-shrink: 0; }
+  .date-chip i { font-size: 9px; }
+
+  /* Location chips — clickable links */
+  .loc-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 500; color: #2563eb; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 20px; padding: 2px 8px; white-space: nowrap; text-decoration: none; transition: background 0.1s, border-color 0.1s, color 0.1s; cursor: pointer; }
+  .loc-chip:hover { background: #dbeafe; border-color: #93c5fd; color: #1d4ed8; }
+  .loc-more { font-size: 10px; color: var(--p-surface-300); }
+
+  /* Meta */
+  .meta { font-size: 10px; color: var(--p-surface-400); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+  .meta i { font-size: 9px; }
+  .meta-sep { color: var(--p-surface-200); }
+  .meta a { color: var(--p-surface-600); text-decoration: underline; text-decoration-color: var(--p-surface-300); text-underline-offset: 2px; cursor: pointer; }
+  .meta a:hover { color: #2563eb; text-decoration-color: #2563eb; }
+
+  /* Signal tags */
+  .sig-tag { display: inline-flex; align-items: center; gap: 3px; font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 20px; letter-spacing: 0.03em; }
+  .sig-new          { background: #ecfdf5; color: var(--p-primary-color); }
+  .sig-accelerating { background: #fff7ed; color: #d97706; }
+  .sig-count        { background: var(--p-surface-50); color: var(--p-surface-500); }
+
+  /* Unread */
+  .unread-dot { width: 8px; height: 8px; border-radius: 50%; background: #3b82f6; flex-shrink: 0; box-shadow: 0 0 0 2px rgba(59,130,246,0.2); }
+  .feed-row.unread { background: #f8fbff; }
+
+  /* Card menu */
+  .card-menu { flex-shrink: 0; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 6px; color: var(--p-surface-300); font-size: 11px; cursor: pointer; transition: background 0.1s, color 0.1s; }
+  .card-menu:hover { background: var(--p-surface-100); color: var(--p-surface-600); }
+
+  /* Tooltip */
+  [data-tip] { position: relative; }
+  [data-tip]::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--p-surface-800); color: var(--p-surface-50); font-size: 10px; white-space: nowrap; padding: 4px 8px; border-radius: 4px; pointer-events: none; opacity: 0; transition: opacity 0.15s; z-index: 100; }
+  [data-tip]:hover::after { opacity: 1; }
+
+  /* Hover action strip (3-col mode only) */
+  .card-actions {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; align-items: center; gap: 4px; padding: 6px 12px;
+    background: rgba(255,255,255,0.96); border-top: 1px solid #f1f5f9;
+    border-radius: 0 0 6px 6px; opacity: 0; pointer-events: none; transition: opacity 0.15s;
+  }
+  .card:hover .card-actions { opacity: 1; pointer-events: auto; }
+  .action-btn { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 500; font-family: 'Inter', system-ui, sans-serif; padding: 3px 8px; border-radius: 4px; border: none; cursor: pointer; background: var(--p-surface-50); color: var(--p-surface-500); transition: background 0.1s, color 0.1s; }
+  .action-btn i { font-size: 9px; }
+  .action-copy:hover     { background: #f8fafc; color: #0f172a; }
+  .action-save:hover     { background: #f0fdf4; color: #00A651; }
+  .action-preview:hover  { background: #eff6ff; color: #2563eb; }
+  .action-flag:hover     { background: #fff7ed; color: #d97706; }
+  .action-escalate:hover { background: #fef2f2; color: #dc2626; }
+
+  /* ══════════════════════════════════════════
+     3-COLUMN MODE
+  ══════════════════════════════════════════ */
+  .view-3col {
+    flex: 1; overflow: hidden; display: flex; flex-direction: column;
+  }
+  .view-3col .feed-wrap {
+    flex: 1; overflow-y: auto; padding: 16px 20px;
+  }
+  .view-3col .feed {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 12px; max-width: 1100px;
+  }
+
+  /* Column panel — the white container */
+  .col-panel {
+    background: var(--p-surface-0);
+    border-radius: 10px;
+    border: 1px solid var(--p-surface-200);
+    box-shadow: 0 2px 8px rgba(15,23,42,0.06);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+
+  /* Panel header */
+  .col-panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px 12px; flex-shrink: 0;
+  }
+  .col-panel-title { font-size: 13px; font-weight: 600; color: var(--p-surface-900); letter-spacing: -0.01em; }
+  .col-panel-btn {
+    width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+    border-radius: 7px; border: none; background: transparent; color: var(--p-surface-400);
+    font-size: 11px; cursor: pointer; transition: background 0.1s, color 0.1s;
+  }
+  .col-panel-btn:hover { background: var(--p-surface-100); color: var(--p-surface-600); }
+
+  /* Panel toolbar */
+  .col-panel-toolbar {
+    display: flex; align-items: center; gap: 2px;
+    padding: 5px 12px; border-top: 1px solid var(--p-surface-100); border-bottom: 1px solid var(--p-surface-100);
+    background: var(--p-surface-50); flex-shrink: 0; height: 36px;
+  }
+  .toolbar-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 500; font-family: 'Inter', system-ui, sans-serif;
+    padding: 3px 8px; border-radius: 6px; border: none; background: transparent;
+    color: var(--p-surface-500); cursor: pointer; white-space: nowrap;
+    transition: background 0.12s, color 0.12s;
+  }
+  .toolbar-btn:hover { background: var(--p-surface-100); color: var(--p-surface-800); }
+  .toolbar-badge {
+    font-size: 10px; font-weight: 600;
+    background: var(--p-surface-200); color: var(--p-surface-600);
+    border-radius: 4px; padding: 0px 5px; line-height: 16px;
+  }
+  .toolbar-sep { width: 1px; height: 14px; background: var(--p-surface-200); flex-shrink: 0; margin: 0 3px; }
+  .toolbar-icon {
+    width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+    border-radius: 6px; border: none; background: transparent; color: var(--p-surface-400);
+    font-size: 10px; cursor: pointer; transition: background 0.1s, color 0.1s;
+  }
+  .toolbar-icon:hover { background: var(--p-surface-100); color: var(--p-surface-700); }
+
+  /* Feed rows inside panel */
+  .col-panel-list { flex: 1; overflow-y: auto; }
+
+  .feed-row {
+    padding: 11px 16px; border-bottom: 1px solid var(--p-surface-100);
+    display: flex; flex-direction: column; gap: 5px;
+    cursor: pointer; position: relative;
+    transition: background 0.12s;
+  }
+  .feed-row:last-child { border-bottom: none; }
+  .feed-row:hover { background: var(--p-surface-50); }
+  .feed-row.unread .title { font-weight: 500; }
+  .title mark { background: #fef9c3; color: inherit; font-weight: 600; border-radius: 2px; padding: 0 1px; }
+
+  /* Actions inline — inside row-meta, right of source info */
+  .row-meta .row-actions {
+    display: flex; align-items: center; gap: 3px;
+    margin-left: auto; flex-shrink: 0;
+    opacity: 0.3; pointer-events: auto; transition: opacity 0.12s;
+  }
+  .feed-row:hover .row-meta .row-actions { opacity: 1; }
+
+  /* Actions floating — rows without source meta */
+  .feed-row > .row-actions {
+    position: absolute; bottom: 8px; right: 14px;
+    display: flex; align-items: center; gap: 3px;
+    opacity: 0.3; pointer-events: auto; transition: opacity 0.12s;
+  }
+  .feed-row:hover > .row-actions { opacity: 1; }
+  .row-action-btn {
+    width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+    border-radius: 7px; border: 1px solid var(--p-surface-200); background: var(--p-surface-0);
+    color: var(--p-surface-400); font-size: 10px; cursor: pointer;
+    transition: background 0.1s, color 0.1s, border-color 0.1s;
+  }
+  .row-action-btn:hover { color: var(--p-surface-600); border-color: var(--p-surface-300); background: var(--p-surface-50); }
+  .row-action-copy:hover    { color: var(--p-surface-900); }
+  .row-action-save:hover    { color: var(--p-primary-color); border-color: #bbf7d0; background: #f0fdf4; }
+  .row-action-preview:hover { color: #2563eb; border-color: #bfdbfe; background: #eff6ff; }
+  .row-action-flag:hover    { color: #d97706; border-color: #fed7aa; background: #fff7ed; }
+  .row-action-escalate:hover { color: #dc2626; border-color: #fecaca; background: #fef2f2; }
+
+  /* Tooltips inside overflow containers point downward to avoid clipping */
+  .row-actions [data-tip]::after,
+  .legend-bar [data-tip]::after,
+  .col-panel-list [data-tip]::after,
+  .split-list [data-tip]::after {
+    bottom: calc(100% + 5px);
+    top: auto;
+  }
+
+  /* ══════════════════════════════════════════
+     SPLIT / OUTLOOK MODE
+  ══════════════════════════════════════════ */
+  .view-split {
+    flex: 1; display: flex; overflow: hidden;
+  }
+
+  .split-left {
+    width: 380px; flex-shrink: 0;
+    border-right: 1px solid var(--p-surface-200); background: var(--p-surface-50);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .split-left-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; border-bottom: 1px solid var(--p-surface-200);
+    background: var(--p-surface-0); flex-shrink: 0;
+  }
+  .split-left-label { font-size: 11px; font-weight: 600; color: var(--p-surface-500); letter-spacing: 0.06em; text-transform: uppercase; }
+  .split-list { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
+  .split-list .card { gap: 5px; }
+  .split-list .title { -webkit-line-clamp: 2; font-size: 12px; }
+
+  .split-right {
+    flex: 1; overflow-y: auto; background: #fff; display: flex; flex-direction: column;
+  }
+  .detail-header { padding: 16px 20px 12px; border-bottom: 1px solid var(--p-surface-100); flex-shrink: 0; }
+  .detail-row-top { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .detail-title { font-size: 16px; font-weight: 500; color: var(--p-surface-900); line-height: 1.5; }
+  .detail-title.preview { color: var(--p-surface-600); font-style: italic; }
+
+  .detail-actions {
+    display: flex; align-items: center; gap: 6px;
+    padding: 12px 20px; border-bottom: 1px solid var(--p-surface-100); flex-shrink: 0;
+  }
+  .detail-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; font-weight: 500; font-family: 'Inter', system-ui, sans-serif;
+    padding: 5px 12px; border-radius: 5px; border: 1px solid var(--p-surface-200);
+    cursor: pointer; background: var(--p-surface-0); color: var(--p-surface-600);
+    transition: background 0.1s, color 0.1s, border-color 0.1s;
+  }
+  .detail-btn i { font-size: 10px; }
+  .detail-btn:hover      { background: var(--p-surface-50); border-color: var(--p-surface-300); color: var(--p-surface-900); }
+  .btn-preview:hover     { background: #eff6ff; border-color: #bfdbfe; color: #2563eb; }
+  .btn-save:hover        { background: #f0fdf4; border-color: #bbf7d0; color: var(--p-primary-color); }
+  .btn-flag:hover        { background: #fff7ed; border-color: #fed7aa; color: #d97706; }
+  .btn-escalate          { background: #fef2f2; border-color: #fecaca; color: #dc2626; margin-left: auto; }
+  .btn-escalate:hover    { background: #fee2e2; border-color: #fca5a5; }
+
+  .detail-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; }
+  .detail-field { display: flex; flex-direction: column; gap: 4px; }
+  .detail-field-label { font-size: 10px; font-weight: 600; color: var(--p-surface-400); letter-spacing: 0.06em; text-transform: uppercase; }
+  .detail-field-value { font-size: 12px; color: var(--p-surface-700); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .detail-revised { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: #f59e0b; }
+  .source-link { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: #2563eb; text-decoration: none; }
+  .source-link:hover { text-decoration: underline; }
+
+  /* Hidden utility */
+  .hidden { display: none !important; }
+</style>
+
+<!-- Top bar -->
+<div class="topbar">
+  <div class="topbar-title">Feed</div>
+  <span class="topbar-count">11</span>
+  <div class="topbar-spacer"></div>
+  <div class="view-toggle">
+    <button class="view-btn active" id="btn-3col" onclick="setView('3col')">
+      <i class="fa-solid fa-table-columns"></i> 3 columns
+    </button>
+    <button class="view-btn" id="btn-split" onclick="setView('split')">
+      <i class="fa-solid fa-sidebar"></i> Detail
+    </button>
+  </div>
+</div>
+
+<!-- ══ 3-COLUMN VIEW ══ -->
+<div class="view-3col" id="view-3col">
+
+  <!-- Legend bar — compact -->
+  <div class="legend-bar" style="display:flex;align-items:center;gap:6px;padding:6px 20px;background:#fff;border-bottom:1px solid #e8ecf1;flex-shrink:0;">
+    <span style="font-size:9px;font-weight:600;color:#94a3b8;letter-spacing:.08em;text-transform:uppercase;margin-right:2px;">Key</span>
+    <span class="type-tag tag-verified" style="font-size:9px;padding:1px 5px;" data-tip="Seerist verified event"><i class="fa-solid fa-circle-check"></i> Verified</span>
+    <span class="type-tag tag-breaking" style="font-size:9px;padding:1px 5px;" data-tip="Breaking — unconfirmed">Breaking</span>
+    <span class="date-chip" style="font-size:9px;padding:1px 5px;" data-tip="Scheduled future event"><i class="fa-regular fa-calendar"></i> Future</span>
+    <span class="type-tag tag-analysis" style="font-size:9px;padding:1px 5px;" data-tip="Intelligence analysis"><i class="fa-solid fa-file-lines"></i> Analysis</span>
+    <span class="type-tag tag-discover" style="font-size:9px;padding:1px 5px;" data-tip="AI summary"><i class="fa-solid fa-wand-magic-sparkles"></i> Discover AI</span>
+    <span style="width:1px;height:12px;background:#e2e8f0;margin:0 2px;"></span>
+    <span style="display:inline-flex;align-items:center;gap:4px;font-size:9px;color:#64748b;"><span style="width:6px;height:6px;border-radius:50%;background:#3b82f6;display:inline-block;"></span> Unread</span>
+    <span style="display:inline-flex;align-items:center;gap:4px;font-size:9px;color:#64748b;"><span style="width:6px;height:6px;border-radius:50%;background:#dc2626;display:inline-block;"></span> High</span>
+    <span style="display:inline-flex;align-items:center;gap:4px;font-size:9px;color:#64748b;"><span style="width:6px;height:6px;border-radius:50%;background:#ca8a04;display:inline-block;"></span> Medium</span>
+  </div>
+
+  <div class="feed-wrap"><div class="feed">
+
+    <!-- ── Col 1: Events ── -->
+    <div class="col-panel">
+      <div class="col-panel-header">
+        <span class="col-panel-title">Events</span>
+        <button class="col-panel-btn"><i class="fa-solid fa-ellipsis"></i></button>
+      </div>
+      <div class="col-panel-toolbar">
+        <button class="toolbar-btn">Select</button>
+        <div class="toolbar-sep"></div>
+        <button class="toolbar-btn">Filters <span class="toolbar-badge">2</span> <i class="fa-solid fa-chevron-down" style="font-size:8px;color:var(--p-surface-400);"></i></button>
+        <button class="toolbar-btn">Geography <span class="toolbar-badge">4</span> <i class="fa-solid fa-chevron-down" style="font-size:8px;color:var(--p-surface-400);"></i></button>
+        <button class="toolbar-icon" style="margin-left:auto;"><i class="fa-solid fa-arrow-up-wide-short"></i></button>
+      </div>
+      <div class="col-panel-list">
+
+        <div class="feed-row unread sev-border-high">
+          <div class="row-top">
+            <span class="unread-dot"></span>
+            <span class="cat-chip"><i class="fa-solid fa-people-group"></i> Civil Unrest</span>
+            <span class="time">Apr 29, 2026 · 14:32 UTC</span>
+          </div>
+          <div class="title-line">
+            <span class="type-tag tag-verified" data-tip="Seerist verified event"><i class="fa-solid fa-circle-check"></i> Verified</span>
+            <span class="sev sev-high">High</span>
+            <span class="title">Armed standoff near BGC financial district — security cordon established, two blocks closed to traffic</span>
+          </div>
+          <div class="row-locs">
+            <a class="loc-chip"><span class="loc-flag">🇵🇭</span><span>Makati, Manila</span></a>
+          </div>
+          <div class="row-meta">
+            <div class="meta"><a href="#">reuters.com</a> <span class="meta-sep">·</span> <a href="#">ap.org</a> <span class="meta-sep">·</span> <span style="color:#00A651;font-weight:600;">2 Trusted</span></div>
+            <div class="row-actions">
+              <button class="row-action-btn row-action-copy" data-tip="Copy"><i class="fa-regular fa-copy"></i></button>
+              <button class="row-action-btn row-action-save" data-tip="Save"><i class="fa-regular fa-bookmark"></i></button>
+              <button class="row-action-btn row-action-preview" data-tip="Preview"><i class="fa-regular fa-eye"></i></button>
+              <button class="row-action-btn row-action-flag" data-tip="Flag"><i class="fa-solid fa-flag"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="feed-row sev-border-breaking">
+          <div class="row-top">
+            <span class="cat-chip"><i class="fa-solid fa-crosshairs"></i> Armed Conflict</span>
+            <span class="time">Apr 29, 2026 · 15:04 UTC</span>
+          </div>
+          <div class="title-line">
+            <span class="type-tag tag-breaking" data-tip="Just happened — details unconfirmed">Breaking</span>
+            <span class="title">Reports of artillery fire near Omdurman crossing — unconfirmed, multiple social sources</span>
+          </div>
+          <div class="row-locs">
+            <a class="loc-chip"><span class="loc-flag">🇸🇩</span><span>Khartoum North</span></a>
+          </div>
+          <div class="row-actions">
+            <button class="row-action-btn row-action-copy" data-tip="Copy"><i class="fa-regular fa-copy"></i></button>
+            <button class="row-action-btn row-action-save" data-tip="Save"><i class="fa-regular fa-bookmark"></i></button>
+            <button class="row-action-btn row-action-preview" data-tip="Preview"><i class="fa-regular fa-eye"></i></button>
+            <button class="row-action-btn row-action-flag" data-tip="Flag"><i class="fa-solid fa-flag"></i></button>
+          </div>
+        </div>
+
+        <div class="feed-row sev-border-medium">
+          <div class="row-top">
+            <span class="cat-chip"><i class="fa-solid fa-people-group"></i> Civil Unrest</span>
+            <span class="time">Apr 29, 2026 · 13:47 UTC</span>
+          </div>
+          <div class="title-line">
+            <span class="type-tag tag-unverified" data-tip="Reported but not yet verified"><i class="fa-regular fa-circle"></i> Unverified</span>
+            <span class="sev sev-medium">Med</span>
+            <span class="title">Clashes reported near parliament building — police using tear gas on protesters</span>
+          </div>
+          <div class="row-locs">
+            <a class="loc-chip"><span class="loc-flag">🇧🇩</span><span>Dhaka</span></a>
+          </div>
+          <div class="row-revised">Revised · Apr 29, 2026 · 13:47 UTC</div>
+          <div class="row-actions">
+            <button class="row-action-btn row-action-copy" data-tip="Copy"><i class="fa-regular fa-copy"></i></button>
+            <button class="row-action-btn row-action-save" data-tip="Save"><i class="fa-regular fa-bookmark"></i></button>
+            <button class="row-action-btn row-action-preview" data-tip="Preview"><i class="fa-regular fa-eye"></i></button>
+            <button class="row-action-btn row-action-flag" data-tip="Flag"><i class="fa-solid fa-flag"></i></button>
+          </div>
+        </div>
+
+        <div class="feed-row sev-border-medium">
+          <div class="row-top">
+            <span class="cat-chip"><i class="fa-solid fa-people-group"></i> Civil Unrest</span>
+            <span class="time">Apr 30, 2026</span>
+          </div>
+          <div class="title-line">
+            <span class="date-chip" data-tip="Scheduled future event"><i class="fa-regular fa-calendar"></i> Future</span>
+            <span class="sev sev-medium">Med</span>
+            <span class="title">General strike — transport disruption expected across Zona Rosa and La Candelaria</span>
+          </div>
+          <div class="row-locs">
+            <a class="loc-chip"><span class="loc-flag">🇨🇴</span><span>Bogotá</span></a>
+          </div>
+          <div class="row-actions">
+            <button class="row-action-btn row-action-copy" data-tip="Copy"><i class="fa-regular fa-copy"></i></button>
+            <button class="row-action-btn row-action-save" data-tip="Save"><i class="fa-regular fa-bookmark"></i></button>
+            <button class="row-action-btn row-action-preview" data-tip="Preview"><i class="fa-regular fa-eye"></i></button>
+            <button class="row-action-btn row-action-flag" data-tip="Flag"><i class="fa-solid fa-flag"></i></button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Col 2: Mixed ── -->
+    <div class="col-panel">
+      <div class="col-panel-header">
+        <span class="col-panel-title">Mixed</span>
+        <button class="col-panel-btn"><i class="fa-solid fa-ellipsis"></i></button>
+      </div>
+      <div class="col-panel-toolbar">
+        <button class="toolbar-btn">Select</button>
+        <div class="toolbar-sep"></div>
+        <button class="toolbar-btn">Filters <span class="toolbar-badge">1</span> <i class="fa-solid fa-chevron-down" style="font-size:8px;color:var(--p-surface-400);"></i></button>
+        <button class="toolbar-btn">Geography <span class="toolbar-badge">6</span> <i class="fa-solid fa-chevron-down" style="font-size:8px;color:var(--p-surface-400);"></i></button>
+        <button class="toolbar-icon" style="margin-left:auto;"><i class="fa-solid fa-arrow-up-wide-short"></i></button>
+      </div>
+      <div class="col-panel-list">
+
+        <div class="feed-row">
+          <div class="row-top">
+            <span class="cat-chip"><i class="fa-solid fa-people-group"></i> Civil Unrest</span>
+            <span class="time">Apr 29, 2026 · 11:15 UTC</span>
+          </div>
+          <div class="title-line">
+            <span class="type-tag tag-analysis" data-tip="Intelligence analysis"><i class="fa-solid fa-file-lines"></i> Analysis</span>
+            <span class="title">Escalating protest activity near CBD indicates elevated risk through end of week — consistent with 2023 regional pattern</span>
+          </div>
+          <div class="row-locs">
+            <a class="loc-chip"><span class="loc-flag">🇰🇪</span><span>Nairobi</span></a>
+          </div>
+          <div class="row-meta">
+            <div class="meta">Control Risk <span class="meta-sep">,</span> Analysis <span class="meta-sep">,</span> High Reliability</div>
+            <div class="row-actions">
+              <button class="row-action-btn row-action-copy" data-tip="Copy"><i class="fa-regular fa-copy"></i></button>
+              <button class="row-action-btn row-action-save" data-tip="Save"><i class="fa-regular fa-bookmark"></i></button>
+              <button class="row-action-btn row-action-preview" data-tip="Preview"><i class="fa-regular fa-eye"></i></button>
+              <button class="row-action-btn row-action-flag" data-tip="Flag"><i class="fa-solid fa-flag"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="feed-row">
+          <div class="row-top">
+            <span class="cat-chip"><i class="fa-solid fa-crosshairs"></i> Armed Conflict</span>
+            <span class="time">Apr 29, 2026 · 13:50 UTC</span>
+          </div>
+          <div class="title-line">
+            <span class="type-tag tag-discover" data-tip="AI-generated summary across multiple sources"><i class="fa-solid fa-wand-magic-sparkles"></i> Discover AI</span>
+            <span class="title">72h timeline of cross-border militia activity across Sahel corridor — escalating pattern observed</span>
+          </div>
+          <div class="row-locs">
+            <a class="loc-chip"><span class="loc-flag">🇲🇱</span><span>Mali</span></a>
+            <a class="loc-chip"><span class="loc-flag">🇧🇫</span><span>Burkina Faso</span></a>
+          </div>
+          <div class="row-meta">
+            <div class="meta"><i class="fa-solid fa-layer-group"></i> 14 sources · last 48h <span class="meta-sep">,</span> <span class="sig-tag sig-new">New</span> <span class="sig-tag sig-accelerating">Accelerating</span> <span class="sig-tag sig-count">23 events</span></div>
+            <div class="row-actions">
+              <button class="row-action-btn row-action-copy" data-tip="Copy"><i class="fa-regular fa-copy"></i></button>
+              <button class="row-action-btn row-action-save" data-tip="Save"><i class="fa-regular fa-bookmark"></i></button>
+              <button class="row-action-btn row-action-preview" data-tip="Preview"><i class="fa-regular fa-eye"></i></button>
+              <button class="row-action-btn row-action-flag" data-tip="Flag"><i class="fa-solid fa-flag"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="feed-row sev-border-high">
+          <div class="row-top">
+            <span class="cat-chip"><i class="fa-solid fa-people-group"></i> Civil Unrest</span>
+            <span class="time">Apr 29, 2026 · 13:22 UTC</span>
+          </div>
+          <div class="title-line">
+            <span class="type-tag tag-verified" data-tip="Seerist verified event"><i class="fa-solid fa-circle-check"></i> Verified</span>
+            <span class="sev sev-high">High</span>
+            <span class="title">Coordinated protests across multiple capitals following disputed regional election results</span>
+          </div>
+          <div class="row-locs">
+            <a class="loc-chip"><span class="loc-flag">🇻🇪</span><span>Caracas</span></a>
+            <a class="loc-chip"><span class="loc-flag">🇨🇴</span><span>Bogotá</span></a>
+            <a class="loc-chip"><span class="loc-flag">🇧🇷</span><span>São Paulo</span></a>
+            <span class="loc-more">+2</span>
+          </div>
+          <div class="row-actions">
+            <button class="row-action-btn row-action-copy" data-tip="Copy"><i class="fa-regular fa-copy"></i></button>
+            <button class="row-action-btn row-action-save" data-tip="Save"><i class="fa-regular fa-bookmark"></i></button>
+            <button class="row-action-btn row-action-preview" data-tip="Preview"><i class="fa-regular fa-eye"></i></button>
+            <button class="row-action-btn row-action-flag" data-tip="Flag"><i class="fa-solid fa-flag"></i></button>
+          </div>
+        </div>
+
+        <div class="feed-row sev-border-low">
+          <div class="row-top">
+            <span class="cat-chip"><i class="fa-solid fa-landmark"></i> Political Risk</span>
+            <span class="time">May 9–12, 2026</span>
+          </div>
+          <div class="title-line">
+            <span class="date-chip" data-tip="Scheduled future event"><i class="fa-regular fa-calendar"></i> Future</span>
+            <span class="sev sev-low">Low</span>
+            <span class="title">National Day commemorations — crowd gatherings expected near central monuments, minimal disruption forecast</span>
+          </div>
+          <div class="row-locs">
+            <a class="loc-chip"><span class="loc-flag">🇺🇦</span><span>Kyiv</span></a>
+          </div>
+          <div class="row-actions">
+            <button class="row-action-btn row-action-copy" data-tip="Copy"><i class="fa-regular fa-copy"></i></button>
+            <button class="row-action-btn row-action-save" data-tip="Save"><i class="fa-regular fa-bookmark"></i></button>
+            <button class="row-action-btn row-action-preview" data-tip="Preview"><i class="fa-regular fa-eye"></i></button>
+            <button class="row-action-btn row-action-flag" data-tip="Flag"><i class="fa-solid fa-flag"></i></button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Col 3: News & Social ── -->
+    <div class="col-panel">
+      <div class="col-panel-header">
+        <span class="col-panel-title">News &amp; Social</span>
+        <button class="col-panel-btn"><i class="fa-solid fa-ellipsis"></i></button>
+      </div>
+      <div class="col-panel-toolbar">
+        <button class="toolbar-btn">Select</button>
+        <div class="toolbar-sep"></div>
+        <button class="toolbar-btn">Filters <span class="toolbar-badge">3</span> <i class="fa-solid fa-chevron-down" style="font-size:8px;color:var(--p-surface-400);"></i></button>
+        <button class="toolbar-btn">Geography <span class="toolbar-badge">8</span> <i class="fa-solid fa-chevron-down" style="font-size:8px;color:var(--p-surface-400);"></i></button>
+        <button class="toolbar-icon" style="margin-left:auto;"><i class="fa-solid fa-arrow-up-wide-short"></i></button>
+      </div>
+      <div class="col-panel-list">
+
+        <div class="feed-row">
+          <div class="row-top">
+            <span class="cat-chip"><i class="fa-solid fa-people-group"></i> Civil Unrest</span>
+            <span class="time">Apr 29, 2026 · 14:51 UTC</span>
+          </div>
+          <div class="title-line">
+            <span class="type-tag" data-tip="External content"><i class="fa-solid fa-newspaper"></i> News &amp; Social</span>
+            <span class="title preview">"Security forces were deployed to the area after reports emerged on social media late Tuesday evening that demonstrators had…"</span>
+          </div>
+          <div class="row-locs">
+            <a class="loc-chip"><span class="loc-flag">🇹🇷</span><span>Istanbul</span></a>
+          </div>
+          <div class="row-meta">
+            <div class="meta"><a href="#">reuters.com</a> <span class="meta-sep">·</span> <span style="color:#00A651;font-weight:600;">Trusted</span></div>
+            <div class="row-actions">
+              <button class="row-action-btn row-action-copy" data-tip="Copy"><i class="fa-regular fa-copy"></i></button>
+              <button class="row-action-btn row-action-save" data-tip="Save"><i class="fa-regular fa-bookmark"></i></button>
+              <button class="row-action-btn row-action-preview" data-tip="Preview"><i class="fa-regular fa-eye"></i></button>
+              <button class="row-action-btn row-action-flag" data-tip="Flag"><i class="fa-solid fa-flag"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="feed-row unread sev-border-breaking">
+          <div class="row-top">
+            <span class="unread-dot"></span>
+            <span class="cat-chip"><i class="fa-solid fa-bomb"></i> Terrorism</span>
+            <span class="time">Apr 29, 2026 · 15:11 UTC</span>
+          </div>
+          <div class="title-line">
+            <span class="type-tag tag-breaking" data-tip="Just happened — details unconfirmed">Breaking</span>
+            <span class="title">Simultaneous explosions reported in three cities — details unconfirmed, emergency services deployed</span>
+          </div>
+          <div class="row-locs">
+            <a class="loc-chip"><span class="loc-flag">🇵🇰</span><span>Karachi</span></a>
+            <a class="loc-chip"><span class="loc-flag">🇵🇰</span><span>Lahore</span></a>
+            <a class="loc-chip"><span class="loc-flag">🇵🇰</span><span>Islamabad</span></a>
+          </div>
+          <div class="row-actions">
+            <button class="row-action-btn row-action-copy" data-tip="Copy"><i class="fa-regular fa-copy"></i></button>
+            <button class="row-action-btn row-action-save" data-tip="Save"><i class="fa-regular fa-bookmark"></i></button>
+            <button class="row-action-btn row-action-preview" data-tip="Preview"><i class="fa-regular fa-eye"></i></button>
+            <button class="row-action-btn row-action-flag" data-tip="Flag"><i class="fa-solid fa-flag"></i></button>
+          </div>
+        </div>
+
+        <div class="feed-row">
+          <div class="row-top">
+            <span class="cat-chip"><i class="fa-solid fa-crosshairs"></i> Armed Conflict</span>
+            <span class="time">Apr 29, 2026 · 08:30 UTC</span>
+          </div>
+          <div class="title-line">
+            <span class="type-tag tag-analysis" data-tip="Intelligence analysis"><i class="fa-solid fa-file-lines"></i> Analysis</span>
+            <span class="title">Drone activity patterns suggest shift toward infrastructure targeting in western oblasts — Q2 threat assessment</span>
+          </div>
+          <div class="row-locs">
+            <a class="loc-chip"><span class="loc-flag">🇺🇦</span><span>Kyiv</span></a>
+            <a class="loc-chip"><span class="loc-flag">🇺🇦</span><span>Lviv</span></a>
+          </div>
+          <div class="row-meta">
+            <div class="meta">Control Risk <span class="meta-sep">,</span> Analysis <span class="meta-sep">,</span> High Reliability</div>
+            <div class="row-actions">
+              <button class="row-action-btn row-action-copy" data-tip="Copy"><i class="fa-regular fa-copy"></i></button>
+              <button class="row-action-btn row-action-save" data-tip="Save"><i class="fa-regular fa-bookmark"></i></button>
+              <button class="row-action-btn row-action-preview" data-tip="Preview"><i class="fa-regular fa-eye"></i></button>
+              <button class="row-action-btn row-action-flag" data-tip="Flag"><i class="fa-solid fa-flag"></i></button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div></div>
+</div>
+
+<!-- ══ SPLIT / DETAIL VIEW ══ -->
+<div class="view-split hidden" id="view-split">
+
+  <div class="split-left">
+    <div class="split-left-header">
+      <span class="split-left-label">All items</span>
+    </div>
+    <div class="split-list">
+
+      <div class="card sev-border-high unread active" onclick="selectCard(this, 'verified-1')">
+        <div class="row-top">
+          <span class="unread-dot"></span>
+          <span class="type-tag tag-verified"><i class="fa-solid fa-circle-check"></i> Verified</span>
+          <span class="sev sev-high">High Severity</span>
+          <span class="time">Apr 29 · 14:32 UTC</span>
+        </div>
+        <div class="title">Armed standoff near BGC financial district — security cordon established, two blocks closed to traffic</div>
+        <div class="row-locs">
+          <a class="loc-chip"><span class="loc-flag">🇵🇭</span><span>Makati, Manila</span></a>
+        </div>
+      </div>
+
+      <div class="card sev-border-breaking" onclick="selectCard(this, 'breaking-1')">
+        <div class="row-top">
+          <span class="type-tag tag-breaking">Breaking</span>
+          <span class="time">Apr 29 · 15:04 UTC</span>
+        </div>
+        <div class="title">Reports of artillery fire near Omdurman crossing — unconfirmed, multiple social sources</div>
+        <div class="row-locs">
+          <a class="loc-chip"><span class="loc-flag">🇸🇩</span><span>Khartoum North</span></a>
+        </div>
+      </div>
+
+      <div class="card sev-border-medium" onclick="selectCard(this, 'unverified-1')">
+        <div class="row-top">
+          <span class="type-tag tag-unverified"><i class="fa-regular fa-circle"></i> Unverified</span>
+          <span class="sev sev-medium">Med Severity</span>
+          <span class="time">Apr 29 · 13:47 UTC</span>
+        </div>
+        <div class="title">Clashes reported near parliament building — police using tear gas on protesters</div>
+        <div class="row-locs">
+          <a class="loc-chip"><span class="loc-flag">🇧🇩</span><span>Dhaka</span></a>
+        </div>
+      </div>
+
+      <div class="card sev-border-medium" onclick="selectCard(this, 'future-1')">
+        <div class="row-top">
+          <span class="date-chip"><i class="fa-regular fa-calendar"></i> Future</span>
+          <span class="sev sev-medium">Med Severity</span>
+          <span class="time">Apr 30, 2026</span>
+        </div>
+        <div class="title">General strike — transport disruption expected across Zona Rosa and La Candelaria</div>
+        <div class="row-locs">
+          <a class="loc-chip"><span class="loc-flag">🇨🇴</span><span>Bogotá</span></a>
+        </div>
+      </div>
+
+      <div class="card" onclick="selectCard(this, 'analysis-1')">
+        <div class="row-top">
+          <span class="type-tag tag-analysis"><i class="fa-solid fa-file-lines"></i> Analysis</span>
+          <span class="time">Apr 29 · 11:15 UTC</span>
+        </div>
+        <div class="title">Escalating protest activity near CBD indicates elevated risk through end of week</div>
+        <div class="row-locs">
+          <a class="loc-chip"><span class="loc-flag">🇰🇪</span><span>Nairobi</span></a>
+        </div>
+      </div>
+
+      <div class="card" onclick="selectCard(this, 'discover-1')">
+        <div class="row-top">
+          <span class="type-tag tag-discover"><i class="fa-solid fa-wand-magic-sparkles"></i> Discover AI</span>
+          <span class="time">Apr 29 · 13:50 UTC</span>
+        </div>
+        <div class="title">72h timeline of cross-border militia activity across Sahel corridor</div>
+        <div class="row-locs">
+          <a class="loc-chip"><span class="loc-flag">🇲🇱</span><span>Mali</span></a>
+          <a class="loc-chip"><span class="loc-flag">🇧🇫</span><span>Burkina Faso</span></a>
+        </div>
+      </div>
+
+      <div class="card sev-border-high" onclick="selectCard(this, 'verified-2')">
+        <div class="row-top">
+          <span class="type-tag tag-verified"><i class="fa-solid fa-circle-check"></i> Verified</span>
+          <span class="sev sev-high">High Severity</span>
+          <span class="time">Apr 29 · 13:22 UTC</span>
+        </div>
+        <div class="title">Coordinated protests across multiple capitals following disputed regional election results</div>
+        <div class="row-locs">
+          <a class="loc-chip"><span class="loc-flag">🇻🇪</span><span>Caracas</span></a>
+          <a class="loc-chip"><span class="loc-flag">🇨🇴</span><span>Bogotá</span></a>
+          <span class="loc-more">+3</span>
+        </div>
+      </div>
+
+      <div class="card" onclick="selectCard(this, 'news-1')">
+        <div class="row-top">
+          <span class="type-tag"><i class="fa-solid fa-newspaper"></i> News &amp; Social</span>
+          <span class="time">Apr 29 · 14:51 UTC</span>
+        </div>
+        <div class="title preview">"Security forces were deployed to the area after reports emerged on social media…"</div>
+        <div class="row-locs">
+          <a class="loc-chip"><span class="loc-flag">🇹🇷</span><span>Istanbul</span></a>
+        </div>
+      </div>
+
+      <div class="card unread sev-border-breaking" onclick="selectCard(this, 'breaking-2')">
+        <div class="row-top">
+          <span class="unread-dot"></span>
+          <span class="type-tag tag-breaking">Breaking</span>
+          <span class="time">Apr 29 · 15:11 UTC</span>
+        </div>
+        <div class="title">Simultaneous explosions reported in three cities — details unconfirmed</div>
+        <div class="row-locs">
+          <a class="loc-chip"><span class="loc-flag">🇵🇰</span><span>Karachi</span></a>
+          <a class="loc-chip"><span class="loc-flag">🇵🇰</span><span>Lahore</span></a>
+          <span class="loc-more">+1</span>
+        </div>
+      </div>
+
+      <div class="card" onclick="selectCard(this, 'social-1')">
+        <div class="row-top">
+          <span class="type-tag"><i class="fa-solid fa-newspaper"></i> News &amp; Social <i class="fa-solid fa-circle-exclamation" style="color:#ea580c;margin-left:2px;"></i></span>
+          <span class="time">Apr 29 · 15:08 UTC</span>
+        </div>
+        <div class="title preview">"BREAKING: military trucks spotted moving north of the capital…"</div>
+        <div class="row-locs">
+          <a class="loc-chip"><span class="loc-flag">🇮🇷</span><span>Tehran</span></a>
+        </div>
+      </div>
+
+      <div class="card" onclick="selectCard(this, 'analysis-2')">
+        <div class="row-top">
+          <span class="type-tag tag-analysis"><i class="fa-solid fa-file-lines"></i> Analysis</span>
+          <span class="time">Apr 29 · 08:30 UTC</span>
+        </div>
+        <div class="title">Drone activity patterns suggest shift toward infrastructure targeting in western oblasts</div>
+        <div class="row-locs">
+          <a class="loc-chip"><span class="loc-flag">🇺🇦</span><span>Kyiv</span></a>
+          <a class="loc-chip"><span class="loc-flag">🇺🇦</span><span>Lviv</span></a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Detail panel -->
+  <div class="split-right" id="detail-panel">
+    <div class="detail-header">
+      <div class="detail-row-top">
+        <span class="type-tag tag-verified"><i class="fa-solid fa-circle-check"></i> Verified</span>
+        <span class="sev sev-high">High Severity</span>
+        <span style="font-size:11px;color:#94a3b8;margin-left:4px;">Apr 29, 2026 · 14:32 UTC</span>
+      </div>
+      <div class="detail-title">Armed standoff near BGC financial district — security cordon established, two blocks closed to traffic</div>
+    </div>
+    <div class="detail-actions">
+      <button class="detail-btn btn-copy"><i class="fa-regular fa-copy"></i> Copy</button>
+      <button class="detail-btn btn-save"><i class="fa-regular fa-bookmark"></i> Save</button>
+      <button class="detail-btn btn-flag"><i class="fa-solid fa-flag"></i> Flag</button>
+    </div>
+    <div class="detail-body">
+      <div class="detail-field">
+        <div class="detail-field-label">Category</div>
+        <div class="detail-field-value">Civil Unrest</div>
+      </div>
+      <div class="detail-field">
+        <div class="detail-field-label">Locations</div>
+        <div class="detail-field-value">
+          <a class="loc-chip"><span class="loc-flag">🇵🇭</span><span>Makati, Manila</span></a>
+        </div>
+      </div>
+      <div class="detail-field">
+        <div class="detail-field-label">Sources</div>
+        <div class="detail-field-value" style="flex-direction:column;align-items:flex-start;gap:6px;">
+          <div class="meta"><a href="#" class="source-link">reuters.com</a> <span class="meta-sep">,</span> Wire <span class="meta-sep">,</span> <span style="color:#00A651;font-weight:600;">Trusted</span> <span class="meta-sep">,</span> EN</div>
+          <div class="meta"><a href="#" class="source-link">ap.org</a> <span class="meta-sep">,</span> Wire <span class="meta-sep">,</span> <span style="color:#00A651;font-weight:600;">Trusted</span> <span class="meta-sep">,</span> EN</div>
+        </div>
+      </div>
+      <div class="detail-field">
+        <div class="detail-field-label">Published</div>
+        <div class="detail-field-value">Apr 29, 2026 · 14:32 UTC</div>
+      </div>
+      <div class="detail-field">
+        <div class="detail-field-label">Revised</div>
+        <div class="detail-field-value">
+          <span class="detail-revised"><i class="fa-solid fa-rotate" style="font-size:10px;"></i> Apr 29, 2026 · 16:05 UTC</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function setView(mode) {
+    document.getElementById('view-3col').classList.toggle('hidden', mode !== '3col');
+    document.getElementById('view-split').classList.toggle('hidden', mode !== 'split');
+    document.getElementById('btn-3col').classList.toggle('active', mode === '3col');
+    document.getElementById('btn-split').classList.toggle('active', mode === 'split');
+  }
+
+  function selectCard(el, id) {
+    document.querySelectorAll('.split-list .card').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+  }
+</script>
+</script>
+</body>
+</html>
